@@ -9,12 +9,6 @@
 #
 # ---Change History---
 #
-# rev: 01-01-01-03
-# date: 23/Feb/2023
-# description:
-# Fixed bug on repeat g-code generation in peck drill data frame
-# Fixed bug on last_row_detect sheet  = 'main' in main data frame
-#
 # rev: 01-01-01-02
 # date: 23/Feb/2023
 # description:
