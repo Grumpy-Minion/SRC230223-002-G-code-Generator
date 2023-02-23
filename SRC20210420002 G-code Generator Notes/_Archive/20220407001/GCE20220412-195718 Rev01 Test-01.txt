@@ -1,0 +1,2817 @@
+
+(==========================)    
+(file_name: GCE20220412-195718 Rev01 Test-01)
+(==========================)  
+
+(---Description---)
+(This program calculates the tool path to ...)
+(Assumes climb milling.)
+
+(TOOL/MILL, dia: 1.000, LOC:3.000, 4.0 Flute, carbide, AT)
+(--X origin: center of right most post--)
+(--Y origin: center of right most post--)
+(--Z origin: top surface of vise--)
+(Part material: ABS)
+(G-code is generated using Python script "SRC20210420001 Rev01-01-10-08 G-code Generator (Draft-01).py")
+
+(---Compiler---)
+(UCCNC v1.2111)\n(DEMO_UC400ETH)
+
+(---Change History---)
+(NA)    
+
+(---Bug List---)
+(NA)
+
+(===General variables===)
+(clear z             = 6.000)
+(initial x           = 0.000)
+(initial y           = 0.000)
+(start z             = 0.000)
+(terminal x          = 0.000)
+(terminal y          = 0.000)
+(cut feed            = 181.1)
+(plunge feed         = 27.2)
+(finish feed         = 108.7)
+(spindle speed       = 2900)
+(diameter of cutter  = 1.000)
+(tolerance of cutter = 0.000)
+(effective diameter  = 1.000)
+(Surface Speed       = 15 m/min)
+(Chipload            = 0.007 mm/tooth)
+
+(start block)
+G90			   (Absolute XYZ)
+G21G64G17	   (mm, Best Speed Path, XY Plane)
+M3 S2900.0      (Spindle Speed)
+G0 Z6.0000   (Go to safe height)
+G0 X0.0000 Y0.0000   (Rapid to start point)
+
+(===Main Start===)
+
+G0 Z6.0000				(Rapid to safe height)
+G0 X6.0000 Y-4.3210                 (Rapid to start point)
+G0 Z-6.0000				(Rapid to cutting height)
+F181.1     (set cutting feed)
+
+    (---toolpath_data_frame start---)
+    (---description---)
+    (Imports a 2D dataframe from an excel file, calculates the toolpath adjusted for offset and tool diameter and prints to a txt file the single or trichoidal tool path in G code.)
+    (returns last position of cutter and end position of arc.)
+    (refer to "ALG20220329001 Toolpath Data Frame Algorithm")
+    (start and end points are located at slot arc center points.)
+    (assumes that cutter is at cutting depth.)
+    (does not return to safe z.)
+    (does not set cutting feed.)
+    (---parameter---)            
+    (cutter diameter: 1.000)        
+    (offset: 0.000)
+    (excel_file: vector-01.xlsx)
+    (sheet: Sheet11)
+    
+    (---trichoidal linear slot start---)                                                                                                                                                                                                                     
+    (---description---)
+    (Calculates and prints to a txt file the trichoidal tool path in G code of a straight slot.)                                                                                                         
+    (returns last position of cutter and end position of slot)
+    (start and end points are located along slot arc center/neutral axis)
+    (assumes that cutter is at cutting depth)
+    (does NOT return to safe z)
+    (---parameters---)                                                                                                          
+    (start: X6.000 Y-4.321)
+    (end: X0.000 Y-4.321)
+    (step over: 0.500)
+    (width of slot: 5.300)                                                                                            
+    (cutter diameter: 1.000)
+    (position of cutter: X6.0000 Y-4.3210)
+    (first slot: True)
+    (last slot: False)                                                                                                  
+    
+    G03 X6.0000 Y-2.1710 R1.0750
+    
+    G1 X5.5000 Y-2.1710
+    G03 X5.5000 Y-6.4710 R2.1500
+    G1 X6.0000 Y-6.4710
+    G03 X6.0000 y-2.1710 R2.1500
+    
+    G1 X5.0000 Y-2.1710
+    G03 X5.0000 Y-6.4710 R2.1500
+    G1 X5.5000 Y-6.4710
+    G03 X5.5000 y-2.1710 R2.1500
+    
+    G1 X4.5000 Y-2.1710
+    G03 X4.5000 Y-6.4710 R2.1500
+    G1 X5.0000 Y-6.4710
+    G03 X5.0000 y-2.1710 R2.1500
+    
+    G1 X4.0000 Y-2.1710
+    G03 X4.0000 Y-6.4710 R2.1500
+    G1 X4.5000 Y-6.4710
+    G03 X4.5000 y-2.1710 R2.1500
+    
+    G1 X3.5000 Y-2.1710
+    G03 X3.5000 Y-6.4710 R2.1500
+    G1 X4.0000 Y-6.4710
+    G03 X4.0000 y-2.1710 R2.1500
+    
+    G1 X3.0000 Y-2.1710
+    G03 X3.0000 Y-6.4710 R2.1500
+    G1 X3.5000 Y-6.4710
+    G03 X3.5000 y-2.1710 R2.1500
+    
+    G1 X2.5000 Y-2.1710
+    G03 X2.5000 Y-6.4710 R2.1500
+    G1 X3.0000 Y-6.4710
+    G03 X3.0000 y-2.1710 R2.1500
+    
+    G1 X2.0000 Y-2.1710
+    G03 X2.0000 Y-6.4710 R2.1500
+    G1 X2.5000 Y-6.4710
+    G03 X2.5000 y-2.1710 R2.1500
+    
+    G1 X1.5000 Y-2.1710
+    G03 X1.5000 Y-6.4710 R2.1500
+    G1 X2.0000 Y-6.4710
+    G03 X2.0000 y-2.1710 R2.1500
+    
+    G1 X1.0000 Y-2.1710
+    G03 X1.0000 Y-6.4710 R2.1500
+    G1 X1.5000 Y-6.4710
+    G03 X1.5000 y-2.1710 R2.1500
+    
+    G1 X0.5000 Y-2.1710
+    G03 X0.5000 Y-6.4710 R2.1500
+    G1 X1.0000 Y-6.4710
+    G03 X1.0000 y-2.1710 R2.1500
+    
+    G1 X-0.0000 Y-2.1710
+    G03 X0.0000 Y-6.4710 R2.1500
+    G1 X0.5000 Y-6.4710
+    G03 X0.5000 y-2.1710 R2.1500
+    G1 X-0.0000 Y-2.1710
+    (---trichoidal linear slot end---)
+    
+    (---trichoidal linear slot start---)                                                                                                                                                                                                                     
+    (---description---)
+    (Calculates and prints to a txt file the trichoidal tool path in G code of a straight slot.)                                                                                                         
+    (returns last position of cutter and end position of slot)
+    (start and end points are located along slot arc center/neutral axis)
+    (assumes that cutter is at cutting depth)
+    (does NOT return to safe z)
+    (---parameters---)                                                                                                          
+    (start: X0.000 Y-4.321)
+    (end: X-20.000 Y-4.321)
+    (step over: 0.500)
+    (width of slot: 5.300)                                                                                            
+    (cutter diameter: 1.000)
+    (position of cutter: X-0.0000 Y-2.1710)
+    (first slot: False)
+    (last slot: False)                                                                                                  
+    
+    G1 X-0.5000 Y-2.1710
+    G03 X-0.5000 Y-6.4710 R2.1500
+    G1 X-0.0000 Y-6.4710
+    G03 X0.0000 y-2.1710 R2.1500
+    
+    G1 X-1.0000 Y-2.1710
+    G03 X-1.0000 Y-6.4710 R2.1500
+    G1 X-0.5000 Y-6.4710
+    G03 X-0.5000 y-2.1710 R2.1500
+    
+    G1 X-1.5000 Y-2.1710
+    G03 X-1.5000 Y-6.4710 R2.1500
+    G1 X-1.0000 Y-6.4710
+    G03 X-1.0000 y-2.1710 R2.1500
+    
+    G1 X-2.0000 Y-2.1710
+    G03 X-2.0000 Y-6.4710 R2.1500
+    G1 X-1.5000 Y-6.4710
+    G03 X-1.5000 y-2.1710 R2.1500
+    
+    G1 X-2.5000 Y-2.1710
+    G03 X-2.5000 Y-6.4710 R2.1500
+    G1 X-2.0000 Y-6.4710
+    G03 X-2.0000 y-2.1710 R2.1500
+    
+    G1 X-3.0000 Y-2.1710
+    G03 X-3.0000 Y-6.4710 R2.1500
+    G1 X-2.5000 Y-6.4710
+    G03 X-2.5000 y-2.1710 R2.1500
+    
+    G1 X-3.5000 Y-2.1710
+    G03 X-3.5000 Y-6.4710 R2.1500
+    G1 X-3.0000 Y-6.4710
+    G03 X-3.0000 y-2.1710 R2.1500
+    
+    G1 X-4.0000 Y-2.1710
+    G03 X-4.0000 Y-6.4710 R2.1500
+    G1 X-3.5000 Y-6.4710
+    G03 X-3.5000 y-2.1710 R2.1500
+    
+    G1 X-4.5000 Y-2.1710
+    G03 X-4.5000 Y-6.4710 R2.1500
+    G1 X-4.0000 Y-6.4710
+    G03 X-4.0000 y-2.1710 R2.1500
+    
+    G1 X-5.0000 Y-2.1710
+    G03 X-5.0000 Y-6.4710 R2.1500
+    G1 X-4.5000 Y-6.4710
+    G03 X-4.5000 y-2.1710 R2.1500
+    
+    G1 X-5.5000 Y-2.1710
+    G03 X-5.5000 Y-6.4710 R2.1500
+    G1 X-5.0000 Y-6.4710
+    G03 X-5.0000 y-2.1710 R2.1500
+    
+    G1 X-6.0000 Y-2.1710
+    G03 X-6.0000 Y-6.4710 R2.1500
+    G1 X-5.5000 Y-6.4710
+    G03 X-5.5000 y-2.1710 R2.1500
+    
+    G1 X-6.5000 Y-2.1710
+    G03 X-6.5000 Y-6.4710 R2.1500
+    G1 X-6.0000 Y-6.4710
+    G03 X-6.0000 y-2.1710 R2.1500
+    
+    G1 X-7.0000 Y-2.1710
+    G03 X-7.0000 Y-6.4710 R2.1500
+    G1 X-6.5000 Y-6.4710
+    G03 X-6.5000 y-2.1710 R2.1500
+    
+    G1 X-7.5000 Y-2.1710
+    G03 X-7.5000 Y-6.4710 R2.1500
+    G1 X-7.0000 Y-6.4710
+    G03 X-7.0000 y-2.1710 R2.1500
+    
+    G1 X-8.0000 Y-2.1710
+    G03 X-8.0000 Y-6.4710 R2.1500
+    G1 X-7.5000 Y-6.4710
+    G03 X-7.5000 y-2.1710 R2.1500
+    
+    G1 X-8.5000 Y-2.1710
+    G03 X-8.5000 Y-6.4710 R2.1500
+    G1 X-8.0000 Y-6.4710
+    G03 X-8.0000 y-2.1710 R2.1500
+    
+    G1 X-9.0000 Y-2.1710
+    G03 X-9.0000 Y-6.4710 R2.1500
+    G1 X-8.5000 Y-6.4710
+    G03 X-8.5000 y-2.1710 R2.1500
+    
+    G1 X-9.5000 Y-2.1710
+    G03 X-9.5000 Y-6.4710 R2.1500
+    G1 X-9.0000 Y-6.4710
+    G03 X-9.0000 y-2.1710 R2.1500
+    
+    G1 X-10.0000 Y-2.1710
+    G03 X-10.0000 Y-6.4710 R2.1500
+    G1 X-9.5000 Y-6.4710
+    G03 X-9.5000 y-2.1710 R2.1500
+    
+    G1 X-10.5000 Y-2.1710
+    G03 X-10.5000 Y-6.4710 R2.1500
+    G1 X-10.0000 Y-6.4710
+    G03 X-10.0000 y-2.1710 R2.1500
+    
+    G1 X-11.0000 Y-2.1710
+    G03 X-11.0000 Y-6.4710 R2.1500
+    G1 X-10.5000 Y-6.4710
+    G03 X-10.5000 y-2.1710 R2.1500
+    
+    G1 X-11.5000 Y-2.1710
+    G03 X-11.5000 Y-6.4710 R2.1500
+    G1 X-11.0000 Y-6.4710
+    G03 X-11.0000 y-2.1710 R2.1500
+    
+    G1 X-12.0000 Y-2.1710
+    G03 X-12.0000 Y-6.4710 R2.1500
+    G1 X-11.5000 Y-6.4710
+    G03 X-11.5000 y-2.1710 R2.1500
+    
+    G1 X-12.5000 Y-2.1710
+    G03 X-12.5000 Y-6.4710 R2.1500
+    G1 X-12.0000 Y-6.4710
+    G03 X-12.0000 y-2.1710 R2.1500
+    
+    G1 X-13.0000 Y-2.1710
+    G03 X-13.0000 Y-6.4710 R2.1500
+    G1 X-12.5000 Y-6.4710
+    G03 X-12.5000 y-2.1710 R2.1500
+    
+    G1 X-13.5000 Y-2.1710
+    G03 X-13.5000 Y-6.4710 R2.1500
+    G1 X-13.0000 Y-6.4710
+    G03 X-13.0000 y-2.1710 R2.1500
+    
+    G1 X-14.0000 Y-2.1710
+    G03 X-14.0000 Y-6.4710 R2.1500
+    G1 X-13.5000 Y-6.4710
+    G03 X-13.5000 y-2.1710 R2.1500
+    
+    G1 X-14.5000 Y-2.1710
+    G03 X-14.5000 Y-6.4710 R2.1500
+    G1 X-14.0000 Y-6.4710
+    G03 X-14.0000 y-2.1710 R2.1500
+    
+    G1 X-15.0000 Y-2.1710
+    G03 X-15.0000 Y-6.4710 R2.1500
+    G1 X-14.5000 Y-6.4710
+    G03 X-14.5000 y-2.1710 R2.1500
+    
+    G1 X-15.5000 Y-2.1710
+    G03 X-15.5000 Y-6.4710 R2.1500
+    G1 X-15.0000 Y-6.4710
+    G03 X-15.0000 y-2.1710 R2.1500
+    
+    G1 X-16.0000 Y-2.1710
+    G03 X-16.0000 Y-6.4710 R2.1500
+    G1 X-15.5000 Y-6.4710
+    G03 X-15.5000 y-2.1710 R2.1500
+    
+    G1 X-16.5000 Y-2.1710
+    G03 X-16.5000 Y-6.4710 R2.1500
+    G1 X-16.0000 Y-6.4710
+    G03 X-16.0000 y-2.1710 R2.1500
+    
+    G1 X-17.0000 Y-2.1710
+    G03 X-17.0000 Y-6.4710 R2.1500
+    G1 X-16.5000 Y-6.4710
+    G03 X-16.5000 y-2.1710 R2.1500
+    
+    G1 X-17.5000 Y-2.1710
+    G03 X-17.5000 Y-6.4710 R2.1500
+    G1 X-17.0000 Y-6.4710
+    G03 X-17.0000 y-2.1710 R2.1500
+    
+    G1 X-18.0000 Y-2.1710
+    G03 X-18.0000 Y-6.4710 R2.1500
+    G1 X-17.5000 Y-6.4710
+    G03 X-17.5000 y-2.1710 R2.1500
+    
+    G1 X-18.5000 Y-2.1710
+    G03 X-18.5000 Y-6.4710 R2.1500
+    G1 X-18.0000 Y-6.4710
+    G03 X-18.0000 y-2.1710 R2.1500
+    
+    G1 X-19.0000 Y-2.1710
+    G03 X-19.0000 Y-6.4710 R2.1500
+    G1 X-18.5000 Y-6.4710
+    G03 X-18.5000 y-2.1710 R2.1500
+    
+    G1 X-19.5000 Y-2.1710
+    G03 X-19.5000 Y-6.4710 R2.1500
+    G1 X-19.0000 Y-6.4710
+    G03 X-19.0000 y-2.1710 R2.1500
+    
+    G1 X-20.0000 Y-2.1710
+    G03 X-20.0000 Y-6.4710 R2.1500
+    G1 X-19.5000 Y-6.4710
+    G03 X-19.5000 y-2.1710 R2.1500
+    G1 X-20.0000 Y-2.1710
+    (---trichoidal linear slot end---)
+    
+    (---trichoidal linear slot start---)                                                                                                                                                                                                                     
+    (---description---)
+    (Calculates and prints to a txt file the trichoidal tool path in G code of a straight slot.)                                                                                                         
+    (returns last position of cutter and end position of slot)
+    (start and end points are located along slot arc center/neutral axis)
+    (assumes that cutter is at cutting depth)
+    (does NOT return to safe z)
+    (---parameters---)                                                                                                          
+    (start: X-20.000 Y-4.321)
+    (end: X-20.000 Y-9.321)
+    (step over: 0.500)
+    (width of slot: 5.300)                                                                                            
+    (cutter diameter: 1.000)
+    (position of cutter: X-20.0000 Y-2.1710)
+    (first slot: False)
+    (last slot: False)                                                                                                  
+    
+    G03 X-22.1500 Y-4.3210 I0.0000 J-2.1500
+    
+    G1 X-22.1500 Y-4.8210
+    G03 X-17.8500 Y-4.8210 R2.1500
+    G1 X-17.8500 Y-4.3210
+    G03 X-22.1500 y-4.3210 R2.1500
+    
+    G1 X-22.1500 Y-5.3210
+    G03 X-17.8500 Y-5.3210 R2.1500
+    G1 X-17.8500 Y-4.8210
+    G03 X-22.1500 y-4.8210 R2.1500
+    
+    G1 X-22.1500 Y-5.8210
+    G03 X-17.8500 Y-5.8210 R2.1500
+    G1 X-17.8500 Y-5.3210
+    G03 X-22.1500 y-5.3210 R2.1500
+    
+    G1 X-22.1500 Y-6.3210
+    G03 X-17.8500 Y-6.3210 R2.1500
+    G1 X-17.8500 Y-5.8210
+    G03 X-22.1500 y-5.8210 R2.1500
+    
+    G1 X-22.1500 Y-6.8210
+    G03 X-17.8500 Y-6.8210 R2.1500
+    G1 X-17.8500 Y-6.3210
+    G03 X-22.1500 y-6.3210 R2.1500
+    
+    G1 X-22.1500 Y-7.3210
+    G03 X-17.8500 Y-7.3210 R2.1500
+    G1 X-17.8500 Y-6.8210
+    G03 X-22.1500 y-6.8210 R2.1500
+    
+    G1 X-22.1500 Y-7.8210
+    G03 X-17.8500 Y-7.8210 R2.1500
+    G1 X-17.8500 Y-7.3210
+    G03 X-22.1500 y-7.3210 R2.1500
+    
+    G1 X-22.1500 Y-8.3210
+    G03 X-17.8500 Y-8.3210 R2.1500
+    G1 X-17.8500 Y-7.8210
+    G03 X-22.1500 y-7.8210 R2.1500
+    
+    G1 X-22.1500 Y-8.8210
+    G03 X-17.8500 Y-8.8210 R2.1500
+    G1 X-17.8500 Y-8.3210
+    G03 X-22.1500 y-8.3210 R2.1500
+    
+    G1 X-22.1500 Y-9.3210
+    G03 X-17.8500 Y-9.3210 R2.1500
+    G1 X-17.8500 Y-8.8210
+    G03 X-22.1500 y-8.8210 R2.1500
+    G1 X-22.1500 Y-9.3210
+    (---trichoidal linear slot end---)
+    
+    (---trichoidal linear slot start---)                                                                                                                                                                                                                     
+    (---description---)
+    (Calculates and prints to a txt file the trichoidal tool path in G code of a straight slot.)                                                                                                         
+    (returns last position of cutter and end position of slot)
+    (start and end points are located along slot arc center/neutral axis)
+    (assumes that cutter is at cutting depth)
+    (does NOT return to safe z)
+    (---parameters---)                                                                                                          
+    (start: X-20.000 Y-9.321)
+    (end: X0.000 Y-9.321)
+    (step over: 0.500)
+    (width of slot: 5.300)                                                                                            
+    (cutter diameter: 1.000)
+    (position of cutter: X-22.1500 Y-9.3210)
+    (first slot: False)
+    (last slot: False)                                                                                                  
+    
+    G03 X-20.0000 Y-11.4710 I2.1500 J-0.0000
+    
+    G1 X-19.5000 Y-11.4710
+    G03 X-19.5000 Y-7.1710 R2.1500
+    G1 X-20.0000 Y-7.1710
+    G03 X-20.0000 y-11.4710 R2.1500
+    
+    G1 X-19.0000 Y-11.4710
+    G03 X-19.0000 Y-7.1710 R2.1500
+    G1 X-19.5000 Y-7.1710
+    G03 X-19.5000 y-11.4710 R2.1500
+    
+    G1 X-18.5000 Y-11.4710
+    G03 X-18.5000 Y-7.1710 R2.1500
+    G1 X-19.0000 Y-7.1710
+    G03 X-19.0000 y-11.4710 R2.1500
+    
+    G1 X-18.0000 Y-11.4710
+    G03 X-18.0000 Y-7.1710 R2.1500
+    G1 X-18.5000 Y-7.1710
+    G03 X-18.5000 y-11.4710 R2.1500
+    
+    G1 X-17.5000 Y-11.4710
+    G03 X-17.5000 Y-7.1710 R2.1500
+    G1 X-18.0000 Y-7.1710
+    G03 X-18.0000 y-11.4710 R2.1500
+    
+    G1 X-17.0000 Y-11.4710
+    G03 X-17.0000 Y-7.1710 R2.1500
+    G1 X-17.5000 Y-7.1710
+    G03 X-17.5000 y-11.4710 R2.1500
+    
+    G1 X-16.5000 Y-11.4710
+    G03 X-16.5000 Y-7.1710 R2.1500
+    G1 X-17.0000 Y-7.1710
+    G03 X-17.0000 y-11.4710 R2.1500
+    
+    G1 X-16.0000 Y-11.4710
+    G03 X-16.0000 Y-7.1710 R2.1500
+    G1 X-16.5000 Y-7.1710
+    G03 X-16.5000 y-11.4710 R2.1500
+    
+    G1 X-15.5000 Y-11.4710
+    G03 X-15.5000 Y-7.1710 R2.1500
+    G1 X-16.0000 Y-7.1710
+    G03 X-16.0000 y-11.4710 R2.1500
+    
+    G1 X-15.0000 Y-11.4710
+    G03 X-15.0000 Y-7.1710 R2.1500
+    G1 X-15.5000 Y-7.1710
+    G03 X-15.5000 y-11.4710 R2.1500
+    
+    G1 X-14.5000 Y-11.4710
+    G03 X-14.5000 Y-7.1710 R2.1500
+    G1 X-15.0000 Y-7.1710
+    G03 X-15.0000 y-11.4710 R2.1500
+    
+    G1 X-14.0000 Y-11.4710
+    G03 X-14.0000 Y-7.1710 R2.1500
+    G1 X-14.5000 Y-7.1710
+    G03 X-14.5000 y-11.4710 R2.1500
+    
+    G1 X-13.5000 Y-11.4710
+    G03 X-13.5000 Y-7.1710 R2.1500
+    G1 X-14.0000 Y-7.1710
+    G03 X-14.0000 y-11.4710 R2.1500
+    
+    G1 X-13.0000 Y-11.4710
+    G03 X-13.0000 Y-7.1710 R2.1500
+    G1 X-13.5000 Y-7.1710
+    G03 X-13.5000 y-11.4710 R2.1500
+    
+    G1 X-12.5000 Y-11.4710
+    G03 X-12.5000 Y-7.1710 R2.1500
+    G1 X-13.0000 Y-7.1710
+    G03 X-13.0000 y-11.4710 R2.1500
+    
+    G1 X-12.0000 Y-11.4710
+    G03 X-12.0000 Y-7.1710 R2.1500
+    G1 X-12.5000 Y-7.1710
+    G03 X-12.5000 y-11.4710 R2.1500
+    
+    G1 X-11.5000 Y-11.4710
+    G03 X-11.5000 Y-7.1710 R2.1500
+    G1 X-12.0000 Y-7.1710
+    G03 X-12.0000 y-11.4710 R2.1500
+    
+    G1 X-11.0000 Y-11.4710
+    G03 X-11.0000 Y-7.1710 R2.1500
+    G1 X-11.5000 Y-7.1710
+    G03 X-11.5000 y-11.4710 R2.1500
+    
+    G1 X-10.5000 Y-11.4710
+    G03 X-10.5000 Y-7.1710 R2.1500
+    G1 X-11.0000 Y-7.1710
+    G03 X-11.0000 y-11.4710 R2.1500
+    
+    G1 X-10.0000 Y-11.4710
+    G03 X-10.0000 Y-7.1710 R2.1500
+    G1 X-10.5000 Y-7.1710
+    G03 X-10.5000 y-11.4710 R2.1500
+    
+    G1 X-9.5000 Y-11.4710
+    G03 X-9.5000 Y-7.1710 R2.1500
+    G1 X-10.0000 Y-7.1710
+    G03 X-10.0000 y-11.4710 R2.1500
+    
+    G1 X-9.0000 Y-11.4710
+    G03 X-9.0000 Y-7.1710 R2.1500
+    G1 X-9.5000 Y-7.1710
+    G03 X-9.5000 y-11.4710 R2.1500
+    
+    G1 X-8.5000 Y-11.4710
+    G03 X-8.5000 Y-7.1710 R2.1500
+    G1 X-9.0000 Y-7.1710
+    G03 X-9.0000 y-11.4710 R2.1500
+    
+    G1 X-8.0000 Y-11.4710
+    G03 X-8.0000 Y-7.1710 R2.1500
+    G1 X-8.5000 Y-7.1710
+    G03 X-8.5000 y-11.4710 R2.1500
+    
+    G1 X-7.5000 Y-11.4710
+    G03 X-7.5000 Y-7.1710 R2.1500
+    G1 X-8.0000 Y-7.1710
+    G03 X-8.0000 y-11.4710 R2.1500
+    
+    G1 X-7.0000 Y-11.4710
+    G03 X-7.0000 Y-7.1710 R2.1500
+    G1 X-7.5000 Y-7.1710
+    G03 X-7.5000 y-11.4710 R2.1500
+    
+    G1 X-6.5000 Y-11.4710
+    G03 X-6.5000 Y-7.1710 R2.1500
+    G1 X-7.0000 Y-7.1710
+    G03 X-7.0000 y-11.4710 R2.1500
+    
+    G1 X-6.0000 Y-11.4710
+    G03 X-6.0000 Y-7.1710 R2.1500
+    G1 X-6.5000 Y-7.1710
+    G03 X-6.5000 y-11.4710 R2.1500
+    
+    G1 X-5.5000 Y-11.4710
+    G03 X-5.5000 Y-7.1710 R2.1500
+    G1 X-6.0000 Y-7.1710
+    G03 X-6.0000 y-11.4710 R2.1500
+    
+    G1 X-5.0000 Y-11.4710
+    G03 X-5.0000 Y-7.1710 R2.1500
+    G1 X-5.5000 Y-7.1710
+    G03 X-5.5000 y-11.4710 R2.1500
+    
+    G1 X-4.5000 Y-11.4710
+    G03 X-4.5000 Y-7.1710 R2.1500
+    G1 X-5.0000 Y-7.1710
+    G03 X-5.0000 y-11.4710 R2.1500
+    
+    G1 X-4.0000 Y-11.4710
+    G03 X-4.0000 Y-7.1710 R2.1500
+    G1 X-4.5000 Y-7.1710
+    G03 X-4.5000 y-11.4710 R2.1500
+    
+    G1 X-3.5000 Y-11.4710
+    G03 X-3.5000 Y-7.1710 R2.1500
+    G1 X-4.0000 Y-7.1710
+    G03 X-4.0000 y-11.4710 R2.1500
+    
+    G1 X-3.0000 Y-11.4710
+    G03 X-3.0000 Y-7.1710 R2.1500
+    G1 X-3.5000 Y-7.1710
+    G03 X-3.5000 y-11.4710 R2.1500
+    
+    G1 X-2.5000 Y-11.4710
+    G03 X-2.5000 Y-7.1710 R2.1500
+    G1 X-3.0000 Y-7.1710
+    G03 X-3.0000 y-11.4710 R2.1500
+    
+    G1 X-2.0000 Y-11.4710
+    G03 X-2.0000 Y-7.1710 R2.1500
+    G1 X-2.5000 Y-7.1710
+    G03 X-2.5000 y-11.4710 R2.1500
+    
+    G1 X-1.5000 Y-11.4710
+    G03 X-1.5000 Y-7.1710 R2.1500
+    G1 X-2.0000 Y-7.1710
+    G03 X-2.0000 y-11.4710 R2.1500
+    
+    G1 X-1.0000 Y-11.4710
+    G03 X-1.0000 Y-7.1710 R2.1500
+    G1 X-1.5000 Y-7.1710
+    G03 X-1.5000 y-11.4710 R2.1500
+    
+    G1 X-0.5000 Y-11.4710
+    G03 X-0.5000 Y-7.1710 R2.1500
+    G1 X-1.0000 Y-7.1710
+    G03 X-1.0000 y-11.4710 R2.1500
+    
+    G1 X0.0000 Y-11.4710
+    G03 X0.0000 Y-7.1710 R2.1500
+    G1 X-0.5000 Y-7.1710
+    G03 X-0.5000 y-11.4710 R2.1500
+    G1 X0.0000 Y-11.4710
+    (---trichoidal linear slot end---)
+    
+    (---trichoidal linear slot start---)                                                                                                                                                                                                                     
+    (---description---)
+    (Calculates and prints to a txt file the trichoidal tool path in G code of a straight slot.)                                                                                                         
+    (returns last position of cutter and end position of slot)
+    (start and end points are located along slot arc center/neutral axis)
+    (assumes that cutter is at cutting depth)
+    (does NOT return to safe z)
+    (---parameters---)                                                                                                          
+    (start: X0.000 Y-9.321)
+    (end: X0.000 Y-15.321)
+    (step over: 0.500)
+    (width of slot: 5.300)                                                                                            
+    (cutter diameter: 1.000)
+    (position of cutter: X0.0000 Y-11.4710)
+    (first slot: False)
+    (last slot: False)                                                                                                  
+    
+    G03 X-2.1500 Y-9.3210 I0.0000 J2.1500
+    
+    G1 X-2.1500 Y-9.8210
+    G03 X2.1500 Y-9.8210 R2.1500
+    G1 X2.1500 Y-9.3210
+    G03 X-2.1500 y-9.3210 R2.1500
+    
+    G1 X-2.1500 Y-10.3210
+    G03 X2.1500 Y-10.3210 R2.1500
+    G1 X2.1500 Y-9.8210
+    G03 X-2.1500 y-9.8210 R2.1500
+    
+    G1 X-2.1500 Y-10.8210
+    G03 X2.1500 Y-10.8210 R2.1500
+    G1 X2.1500 Y-10.3210
+    G03 X-2.1500 y-10.3210 R2.1500
+    
+    G1 X-2.1500 Y-11.3210
+    G03 X2.1500 Y-11.3210 R2.1500
+    G1 X2.1500 Y-10.8210
+    G03 X-2.1500 y-10.8210 R2.1500
+    
+    G1 X-2.1500 Y-11.8210
+    G03 X2.1500 Y-11.8210 R2.1500
+    G1 X2.1500 Y-11.3210
+    G03 X-2.1500 y-11.3210 R2.1500
+    
+    G1 X-2.1500 Y-12.3210
+    G03 X2.1500 Y-12.3210 R2.1500
+    G1 X2.1500 Y-11.8210
+    G03 X-2.1500 y-11.8210 R2.1500
+    
+    G1 X-2.1500 Y-12.8210
+    G03 X2.1500 Y-12.8210 R2.1500
+    G1 X2.1500 Y-12.3210
+    G03 X-2.1500 y-12.3210 R2.1500
+    
+    G1 X-2.1500 Y-13.3210
+    G03 X2.1500 Y-13.3210 R2.1500
+    G1 X2.1500 Y-12.8210
+    G03 X-2.1500 y-12.8210 R2.1500
+    
+    G1 X-2.1500 Y-13.8210
+    G03 X2.1500 Y-13.8210 R2.1500
+    G1 X2.1500 Y-13.3210
+    G03 X-2.1500 y-13.3210 R2.1500
+    
+    G1 X-2.1500 Y-14.3210
+    G03 X2.1500 Y-14.3210 R2.1500
+    G1 X2.1500 Y-13.8210
+    G03 X-2.1500 y-13.8210 R2.1500
+    
+    G1 X-2.1500 Y-14.8210
+    G03 X2.1500 Y-14.8210 R2.1500
+    G1 X2.1500 Y-14.3210
+    G03 X-2.1500 y-14.3210 R2.1500
+    
+    G1 X-2.1500 Y-15.3210
+    G03 X2.1500 Y-15.3210 R2.1500
+    G1 X2.1500 Y-14.8210
+    G03 X-2.1500 y-14.8210 R2.1500
+    G1 X-2.1500 Y-15.3210
+    (---trichoidal linear slot end---)
+    
+    (---trichoidal linear slot start---)                                                                                                                                                                                                                     
+    (---description---)
+    (Calculates and prints to a txt file the trichoidal tool path in G code of a straight slot.)                                                                                                         
+    (returns last position of cutter and end position of slot)
+    (start and end points are located along slot arc center/neutral axis)
+    (assumes that cutter is at cutting depth)
+    (does NOT return to safe z)
+    (---parameters---)                                                                                                          
+    (start: X0.000 Y-15.321)
+    (end: X-20.000 Y-15.321)
+    (step over: 0.500)
+    (width of slot: 5.300)                                                                                            
+    (cutter diameter: 1.000)
+    (position of cutter: X-2.1500 Y-15.3210)
+    (first slot: False)
+    (last slot: False)                                                                                                  
+    
+    G03 X0.0000 Y-13.1710 I2.1500 J0.0000
+    
+    G1 X-0.5000 Y-13.1710
+    G03 X-0.5000 Y-17.4710 R2.1500
+    G1 X-0.0000 Y-17.4710
+    G03 X0.0000 y-13.1710 R2.1500
+    
+    G1 X-1.0000 Y-13.1710
+    G03 X-1.0000 Y-17.4710 R2.1500
+    G1 X-0.5000 Y-17.4710
+    G03 X-0.5000 y-13.1710 R2.1500
+    
+    G1 X-1.5000 Y-13.1710
+    G03 X-1.5000 Y-17.4710 R2.1500
+    G1 X-1.0000 Y-17.4710
+    G03 X-1.0000 y-13.1710 R2.1500
+    
+    G1 X-2.0000 Y-13.1710
+    G03 X-2.0000 Y-17.4710 R2.1500
+    G1 X-1.5000 Y-17.4710
+    G03 X-1.5000 y-13.1710 R2.1500
+    
+    G1 X-2.5000 Y-13.1710
+    G03 X-2.5000 Y-17.4710 R2.1500
+    G1 X-2.0000 Y-17.4710
+    G03 X-2.0000 y-13.1710 R2.1500
+    
+    G1 X-3.0000 Y-13.1710
+    G03 X-3.0000 Y-17.4710 R2.1500
+    G1 X-2.5000 Y-17.4710
+    G03 X-2.5000 y-13.1710 R2.1500
+    
+    G1 X-3.5000 Y-13.1710
+    G03 X-3.5000 Y-17.4710 R2.1500
+    G1 X-3.0000 Y-17.4710
+    G03 X-3.0000 y-13.1710 R2.1500
+    
+    G1 X-4.0000 Y-13.1710
+    G03 X-4.0000 Y-17.4710 R2.1500
+    G1 X-3.5000 Y-17.4710
+    G03 X-3.5000 y-13.1710 R2.1500
+    
+    G1 X-4.5000 Y-13.1710
+    G03 X-4.5000 Y-17.4710 R2.1500
+    G1 X-4.0000 Y-17.4710
+    G03 X-4.0000 y-13.1710 R2.1500
+    
+    G1 X-5.0000 Y-13.1710
+    G03 X-5.0000 Y-17.4710 R2.1500
+    G1 X-4.5000 Y-17.4710
+    G03 X-4.5000 y-13.1710 R2.1500
+    
+    G1 X-5.5000 Y-13.1710
+    G03 X-5.5000 Y-17.4710 R2.1500
+    G1 X-5.0000 Y-17.4710
+    G03 X-5.0000 y-13.1710 R2.1500
+    
+    G1 X-6.0000 Y-13.1710
+    G03 X-6.0000 Y-17.4710 R2.1500
+    G1 X-5.5000 Y-17.4710
+    G03 X-5.5000 y-13.1710 R2.1500
+    
+    G1 X-6.5000 Y-13.1710
+    G03 X-6.5000 Y-17.4710 R2.1500
+    G1 X-6.0000 Y-17.4710
+    G03 X-6.0000 y-13.1710 R2.1500
+    
+    G1 X-7.0000 Y-13.1710
+    G03 X-7.0000 Y-17.4710 R2.1500
+    G1 X-6.5000 Y-17.4710
+    G03 X-6.5000 y-13.1710 R2.1500
+    
+    G1 X-7.5000 Y-13.1710
+    G03 X-7.5000 Y-17.4710 R2.1500
+    G1 X-7.0000 Y-17.4710
+    G03 X-7.0000 y-13.1710 R2.1500
+    
+    G1 X-8.0000 Y-13.1710
+    G03 X-8.0000 Y-17.4710 R2.1500
+    G1 X-7.5000 Y-17.4710
+    G03 X-7.5000 y-13.1710 R2.1500
+    
+    G1 X-8.5000 Y-13.1710
+    G03 X-8.5000 Y-17.4710 R2.1500
+    G1 X-8.0000 Y-17.4710
+    G03 X-8.0000 y-13.1710 R2.1500
+    
+    G1 X-9.0000 Y-13.1710
+    G03 X-9.0000 Y-17.4710 R2.1500
+    G1 X-8.5000 Y-17.4710
+    G03 X-8.5000 y-13.1710 R2.1500
+    
+    G1 X-9.5000 Y-13.1710
+    G03 X-9.5000 Y-17.4710 R2.1500
+    G1 X-9.0000 Y-17.4710
+    G03 X-9.0000 y-13.1710 R2.1500
+    
+    G1 X-10.0000 Y-13.1710
+    G03 X-10.0000 Y-17.4710 R2.1500
+    G1 X-9.5000 Y-17.4710
+    G03 X-9.5000 y-13.1710 R2.1500
+    
+    G1 X-10.5000 Y-13.1710
+    G03 X-10.5000 Y-17.4710 R2.1500
+    G1 X-10.0000 Y-17.4710
+    G03 X-10.0000 y-13.1710 R2.1500
+    
+    G1 X-11.0000 Y-13.1710
+    G03 X-11.0000 Y-17.4710 R2.1500
+    G1 X-10.5000 Y-17.4710
+    G03 X-10.5000 y-13.1710 R2.1500
+    
+    G1 X-11.5000 Y-13.1710
+    G03 X-11.5000 Y-17.4710 R2.1500
+    G1 X-11.0000 Y-17.4710
+    G03 X-11.0000 y-13.1710 R2.1500
+    
+    G1 X-12.0000 Y-13.1710
+    G03 X-12.0000 Y-17.4710 R2.1500
+    G1 X-11.5000 Y-17.4710
+    G03 X-11.5000 y-13.1710 R2.1500
+    
+    G1 X-12.5000 Y-13.1710
+    G03 X-12.5000 Y-17.4710 R2.1500
+    G1 X-12.0000 Y-17.4710
+    G03 X-12.0000 y-13.1710 R2.1500
+    
+    G1 X-13.0000 Y-13.1710
+    G03 X-13.0000 Y-17.4710 R2.1500
+    G1 X-12.5000 Y-17.4710
+    G03 X-12.5000 y-13.1710 R2.1500
+    
+    G1 X-13.5000 Y-13.1710
+    G03 X-13.5000 Y-17.4710 R2.1500
+    G1 X-13.0000 Y-17.4710
+    G03 X-13.0000 y-13.1710 R2.1500
+    
+    G1 X-14.0000 Y-13.1710
+    G03 X-14.0000 Y-17.4710 R2.1500
+    G1 X-13.5000 Y-17.4710
+    G03 X-13.5000 y-13.1710 R2.1500
+    
+    G1 X-14.5000 Y-13.1710
+    G03 X-14.5000 Y-17.4710 R2.1500
+    G1 X-14.0000 Y-17.4710
+    G03 X-14.0000 y-13.1710 R2.1500
+    
+    G1 X-15.0000 Y-13.1710
+    G03 X-15.0000 Y-17.4710 R2.1500
+    G1 X-14.5000 Y-17.4710
+    G03 X-14.5000 y-13.1710 R2.1500
+    
+    G1 X-15.5000 Y-13.1710
+    G03 X-15.5000 Y-17.4710 R2.1500
+    G1 X-15.0000 Y-17.4710
+    G03 X-15.0000 y-13.1710 R2.1500
+    
+    G1 X-16.0000 Y-13.1710
+    G03 X-16.0000 Y-17.4710 R2.1500
+    G1 X-15.5000 Y-17.4710
+    G03 X-15.5000 y-13.1710 R2.1500
+    
+    G1 X-16.5000 Y-13.1710
+    G03 X-16.5000 Y-17.4710 R2.1500
+    G1 X-16.0000 Y-17.4710
+    G03 X-16.0000 y-13.1710 R2.1500
+    
+    G1 X-17.0000 Y-13.1710
+    G03 X-17.0000 Y-17.4710 R2.1500
+    G1 X-16.5000 Y-17.4710
+    G03 X-16.5000 y-13.1710 R2.1500
+    
+    G1 X-17.5000 Y-13.1710
+    G03 X-17.5000 Y-17.4710 R2.1500
+    G1 X-17.0000 Y-17.4710
+    G03 X-17.0000 y-13.1710 R2.1500
+    
+    G1 X-18.0000 Y-13.1710
+    G03 X-18.0000 Y-17.4710 R2.1500
+    G1 X-17.5000 Y-17.4710
+    G03 X-17.5000 y-13.1710 R2.1500
+    
+    G1 X-18.5000 Y-13.1710
+    G03 X-18.5000 Y-17.4710 R2.1500
+    G1 X-18.0000 Y-17.4710
+    G03 X-18.0000 y-13.1710 R2.1500
+    
+    G1 X-19.0000 Y-13.1710
+    G03 X-19.0000 Y-17.4710 R2.1500
+    G1 X-18.5000 Y-17.4710
+    G03 X-18.5000 y-13.1710 R2.1500
+    
+    G1 X-19.5000 Y-13.1710
+    G03 X-19.5000 Y-17.4710 R2.1500
+    G1 X-19.0000 Y-17.4710
+    G03 X-19.0000 y-13.1710 R2.1500
+    
+    G1 X-20.0000 Y-13.1710
+    G03 X-20.0000 Y-17.4710 R2.1500
+    G1 X-19.5000 Y-17.4710
+    G03 X-19.5000 y-13.1710 R2.1500
+    G1 X-20.0000 Y-13.1710
+    (---trichoidal linear slot end---)
+    
+    (---trichoidal linear slot start---)                                                                                                                                                                                                                     
+    (---description---)
+    (Calculates and prints to a txt file the trichoidal tool path in G code of a straight slot.)                                                                                                         
+    (returns last position of cutter and end position of slot)
+    (start and end points are located along slot arc center/neutral axis)
+    (assumes that cutter is at cutting depth)
+    (does NOT return to safe z)
+    (---parameters---)                                                                                                          
+    (start: X-20.000 Y-15.321)
+    (end: X-23.000 Y-15.321)
+    (step over: 0.500)
+    (width of slot: 5.300)                                                                                            
+    (cutter diameter: 1.000)
+    (position of cutter: X-20.0000 Y-13.1710)
+    (first slot: False)
+    (last slot: True)                                                                                                  
+    
+    G1 X-20.5000 Y-13.1710
+    G03 X-20.5000 Y-17.4710 R2.1500
+    G1 X-20.0000 Y-17.4710
+    G03 X-20.0000 y-13.1710 R2.1500
+    
+    G1 X-21.0000 Y-13.1710
+    G03 X-21.0000 Y-17.4710 R2.1500
+    G1 X-20.5000 Y-17.4710
+    G03 X-20.5000 y-13.1710 R2.1500
+    
+    G1 X-21.5000 Y-13.1710
+    G03 X-21.5000 Y-17.4710 R2.1500
+    G1 X-21.0000 Y-17.4710
+    G03 X-21.0000 y-13.1710 R2.1500
+    
+    G1 X-22.0000 Y-13.1710
+    G03 X-22.0000 Y-17.4710 R2.1500
+    G1 X-21.5000 Y-17.4710
+    G03 X-21.5000 y-13.1710 R2.1500
+    
+    G1 X-22.5000 Y-13.1710
+    G03 X-22.5000 Y-17.4710 R2.1500
+    G1 X-22.0000 Y-17.4710
+    G03 X-22.0000 y-13.1710 R2.1500
+    
+    G1 X-23.0000 Y-13.1710
+    G03 X-23.0000 Y-17.4710 R2.1500
+    G1 X-22.5000 Y-17.4710
+    G03 X-22.5000 y-15.3210 R1.0750
+    G1 X-23.0000 Y-15.3210
+    (---trichoidal linear slot end---)
+    
+G0 Z6.0000				(Rapid to safe height)
+G0 X6.0000 Y-3.4207                 (Rapid to start point)
+G0 Z-6.0000				(Rapid to cutting height)
+F181.1     (set cutting feed)
+
+    (---toolpath_data_frame start---)
+    (---description---)
+    (Imports a 2D dataframe from an excel file, calculates the toolpath adjusted for offset and tool diameter and prints to a txt file the single or trichoidal tool path in G code.)
+    (returns last position of cutter and end position of arc.)
+    (refer to "ALG20220329001 Toolpath Data Frame Algorithm")
+    (start and end points are located at slot arc center points.)
+    (assumes that cutter is at cutting depth.)
+    (does not return to safe z.)
+    (does not set cutting feed.)
+    (---parameter---)            
+    (cutter diameter: 1.000)        
+    (offset: 0.100)
+    (excel_file: vector-01.xlsx)
+    (sheet: Sheet10)
+    
+    (---trichoidal linear slot start---)                                                                                                                                                                                                                     
+    (---description---)
+    (Calculates and prints to a txt file the trichoidal tool path in G code of a straight slot.)                                                                                                         
+    (returns last position of cutter and end position of slot)
+    (start and end points are located along slot arc center/neutral axis)
+    (assumes that cutter is at cutting depth)
+    (does NOT return to safe z)
+    (---parameters---)                                                                                                          
+    (start: X6.000 Y-3.421)
+    (end: X-1.189 Y-3.421)
+    (step over: 0.500)
+    (width of slot: 6.000)                                                                                            
+    (cutter diameter: 1.000)
+    (position of cutter: X6.0000 Y-3.4207)
+    (first slot: True)
+    (last slot: False)                                                                                                  
+    
+    G03 X6.0000 Y-0.9207 R1.2500
+    
+    G1 X5.5000 Y-0.9207
+    G03 X5.5000 Y-5.9207 R2.5000
+    G1 X6.0000 Y-5.9207
+    G03 X6.0000 y-0.9207 R2.5000
+    
+    G1 X5.0000 Y-0.9207
+    G03 X5.0000 Y-5.9207 R2.5000
+    G1 X5.5000 Y-5.9207
+    G03 X5.5000 y-0.9207 R2.5000
+    
+    G1 X4.5000 Y-0.9207
+    G03 X4.5000 Y-5.9207 R2.5000
+    G1 X5.0000 Y-5.9207
+    G03 X5.0000 y-0.9207 R2.5000
+    
+    G1 X4.0000 Y-0.9207
+    G03 X4.0000 Y-5.9207 R2.5000
+    G1 X4.5000 Y-5.9207
+    G03 X4.5000 y-0.9207 R2.5000
+    
+    G1 X3.5000 Y-0.9207
+    G03 X3.5000 Y-5.9207 R2.5000
+    G1 X4.0000 Y-5.9207
+    G03 X4.0000 y-0.9207 R2.5000
+    
+    G1 X3.0000 Y-0.9207
+    G03 X3.0000 Y-5.9207 R2.5000
+    G1 X3.5000 Y-5.9207
+    G03 X3.5000 y-0.9207 R2.5000
+    
+    G1 X2.5000 Y-0.9207
+    G03 X2.5000 Y-5.9207 R2.5000
+    G1 X3.0000 Y-5.9207
+    G03 X3.0000 y-0.9207 R2.5000
+    
+    G1 X2.0000 Y-0.9207
+    G03 X2.0000 Y-5.9207 R2.5000
+    G1 X2.5000 Y-5.9207
+    G03 X2.5000 y-0.9207 R2.5000
+    
+    G1 X1.5000 Y-0.9207
+    G03 X1.5000 Y-5.9207 R2.5000
+    G1 X2.0000 Y-5.9207
+    G03 X2.0000 y-0.9207 R2.5000
+    
+    G1 X1.0000 Y-0.9207
+    G03 X1.0000 Y-5.9207 R2.5000
+    G1 X1.5000 Y-5.9207
+    G03 X1.5000 y-0.9207 R2.5000
+    
+    G1 X0.5000 Y-0.9207
+    G03 X0.5000 Y-5.9207 R2.5000
+    G1 X1.0000 Y-5.9207
+    G03 X1.0000 y-0.9207 R2.5000
+    
+    G1 X0.0000 Y-0.9207
+    G03 X-0.0000 Y-5.9207 R2.5000
+    G1 X0.5000 Y-5.9207
+    G03 X0.5000 y-0.9207 R2.5000
+    
+    G1 X-0.5000 Y-0.9207
+    G03 X-0.5000 Y-5.9207 R2.5000
+    G1 X-0.0000 Y-5.9207
+    G03 X0.0000 y-0.9207 R2.5000
+    
+    G1 X-1.0000 Y-0.9207
+    G03 X-1.0000 Y-5.9207 R2.5000
+    G1 X-0.5000 Y-5.9207
+    G03 X-0.5000 y-0.9207 R2.5000
+    
+    G1 X-1.1894 Y-0.9207
+    G03 X-1.1894 Y-5.9207 R2.5000
+    G1 X-1.0000 Y-5.9207
+    G03 X-1.0000 y-0.9207 R2.5000
+    G1 X-1.1894 Y-0.9207
+    (---trichoidal linear slot end---)
+    (---trichoidal arc slot start---)
+    (---description---)
+    (Calculates and prints to a txt file the trichoidal tool path in G code of a counter clockwise arc.)
+    (returns last position of cutter and end position of arc.)
+    (refer to "PRT20210421001 Trichoidal Arc Calculator", "MEM20210522001 Trichoidal Arc", "MEM20210429002 Trichoidal Notes")
+    (start and end points are located at slot arc center points.)
+    (assumes that cutter is at cutting depth.)
+    (does not return to safe z.)
+    (does not set cutting feed.)
+    (---parameter---)
+    (start: X-1.189 Y-3.421)
+    (end: X-4.182 Y-1.128)
+    (step over: 0.500)                     
+    (width of slot: 6.000) 
+    (slot radius : 3.100)                  
+    (cutter diameter: 1.000)        
+    (position of cutter: X-1.1894 Y-0.9207) 
+    (first slot: False)              
+    (last slot: False)                
+    (clockwise : True)
+    (acute angle: True)
+    
+            G02 X-1.2858 Y-0.9129 R0.6000
+            G03 X-2.0887 Y-5.8480 R2.5000
+            G03 X-1.1894 Y-5.9207 R5.6000
+            G03 X-1.1894 Y-0.9207 R2.5000
+            
+            G02 X-1.2858 Y-0.9129 R0.6000
+            
+            G02 X-1.3796 Y-0.8898 R0.6000
+            G03 X-2.9647 Y-5.6319 R2.5000
+            G03 X-2.0887 Y-5.8480 R5.6000
+            G03 X-1.2858 Y-0.9129 R2.5000
+            
+            G02 X-1.3796 Y-0.8898 R0.6000
+            
+            G02 X-1.4685 Y-0.8518 R0.6000
+            G03 X-3.7946 Y-5.2778 R2.5000
+            G03 X-2.9647 Y-5.6319 R5.6000
+            G03 X-1.3796 Y-0.8898 R2.5000
+            
+            G02 X-1.4685 Y-0.8518 R0.6000
+            
+            G02 X-1.5502 Y-0.8001 R0.6000
+            G03 X-4.5568 Y-4.7951 R2.5000
+            G03 X-3.7946 Y-5.2778 R5.6000
+            G03 X-1.4685 Y-0.8518 R2.5000
+            
+            G02 X-1.5502 Y-0.8001 R0.6000
+            
+            G02 X-1.6225 Y-0.7359 R0.6000
+            G03 X-5.2317 Y-4.1963 R2.5000
+            G03 X-4.5568 Y-4.7951 R5.6000
+            G03 X-1.5502 Y-0.8001 R2.5000
+            
+            G02 X-1.6225 Y-0.7359 R0.6000
+            
+            G02 X-1.6836 Y-0.6610 R0.6000
+            G03 X-5.8016 Y-3.4968 R2.5000
+            G03 X-5.2317 Y-4.1963 R5.6000
+            G03 X-1.6225 Y-0.7359 R2.5000
+            
+            G02 X-1.6836 Y-0.6610 R0.6000
+            
+            G02 X-1.7318 Y-0.5772 R0.6000
+            G03 X-6.2518 Y-2.7149 R2.5000
+            G03 X-5.8016 Y-3.4968 R5.6000
+            G03 X-1.6836 Y-0.6610 R2.5000
+            
+            G02 X-1.7318 Y-0.5772 R0.6000
+            
+            G02 X-1.7660 Y-0.4868 R0.6000
+            G03 X-6.5706 Y-1.8708 R2.5000
+            G03 X-6.2518 Y-2.7149 R5.6000
+            G03 X-1.7318 Y-0.5772 R2.5000
+            
+            G02 X-1.7660 Y-0.4868 R0.6000
+            
+            G02 X-1.7687 Y-0.4769 R0.6000
+            G03 X-6.5962 Y-1.7789 R2.5000
+            G03 X-6.5706 Y-1.8708 R5.6000
+            G03 X-1.7660 Y-0.4868 R2.5000
+            G02 X-1.7687 Y-0.4769 R0.6000
+    (---trichoidal arc slot end---)
+    (---trichoidal arc slot start---)
+    (---description---)
+    (Calculates and prints to a txt file the trichoidal tool path in G code of a counter clockwise arc.)
+    (returns last position of cutter and end position of arc.)
+    (refer to "PRT20210421001 Trichoidal Arc Calculator", "MEM20210522001 Trichoidal Arc", "MEM20210429002 Trichoidal Notes")
+    (start and end points are located at slot arc center points.)
+    (assumes that cutter is at cutting depth.)
+    (does not return to safe z.)
+    (does not set cutting feed.)
+    (---parameter---)
+    (start: X-4.182 Y-1.128)
+    (end: X4.182 Y-1.128)
+    (step over: 0.500)                     
+    (width of slot: 6.000) 
+    (slot radius : 4.332)                  
+    (cutter diameter: 1.000)        
+    (position of cutter: X-1.7687 Y-0.4769) 
+    (first slot: False)              
+    (last slot: False)                
+    (clockwise : True)
+    (acute angle: False)
+    
+            G02 X-1.8119 Y-0.2701 R1.8319
+            G03 X-6.7572 Y-1.0074 R2.5000
+            G03 X-6.5962 Y-1.7789 R6.8319
+            G03 X-1.7687 Y-0.4769 R2.5000
+            
+            G02 X-1.8119 Y-0.2701 R1.8319
+            
+            G02 X-1.8309 Y-0.0596 R1.8319
+            G03 X-6.8283 Y-0.2225 R2.5000
+            G03 X-6.7572 Y-1.0074 R6.8319
+            G03 X-1.8119 Y-0.2701 R2.5000
+            
+            G02 X-1.8309 Y-0.0596 R1.8319
+            
+            G02 X-1.8256 Y0.1517 R1.8319
+            G03 X-6.8085 Y0.5653 R2.5000
+            G03 X-6.8283 Y-0.2225 R6.8319
+            G03 X-1.8309 Y-0.0596 R2.5000
+            
+            G02 X-1.8256 Y0.1517 R1.8319
+            
+            G02 X-1.7960 Y0.3609 R1.8319
+            G03 X-6.6981 Y1.3457 R2.5000
+            G03 X-6.8085 Y0.5653 R6.8319
+            G03 X-1.8256 Y0.1517 R2.5000
+            
+            G02 X-1.7960 Y0.3609 R1.8319
+            
+            G02 X-1.7425 Y0.5653 R1.8319
+            G03 X-6.4985 Y2.1081 R2.5000
+            G03 X-6.6981 Y1.3457 R6.8319
+            G03 X-1.7960 Y0.3609 R2.5000
+            
+            G02 X-1.7425 Y0.5653 R1.8319
+            
+            G02 X-1.6658 Y0.7623 R1.8319
+            G03 X-6.2125 Y2.8425 R2.5000
+            G03 X-6.4985 Y2.1081 R6.8319
+            G03 X-1.7425 Y0.5653 R2.5000
+            
+            G02 X-1.6658 Y0.7623 R1.8319
+            
+            G02 X-1.5670 Y0.9490 R1.8319
+            G03 X-5.8438 Y3.5391 R2.5000
+            G03 X-6.2125 Y2.8425 R6.8319
+            G03 X-1.6658 Y0.7623 R2.5000
+            
+            G02 X-1.5670 Y0.9490 R1.8319
+            
+            G02 X-1.4473 Y1.1232 R1.8319
+            G03 X-5.3974 Y4.1885 R2.5000
+            G03 X-5.8438 Y3.5391 R6.8319
+            G03 X-1.5670 Y0.9490 R2.5000
+            
+            G02 X-1.4473 Y1.1232 R1.8319
+            
+            G02 X-1.3083 Y1.2824 R1.8319
+            G03 X-4.8791 Y4.7823 R2.5000
+            G03 X-5.3974 Y4.1885 R6.8319
+            G03 X-1.4473 Y1.1232 R2.5000
+            
+            G02 X-1.3083 Y1.2824 R1.8319
+            
+            G02 X-1.1519 Y1.4245 R1.8319
+            G03 X-4.2959 Y5.3124 R2.5000
+            G03 X-4.8791 Y4.7823 R6.8319
+            G03 X-1.3083 Y1.2824 R2.5000
+            
+            G02 X-1.1519 Y1.4245 R1.8319
+            
+            G02 X-0.9802 Y1.5477 R1.8319
+            G03 X-3.6555 Y5.7718 R2.5000
+            G03 X-4.2959 Y5.3124 R6.8319
+            G03 X-1.1519 Y1.4245 R2.5000
+            
+            G02 X-0.9802 Y1.5477 R1.8319
+            
+            G02 X-0.7954 Y1.6503 R1.8319
+            G03 X-2.9665 Y6.1544 R2.5000
+            G03 X-3.6555 Y5.7718 R6.8319
+            G03 X-0.9802 Y1.5477 R2.5000
+            
+            G02 X-0.7954 Y1.6503 R1.8319
+            
+            G02 X-0.6001 Y1.7309 R1.8319
+            G03 X-2.2380 Y6.4550 R2.5000
+            G03 X-2.9665 Y6.1544 R6.8319
+            G03 X-0.7954 Y1.6503 R2.5000
+            
+            G02 X-0.6001 Y1.7309 R1.8319
+            
+            G02 X-0.3968 Y1.7885 R1.8319
+            G03 X-1.4797 Y6.6698 R2.5000
+            G03 X-2.2380 Y6.4550 R6.8319
+            G03 X-0.6001 Y1.7309 R2.5000
+            
+            G02 X-0.3968 Y1.7885 R1.8319
+            
+            G02 X-0.1882 Y1.8223 R1.8319
+            G03 X-0.7017 Y6.7959 R2.5000
+            G03 X-1.4797 Y6.6698 R6.8319
+            G03 X-0.3968 Y1.7885 R2.5000
+            
+            G02 X-0.1882 Y1.8223 R1.8319
+            
+            G02 X0.0230 Y1.8319 R1.8319
+            G03 X0.0856 Y6.8315 R2.5000
+            G03 X-0.7017 Y6.7959 R6.8319
+            G03 X-0.1882 Y1.8223 R2.5000
+            
+            G02 X0.0230 Y1.8319 R1.8319
+            
+            G02 X0.2338 Y1.8170 R1.8319
+            G03 X0.8718 Y6.7761 R2.5000
+            G03 X0.0856 Y6.8315 R6.8319
+            G03 X0.0230 Y1.8319 R2.5000
+            
+            G02 X0.2338 Y1.8170 R1.8319
+            
+            G02 X0.4415 Y1.7780 R1.8319
+            G03 X1.6463 Y6.6307 R2.5000
+            G03 X0.8718 Y6.7761 R6.8319
+            G03 X0.2338 Y1.8170 R2.5000
+            
+            G02 X0.4415 Y1.7780 R1.8319
+            
+            G02 X0.6433 Y1.7153 R1.8319
+            G03 X2.3990 Y6.3969 R2.5000
+            G03 X1.6463 Y6.6307 R6.8319
+            G03 X0.4415 Y1.7780 R2.5000
+            
+            G02 X0.6433 Y1.7153 R1.8319
+            
+            G02 X0.8365 Y1.6298 R1.8319
+            G03 X3.1198 Y6.0781 R2.5000
+            G03 X2.3990 Y6.3969 R6.8319
+            G03 X0.6433 Y1.7153 R2.5000
+            
+            G02 X0.8365 Y1.6298 R1.8319
+            
+            G02 X1.0187 Y1.5227 R1.8319
+            G03 X3.7990 Y5.6784 R2.5000
+            G03 X3.1198 Y6.0781 R6.8319
+            G03 X0.8365 Y1.6298 R2.5000
+            
+            G02 X1.0187 Y1.5227 R1.8319
+            
+            G02 X1.1872 Y1.3952 R1.8319
+            G03 X4.4276 Y5.2031 R2.5000
+            G03 X3.7990 Y5.6784 R6.8319
+            G03 X1.0187 Y1.5227 R2.5000
+            
+            G02 X1.1872 Y1.3952 R1.8319
+            
+            G02 X1.3400 Y1.2492 R1.8319
+            G03 X4.9974 Y4.6585 R2.5000
+            G03 X4.4276 Y5.2031 R6.8319
+            G03 X1.1872 Y1.3952 R2.5000
+            
+            G02 X1.3400 Y1.2492 R1.8319
+            
+            G02 X1.4749 Y1.0866 R1.8319
+            G03 X5.5006 Y4.0520 R2.5000
+            G03 X4.9974 Y4.6585 R6.8319
+            G03 X1.3400 Y1.2492 R2.5000
+            
+            G02 X1.4749 Y1.0866 R1.8319
+            
+            G02 X1.5902 Y0.9095 R1.8319
+            G03 X5.9307 Y3.3915 R2.5000
+            G03 X5.5006 Y4.0520 R6.8319
+            G03 X1.4749 Y1.0866 R2.5000
+            
+            G02 X1.5902 Y0.9095 R1.8319
+            
+            G02 X1.6844 Y0.7203 R1.8319
+            G03 X6.2818 Y2.6860 R2.5000
+            G03 X5.9307 Y3.3915 R6.8319
+            G03 X1.5902 Y0.9095 R2.5000
+            
+            G02 X1.6844 Y0.7203 R1.8319
+            
+            G02 X1.7561 Y0.5215 R1.8319
+            G03 X6.5493 Y1.9446 R2.5000
+            G03 X6.2818 Y2.6860 R6.8319
+            G03 X1.6844 Y0.7203 R2.5000
+            
+            G02 X1.7561 Y0.5215 R1.8319
+            
+            G02 X1.8045 Y0.3158 R1.8319
+            G03 X6.7297 Y1.1774 R2.5000
+            G03 X6.5493 Y1.9446 R6.8319
+            G03 X1.7561 Y0.5215 R2.5000
+            
+            G02 X1.8045 Y0.3158 R1.8319
+            
+            G02 X1.8288 Y0.1059 R1.8319
+            G03 X6.8205 Y0.3946 R2.5000
+            G03 X6.7297 Y1.1774 R6.8319
+            G03 X1.8045 Y0.3158 R2.5000
+            
+            G02 X1.8288 Y0.1059 R1.8319
+            
+            G02 X1.8289 Y-0.1055 R1.8319
+            G03 X6.8205 Y-0.3936 R2.5000
+            G03 X6.8205 Y0.3946 R6.8319
+            G03 X1.8288 Y0.1059 R2.5000
+            
+            G02 X1.8289 Y-0.1055 R1.8319
+            
+            G02 X1.8045 Y-0.3154 R1.8319
+            G03 X6.7298 Y-1.1764 R2.5000
+            G03 X6.8205 Y-0.3936 R6.8319
+            G03 X1.8289 Y-0.1055 R2.5000
+            
+            G02 X1.8045 Y-0.3154 R1.8319
+            
+            G02 X1.7687 Y-0.4769 R1.8319
+            G03 X6.5962 Y-1.7789 R2.5000
+            G03 X6.7298 Y-1.1764 R6.8319
+            G03 X1.8045 Y-0.3154 R2.5000
+            G02 X1.7687 Y-0.4769 R1.8319
+    (---trichoidal arc slot end---)
+    (---trichoidal arc slot start---)
+    (---description---)
+    (Calculates and prints to a txt file the trichoidal tool path in G code of a counter clockwise arc.)
+    (returns last position of cutter and end position of arc.)
+    (refer to "PRT20210421001 Trichoidal Arc Calculator", "MEM20210522001 Trichoidal Arc", "MEM20210429002 Trichoidal Notes")
+    (start and end points are located at slot arc center points.)
+    (assumes that cutter is at cutting depth.)
+    (does not return to safe z.)
+    (does not set cutting feed.)
+    (---parameter---)
+    (start: X4.182 Y-1.128)
+    (end: X1.189 Y-3.421)
+    (step over: 0.500)                     
+    (width of slot: 6.000) 
+    (slot radius : 3.100)                  
+    (cutter diameter: 1.000)        
+    (position of cutter: X1.7687 Y-0.4769) 
+    (first slot: False)              
+    (last slot: False)                
+    (clockwise : True)
+    (acute angle: True)
+    
+            G02 X1.7361 Y-0.5679 R0.6000
+            G03 X6.2918 Y-2.6283 R2.5000
+            G03 X6.5962 Y-1.7789 R5.6000
+            G03 X1.7687 Y-0.4769 R2.5000
+            
+            G02 X1.7361 Y-0.5679 R0.6000
+            
+            G02 X1.6893 Y-0.6525 R0.6000
+            G03 X5.8550 Y-3.4178 R2.5000
+            G03 X6.2918 Y-2.6283 R5.6000
+            G03 X1.7361 Y-0.5679 R2.5000
+            
+            G02 X1.6893 Y-0.6525 R0.6000
+            
+            G02 X1.6295 Y-0.7285 R0.6000
+            G03 X5.2971 Y-4.1268 R2.5000
+            G03 X5.8550 Y-3.4178 R5.6000
+            G03 X1.6893 Y-0.6525 R2.5000
+            
+            G02 X1.6295 Y-0.7285 R0.6000
+            
+            G02 X1.5583 Y-0.7939 R0.6000
+            G03 X4.6326 Y-4.7371 R2.5000
+            G03 X5.2971 Y-4.1268 R5.6000
+            G03 X1.6295 Y-0.7285 R2.5000
+            
+            G02 X1.5583 Y-0.7939 R0.6000
+            
+            G02 X1.4775 Y-0.8470 R0.6000
+            G03 X3.8786 Y-5.2327 R2.5000
+            G03 X4.6326 Y-4.7371 R5.6000
+            G03 X1.5583 Y-0.7939 R2.5000
+            
+            G02 X1.4775 Y-0.8470 R0.6000
+            
+            G02 X1.3893 Y-0.8864 R0.6000
+            G03 X3.0549 Y-5.6008 R2.5000
+            G03 X3.8786 Y-5.2327 R5.6000
+            G03 X1.4775 Y-0.8470 R2.5000
+            
+            G02 X1.3893 Y-0.8864 R0.6000
+            
+            G02 X1.2958 Y-0.9112 R0.6000
+            G03 X2.1827 Y-5.8319 R2.5000
+            G03 X3.0549 Y-5.6008 R5.6000
+            G03 X1.3893 Y-0.8864 R2.5000
+            
+            G02 X1.2958 Y-0.9112 R0.6000
+            
+            G02 X1.1996 Y-0.9206 R0.6000
+            G03 X1.2848 Y-5.9199 R2.5000
+            G03 X2.1827 Y-5.8319 R5.6000
+            G03 X1.2958 Y-0.9112 R2.5000
+            
+            G02 X1.1996 Y-0.9206 R0.6000
+            
+            G02 X1.1894 Y-0.9207 R0.6000
+            G03 X1.1894 Y-5.9207 R2.5000
+            G03 X1.2848 Y-5.9199 R5.6000
+            G03 X1.1996 Y-0.9206 R2.5000
+            G02 X1.1894 Y-0.9207 R0.6000
+    (---trichoidal arc slot end---)
+    
+    (---trichoidal linear slot start---)                                                                                                                                                                                                                     
+    (---description---)
+    (Calculates and prints to a txt file the trichoidal tool path in G code of a straight slot.)                                                                                                         
+    (returns last position of cutter and end position of slot)
+    (start and end points are located along slot arc center/neutral axis)
+    (assumes that cutter is at cutting depth)
+    (does NOT return to safe z)
+    (---parameters---)                                                                                                          
+    (start: X1.189 Y-3.421)
+    (end: X0.100 Y-3.421)
+    (step over: 0.500)
+    (width of slot: 6.000)                                                                                            
+    (cutter diameter: 1.000)
+    (position of cutter: X1.1894 Y-0.9207)
+    (first slot: False)
+    (last slot: True)                                                                                                  
+    
+    G1 X0.6894 Y-0.9207
+    G03 X0.6894 Y-5.9207 R2.5000
+    G1 X1.1894 Y-5.9207
+    G03 X1.1894 y-0.9207 R2.5000
+    
+    G1 X0.1894 Y-0.9207
+    G03 X0.1894 Y-5.9207 R2.5000
+    G1 X0.6894 Y-5.9207
+    G03 X0.6894 y-0.9207 R2.5000
+    
+    G1 X0.1000 Y-0.9207
+    G03 X0.1000 Y-5.9207 R2.5000
+    G1 X0.1894 Y-5.9207
+    G03 X0.1894 y-3.4207 R1.2500
+    G1 X0.1000 Y-3.4207
+    (---trichoidal linear slot end---)
+    
+G0 Z6.0000				(Rapid to safe height)
+G0 X6.0000 Y-0.8207                 (Rapid to start point)
+G0 Z-6.0000				(Rapid to cutting height)
+F181.1     (set cutting feed)
+
+    (---toolpath_data_frame start---)
+    (---description---)
+    (Imports a 2D dataframe from an excel file, calculates the toolpath adjusted for offset and tool diameter and prints to a txt file the single or trichoidal tool path in G code.)
+    (returns last position of cutter and end position of arc.)
+    (refer to "ALG20220329001 Toolpath Data Frame Algorithm")
+    (start and end points are located at slot arc center points.)
+    (assumes that cutter is at cutting depth.)
+    (does not return to safe z.)
+    (does not set cutting feed.)
+    (---parameter---)            
+    (cutter diameter: 1.000)        
+    (offset: 0.100)
+    (excel_file: vector-01.xlsx)
+    (sheet: Sheet12)
+    G1 X-1.1894 Y-0.8207 F109
+G02 X-1.6722 Y-0.4509 R0.5000 F109
+G02 X1.6722 Y-0.4509 R-1.7319 F109
+G02 X1.1894 Y-0.8207 R0.5000 F109
+G1 X-1.1894 Y-0.8207 F109
+G02 X-1.6722 Y-0.4509 R0.5000 F109
+G02 X1.6722 Y-0.4509 R-1.7319 F109
+G02 X1.1894 Y-0.8207 R0.5000 F109
+G1 X-1.1894 Y-0.8207 F109
+G02 X-1.6722 Y-0.4509 R0.5000 F109
+G02 X1.6722 Y-0.4509 R-1.7319 F109
+G02 X1.1894 Y-0.8207 R0.5000 F109
+G1 X0.1000 Y-0.8207 F109
+
+    G0 Z6.0000				(Rapid to safe height)
+    G0 X0 Y0                 (Rapid to zero point)
+    G92 X7.9638 Y0       (Offset datum)
+    G0 X6.0000 Y-3.4207                 (Rapid to start point)
+    G0 Z-6.0000				(Rapid to cutting height)
+    F181.1     (set cutting feed)
+    
+    (---toolpath_data_frame start---)
+    (---description---)
+    (Imports a 2D dataframe from an excel file, calculates the toolpath adjusted for offset and tool diameter and prints to a txt file the single or trichoidal tool path in G code.)
+    (returns last position of cutter and end position of arc.)
+    (refer to "ALG20220329001 Toolpath Data Frame Algorithm")
+    (start and end points are located at slot arc center points.)
+    (assumes that cutter is at cutting depth.)
+    (does not return to safe z.)
+    (does not set cutting feed.)
+    (---parameter---)            
+    (cutter diameter: 1.000)        
+    (offset: 0.100)
+    (excel_file: vector-01.xlsx)
+    (sheet: Sheet10)
+    
+    (---trichoidal linear slot start---)                                                                                                                                                                                                                     
+    (---description---)
+    (Calculates and prints to a txt file the trichoidal tool path in G code of a straight slot.)                                                                                                         
+    (returns last position of cutter and end position of slot)
+    (start and end points are located along slot arc center/neutral axis)
+    (assumes that cutter is at cutting depth)
+    (does NOT return to safe z)
+    (---parameters---)                                                                                                          
+    (start: X6.000 Y-3.421)
+    (end: X-1.189 Y-3.421)
+    (step over: 0.500)
+    (width of slot: 6.000)                                                                                            
+    (cutter diameter: 1.000)
+    (position of cutter: X6.0000 Y-3.4207)
+    (first slot: True)
+    (last slot: False)                                                                                                  
+    
+    G03 X6.0000 Y-0.9207 R1.2500
+    
+    G1 X5.5000 Y-0.9207
+    G03 X5.5000 Y-5.9207 R2.5000
+    G1 X6.0000 Y-5.9207
+    G03 X6.0000 y-0.9207 R2.5000
+    
+    G1 X5.0000 Y-0.9207
+    G03 X5.0000 Y-5.9207 R2.5000
+    G1 X5.5000 Y-5.9207
+    G03 X5.5000 y-0.9207 R2.5000
+    
+    G1 X4.5000 Y-0.9207
+    G03 X4.5000 Y-5.9207 R2.5000
+    G1 X5.0000 Y-5.9207
+    G03 X5.0000 y-0.9207 R2.5000
+    
+    G1 X4.0000 Y-0.9207
+    G03 X4.0000 Y-5.9207 R2.5000
+    G1 X4.5000 Y-5.9207
+    G03 X4.5000 y-0.9207 R2.5000
+    
+    G1 X3.5000 Y-0.9207
+    G03 X3.5000 Y-5.9207 R2.5000
+    G1 X4.0000 Y-5.9207
+    G03 X4.0000 y-0.9207 R2.5000
+    
+    G1 X3.0000 Y-0.9207
+    G03 X3.0000 Y-5.9207 R2.5000
+    G1 X3.5000 Y-5.9207
+    G03 X3.5000 y-0.9207 R2.5000
+    
+    G1 X2.5000 Y-0.9207
+    G03 X2.5000 Y-5.9207 R2.5000
+    G1 X3.0000 Y-5.9207
+    G03 X3.0000 y-0.9207 R2.5000
+    
+    G1 X2.0000 Y-0.9207
+    G03 X2.0000 Y-5.9207 R2.5000
+    G1 X2.5000 Y-5.9207
+    G03 X2.5000 y-0.9207 R2.5000
+    
+    G1 X1.5000 Y-0.9207
+    G03 X1.5000 Y-5.9207 R2.5000
+    G1 X2.0000 Y-5.9207
+    G03 X2.0000 y-0.9207 R2.5000
+    
+    G1 X1.0000 Y-0.9207
+    G03 X1.0000 Y-5.9207 R2.5000
+    G1 X1.5000 Y-5.9207
+    G03 X1.5000 y-0.9207 R2.5000
+    
+    G1 X0.5000 Y-0.9207
+    G03 X0.5000 Y-5.9207 R2.5000
+    G1 X1.0000 Y-5.9207
+    G03 X1.0000 y-0.9207 R2.5000
+    
+    G1 X0.0000 Y-0.9207
+    G03 X-0.0000 Y-5.9207 R2.5000
+    G1 X0.5000 Y-5.9207
+    G03 X0.5000 y-0.9207 R2.5000
+    
+    G1 X-0.5000 Y-0.9207
+    G03 X-0.5000 Y-5.9207 R2.5000
+    G1 X-0.0000 Y-5.9207
+    G03 X0.0000 y-0.9207 R2.5000
+    
+    G1 X-1.0000 Y-0.9207
+    G03 X-1.0000 Y-5.9207 R2.5000
+    G1 X-0.5000 Y-5.9207
+    G03 X-0.5000 y-0.9207 R2.5000
+    
+    G1 X-1.1894 Y-0.9207
+    G03 X-1.1894 Y-5.9207 R2.5000
+    G1 X-1.0000 Y-5.9207
+    G03 X-1.0000 y-0.9207 R2.5000
+    G1 X-1.1894 Y-0.9207
+    (---trichoidal linear slot end---)
+    (---trichoidal arc slot start---)
+    (---description---)
+    (Calculates and prints to a txt file the trichoidal tool path in G code of a counter clockwise arc.)
+    (returns last position of cutter and end position of arc.)
+    (refer to "PRT20210421001 Trichoidal Arc Calculator", "MEM20210522001 Trichoidal Arc", "MEM20210429002 Trichoidal Notes")
+    (start and end points are located at slot arc center points.)
+    (assumes that cutter is at cutting depth.)
+    (does not return to safe z.)
+    (does not set cutting feed.)
+    (---parameter---)
+    (start: X-1.189 Y-3.421)
+    (end: X-4.182 Y-1.128)
+    (step over: 0.500)                     
+    (width of slot: 6.000) 
+    (slot radius : 3.100)                  
+    (cutter diameter: 1.000)        
+    (position of cutter: X-1.1894 Y-0.9207) 
+    (first slot: False)              
+    (last slot: False)                
+    (clockwise : True)
+    (acute angle: True)
+    
+            G02 X-1.2858 Y-0.9129 R0.6000
+            G03 X-2.0887 Y-5.8480 R2.5000
+            G03 X-1.1894 Y-5.9207 R5.6000
+            G03 X-1.1894 Y-0.9207 R2.5000
+            
+            G02 X-1.2858 Y-0.9129 R0.6000
+            
+            G02 X-1.3796 Y-0.8898 R0.6000
+            G03 X-2.9647 Y-5.6319 R2.5000
+            G03 X-2.0887 Y-5.8480 R5.6000
+            G03 X-1.2858 Y-0.9129 R2.5000
+            
+            G02 X-1.3796 Y-0.8898 R0.6000
+            
+            G02 X-1.4685 Y-0.8518 R0.6000
+            G03 X-3.7946 Y-5.2778 R2.5000
+            G03 X-2.9647 Y-5.6319 R5.6000
+            G03 X-1.3796 Y-0.8898 R2.5000
+            
+            G02 X-1.4685 Y-0.8518 R0.6000
+            
+            G02 X-1.5502 Y-0.8001 R0.6000
+            G03 X-4.5568 Y-4.7951 R2.5000
+            G03 X-3.7946 Y-5.2778 R5.6000
+            G03 X-1.4685 Y-0.8518 R2.5000
+            
+            G02 X-1.5502 Y-0.8001 R0.6000
+            
+            G02 X-1.6225 Y-0.7359 R0.6000
+            G03 X-5.2317 Y-4.1963 R2.5000
+            G03 X-4.5568 Y-4.7951 R5.6000
+            G03 X-1.5502 Y-0.8001 R2.5000
+            
+            G02 X-1.6225 Y-0.7359 R0.6000
+            
+            G02 X-1.6836 Y-0.6610 R0.6000
+            G03 X-5.8016 Y-3.4968 R2.5000
+            G03 X-5.2317 Y-4.1963 R5.6000
+            G03 X-1.6225 Y-0.7359 R2.5000
+            
+            G02 X-1.6836 Y-0.6610 R0.6000
+            
+            G02 X-1.7318 Y-0.5772 R0.6000
+            G03 X-6.2518 Y-2.7149 R2.5000
+            G03 X-5.8016 Y-3.4968 R5.6000
+            G03 X-1.6836 Y-0.6610 R2.5000
+            
+            G02 X-1.7318 Y-0.5772 R0.6000
+            
+            G02 X-1.7660 Y-0.4868 R0.6000
+            G03 X-6.5706 Y-1.8708 R2.5000
+            G03 X-6.2518 Y-2.7149 R5.6000
+            G03 X-1.7318 Y-0.5772 R2.5000
+            
+            G02 X-1.7660 Y-0.4868 R0.6000
+            
+            G02 X-1.7687 Y-0.4769 R0.6000
+            G03 X-6.5962 Y-1.7789 R2.5000
+            G03 X-6.5706 Y-1.8708 R5.6000
+            G03 X-1.7660 Y-0.4868 R2.5000
+            G02 X-1.7687 Y-0.4769 R0.6000
+    (---trichoidal arc slot end---)
+    (---trichoidal arc slot start---)
+    (---description---)
+    (Calculates and prints to a txt file the trichoidal tool path in G code of a counter clockwise arc.)
+    (returns last position of cutter and end position of arc.)
+    (refer to "PRT20210421001 Trichoidal Arc Calculator", "MEM20210522001 Trichoidal Arc", "MEM20210429002 Trichoidal Notes")
+    (start and end points are located at slot arc center points.)
+    (assumes that cutter is at cutting depth.)
+    (does not return to safe z.)
+    (does not set cutting feed.)
+    (---parameter---)
+    (start: X-4.182 Y-1.128)
+    (end: X4.182 Y-1.128)
+    (step over: 0.500)                     
+    (width of slot: 6.000) 
+    (slot radius : 4.332)                  
+    (cutter diameter: 1.000)        
+    (position of cutter: X-1.7687 Y-0.4769) 
+    (first slot: False)              
+    (last slot: False)                
+    (clockwise : True)
+    (acute angle: False)
+    
+            G02 X-1.8119 Y-0.2701 R1.8319
+            G03 X-6.7572 Y-1.0074 R2.5000
+            G03 X-6.5962 Y-1.7789 R6.8319
+            G03 X-1.7687 Y-0.4769 R2.5000
+            
+            G02 X-1.8119 Y-0.2701 R1.8319
+            
+            G02 X-1.8309 Y-0.0596 R1.8319
+            G03 X-6.8283 Y-0.2225 R2.5000
+            G03 X-6.7572 Y-1.0074 R6.8319
+            G03 X-1.8119 Y-0.2701 R2.5000
+            
+            G02 X-1.8309 Y-0.0596 R1.8319
+            
+            G02 X-1.8256 Y0.1517 R1.8319
+            G03 X-6.8085 Y0.5653 R2.5000
+            G03 X-6.8283 Y-0.2225 R6.8319
+            G03 X-1.8309 Y-0.0596 R2.5000
+            
+            G02 X-1.8256 Y0.1517 R1.8319
+            
+            G02 X-1.7960 Y0.3609 R1.8319
+            G03 X-6.6981 Y1.3457 R2.5000
+            G03 X-6.8085 Y0.5653 R6.8319
+            G03 X-1.8256 Y0.1517 R2.5000
+            
+            G02 X-1.7960 Y0.3609 R1.8319
+            
+            G02 X-1.7425 Y0.5653 R1.8319
+            G03 X-6.4985 Y2.1081 R2.5000
+            G03 X-6.6981 Y1.3457 R6.8319
+            G03 X-1.7960 Y0.3609 R2.5000
+            
+            G02 X-1.7425 Y0.5653 R1.8319
+            
+            G02 X-1.6658 Y0.7623 R1.8319
+            G03 X-6.2125 Y2.8425 R2.5000
+            G03 X-6.4985 Y2.1081 R6.8319
+            G03 X-1.7425 Y0.5653 R2.5000
+            
+            G02 X-1.6658 Y0.7623 R1.8319
+            
+            G02 X-1.5670 Y0.9490 R1.8319
+            G03 X-5.8438 Y3.5391 R2.5000
+            G03 X-6.2125 Y2.8425 R6.8319
+            G03 X-1.6658 Y0.7623 R2.5000
+            
+            G02 X-1.5670 Y0.9490 R1.8319
+            
+            G02 X-1.4473 Y1.1232 R1.8319
+            G03 X-5.3974 Y4.1885 R2.5000
+            G03 X-5.8438 Y3.5391 R6.8319
+            G03 X-1.5670 Y0.9490 R2.5000
+            
+            G02 X-1.4473 Y1.1232 R1.8319
+            
+            G02 X-1.3083 Y1.2824 R1.8319
+            G03 X-4.8791 Y4.7823 R2.5000
+            G03 X-5.3974 Y4.1885 R6.8319
+            G03 X-1.4473 Y1.1232 R2.5000
+            
+            G02 X-1.3083 Y1.2824 R1.8319
+            
+            G02 X-1.1519 Y1.4245 R1.8319
+            G03 X-4.2959 Y5.3124 R2.5000
+            G03 X-4.8791 Y4.7823 R6.8319
+            G03 X-1.3083 Y1.2824 R2.5000
+            
+            G02 X-1.1519 Y1.4245 R1.8319
+            
+            G02 X-0.9802 Y1.5477 R1.8319
+            G03 X-3.6555 Y5.7718 R2.5000
+            G03 X-4.2959 Y5.3124 R6.8319
+            G03 X-1.1519 Y1.4245 R2.5000
+            
+            G02 X-0.9802 Y1.5477 R1.8319
+            
+            G02 X-0.7954 Y1.6503 R1.8319
+            G03 X-2.9665 Y6.1544 R2.5000
+            G03 X-3.6555 Y5.7718 R6.8319
+            G03 X-0.9802 Y1.5477 R2.5000
+            
+            G02 X-0.7954 Y1.6503 R1.8319
+            
+            G02 X-0.6001 Y1.7309 R1.8319
+            G03 X-2.2380 Y6.4550 R2.5000
+            G03 X-2.9665 Y6.1544 R6.8319
+            G03 X-0.7954 Y1.6503 R2.5000
+            
+            G02 X-0.6001 Y1.7309 R1.8319
+            
+            G02 X-0.3968 Y1.7885 R1.8319
+            G03 X-1.4797 Y6.6698 R2.5000
+            G03 X-2.2380 Y6.4550 R6.8319
+            G03 X-0.6001 Y1.7309 R2.5000
+            
+            G02 X-0.3968 Y1.7885 R1.8319
+            
+            G02 X-0.1882 Y1.8223 R1.8319
+            G03 X-0.7017 Y6.7959 R2.5000
+            G03 X-1.4797 Y6.6698 R6.8319
+            G03 X-0.3968 Y1.7885 R2.5000
+            
+            G02 X-0.1882 Y1.8223 R1.8319
+            
+            G02 X0.0230 Y1.8319 R1.8319
+            G03 X0.0856 Y6.8315 R2.5000
+            G03 X-0.7017 Y6.7959 R6.8319
+            G03 X-0.1882 Y1.8223 R2.5000
+            
+            G02 X0.0230 Y1.8319 R1.8319
+            
+            G02 X0.2338 Y1.8170 R1.8319
+            G03 X0.8718 Y6.7761 R2.5000
+            G03 X0.0856 Y6.8315 R6.8319
+            G03 X0.0230 Y1.8319 R2.5000
+            
+            G02 X0.2338 Y1.8170 R1.8319
+            
+            G02 X0.4415 Y1.7780 R1.8319
+            G03 X1.6463 Y6.6307 R2.5000
+            G03 X0.8718 Y6.7761 R6.8319
+            G03 X0.2338 Y1.8170 R2.5000
+            
+            G02 X0.4415 Y1.7780 R1.8319
+            
+            G02 X0.6433 Y1.7153 R1.8319
+            G03 X2.3990 Y6.3969 R2.5000
+            G03 X1.6463 Y6.6307 R6.8319
+            G03 X0.4415 Y1.7780 R2.5000
+            
+            G02 X0.6433 Y1.7153 R1.8319
+            
+            G02 X0.8365 Y1.6298 R1.8319
+            G03 X3.1198 Y6.0781 R2.5000
+            G03 X2.3990 Y6.3969 R6.8319
+            G03 X0.6433 Y1.7153 R2.5000
+            
+            G02 X0.8365 Y1.6298 R1.8319
+            
+            G02 X1.0187 Y1.5227 R1.8319
+            G03 X3.7990 Y5.6784 R2.5000
+            G03 X3.1198 Y6.0781 R6.8319
+            G03 X0.8365 Y1.6298 R2.5000
+            
+            G02 X1.0187 Y1.5227 R1.8319
+            
+            G02 X1.1872 Y1.3952 R1.8319
+            G03 X4.4276 Y5.2031 R2.5000
+            G03 X3.7990 Y5.6784 R6.8319
+            G03 X1.0187 Y1.5227 R2.5000
+            
+            G02 X1.1872 Y1.3952 R1.8319
+            
+            G02 X1.3400 Y1.2492 R1.8319
+            G03 X4.9974 Y4.6585 R2.5000
+            G03 X4.4276 Y5.2031 R6.8319
+            G03 X1.1872 Y1.3952 R2.5000
+            
+            G02 X1.3400 Y1.2492 R1.8319
+            
+            G02 X1.4749 Y1.0866 R1.8319
+            G03 X5.5006 Y4.0520 R2.5000
+            G03 X4.9974 Y4.6585 R6.8319
+            G03 X1.3400 Y1.2492 R2.5000
+            
+            G02 X1.4749 Y1.0866 R1.8319
+            
+            G02 X1.5902 Y0.9095 R1.8319
+            G03 X5.9307 Y3.3915 R2.5000
+            G03 X5.5006 Y4.0520 R6.8319
+            G03 X1.4749 Y1.0866 R2.5000
+            
+            G02 X1.5902 Y0.9095 R1.8319
+            
+            G02 X1.6844 Y0.7203 R1.8319
+            G03 X6.2818 Y2.6860 R2.5000
+            G03 X5.9307 Y3.3915 R6.8319
+            G03 X1.5902 Y0.9095 R2.5000
+            
+            G02 X1.6844 Y0.7203 R1.8319
+            
+            G02 X1.7561 Y0.5215 R1.8319
+            G03 X6.5493 Y1.9446 R2.5000
+            G03 X6.2818 Y2.6860 R6.8319
+            G03 X1.6844 Y0.7203 R2.5000
+            
+            G02 X1.7561 Y0.5215 R1.8319
+            
+            G02 X1.8045 Y0.3158 R1.8319
+            G03 X6.7297 Y1.1774 R2.5000
+            G03 X6.5493 Y1.9446 R6.8319
+            G03 X1.7561 Y0.5215 R2.5000
+            
+            G02 X1.8045 Y0.3158 R1.8319
+            
+            G02 X1.8288 Y0.1059 R1.8319
+            G03 X6.8205 Y0.3946 R2.5000
+            G03 X6.7297 Y1.1774 R6.8319
+            G03 X1.8045 Y0.3158 R2.5000
+            
+            G02 X1.8288 Y0.1059 R1.8319
+            
+            G02 X1.8289 Y-0.1055 R1.8319
+            G03 X6.8205 Y-0.3936 R2.5000
+            G03 X6.8205 Y0.3946 R6.8319
+            G03 X1.8288 Y0.1059 R2.5000
+            
+            G02 X1.8289 Y-0.1055 R1.8319
+            
+            G02 X1.8045 Y-0.3154 R1.8319
+            G03 X6.7298 Y-1.1764 R2.5000
+            G03 X6.8205 Y-0.3936 R6.8319
+            G03 X1.8289 Y-0.1055 R2.5000
+            
+            G02 X1.8045 Y-0.3154 R1.8319
+            
+            G02 X1.7687 Y-0.4769 R1.8319
+            G03 X6.5962 Y-1.7789 R2.5000
+            G03 X6.7298 Y-1.1764 R6.8319
+            G03 X1.8045 Y-0.3154 R2.5000
+            G02 X1.7687 Y-0.4769 R1.8319
+    (---trichoidal arc slot end---)
+    (---trichoidal arc slot start---)
+    (---description---)
+    (Calculates and prints to a txt file the trichoidal tool path in G code of a counter clockwise arc.)
+    (returns last position of cutter and end position of arc.)
+    (refer to "PRT20210421001 Trichoidal Arc Calculator", "MEM20210522001 Trichoidal Arc", "MEM20210429002 Trichoidal Notes")
+    (start and end points are located at slot arc center points.)
+    (assumes that cutter is at cutting depth.)
+    (does not return to safe z.)
+    (does not set cutting feed.)
+    (---parameter---)
+    (start: X4.182 Y-1.128)
+    (end: X1.189 Y-3.421)
+    (step over: 0.500)                     
+    (width of slot: 6.000) 
+    (slot radius : 3.100)                  
+    (cutter diameter: 1.000)        
+    (position of cutter: X1.7687 Y-0.4769) 
+    (first slot: False)              
+    (last slot: False)                
+    (clockwise : True)
+    (acute angle: True)
+    
+            G02 X1.7361 Y-0.5679 R0.6000
+            G03 X6.2918 Y-2.6283 R2.5000
+            G03 X6.5962 Y-1.7789 R5.6000
+            G03 X1.7687 Y-0.4769 R2.5000
+            
+            G02 X1.7361 Y-0.5679 R0.6000
+            
+            G02 X1.6893 Y-0.6525 R0.6000
+            G03 X5.8550 Y-3.4178 R2.5000
+            G03 X6.2918 Y-2.6283 R5.6000
+            G03 X1.7361 Y-0.5679 R2.5000
+            
+            G02 X1.6893 Y-0.6525 R0.6000
+            
+            G02 X1.6295 Y-0.7285 R0.6000
+            G03 X5.2971 Y-4.1268 R2.5000
+            G03 X5.8550 Y-3.4178 R5.6000
+            G03 X1.6893 Y-0.6525 R2.5000
+            
+            G02 X1.6295 Y-0.7285 R0.6000
+            
+            G02 X1.5583 Y-0.7939 R0.6000
+            G03 X4.6326 Y-4.7371 R2.5000
+            G03 X5.2971 Y-4.1268 R5.6000
+            G03 X1.6295 Y-0.7285 R2.5000
+            
+            G02 X1.5583 Y-0.7939 R0.6000
+            
+            G02 X1.4775 Y-0.8470 R0.6000
+            G03 X3.8786 Y-5.2327 R2.5000
+            G03 X4.6326 Y-4.7371 R5.6000
+            G03 X1.5583 Y-0.7939 R2.5000
+            
+            G02 X1.4775 Y-0.8470 R0.6000
+            
+            G02 X1.3893 Y-0.8864 R0.6000
+            G03 X3.0549 Y-5.6008 R2.5000
+            G03 X3.8786 Y-5.2327 R5.6000
+            G03 X1.4775 Y-0.8470 R2.5000
+            
+            G02 X1.3893 Y-0.8864 R0.6000
+            
+            G02 X1.2958 Y-0.9112 R0.6000
+            G03 X2.1827 Y-5.8319 R2.5000
+            G03 X3.0549 Y-5.6008 R5.6000
+            G03 X1.3893 Y-0.8864 R2.5000
+            
+            G02 X1.2958 Y-0.9112 R0.6000
+            
+            G02 X1.1996 Y-0.9206 R0.6000
+            G03 X1.2848 Y-5.9199 R2.5000
+            G03 X2.1827 Y-5.8319 R5.6000
+            G03 X1.2958 Y-0.9112 R2.5000
+            
+            G02 X1.1996 Y-0.9206 R0.6000
+            
+            G02 X1.1894 Y-0.9207 R0.6000
+            G03 X1.1894 Y-5.9207 R2.5000
+            G03 X1.2848 Y-5.9199 R5.6000
+            G03 X1.1996 Y-0.9206 R2.5000
+            G02 X1.1894 Y-0.9207 R0.6000
+    (---trichoidal arc slot end---)
+    
+    (---trichoidal linear slot start---)                                                                                                                                                                                                                     
+    (---description---)
+    (Calculates and prints to a txt file the trichoidal tool path in G code of a straight slot.)                                                                                                         
+    (returns last position of cutter and end position of slot)
+    (start and end points are located along slot arc center/neutral axis)
+    (assumes that cutter is at cutting depth)
+    (does NOT return to safe z)
+    (---parameters---)                                                                                                          
+    (start: X1.189 Y-3.421)
+    (end: X0.100 Y-3.421)
+    (step over: 0.500)
+    (width of slot: 6.000)                                                                                            
+    (cutter diameter: 1.000)
+    (position of cutter: X1.1894 Y-0.9207)
+    (first slot: False)
+    (last slot: True)                                                                                                  
+    
+    G1 X0.6894 Y-0.9207
+    G03 X0.6894 Y-5.9207 R2.5000
+    G1 X1.1894 Y-5.9207
+    G03 X1.1894 y-0.9207 R2.5000
+    
+    G1 X0.1894 Y-0.9207
+    G03 X0.1894 Y-5.9207 R2.5000
+    G1 X0.6894 Y-5.9207
+    G03 X0.6894 y-0.9207 R2.5000
+    
+    G1 X0.1000 Y-0.9207
+    G03 X0.1000 Y-5.9207 R2.5000
+    G1 X0.1894 Y-5.9207
+    G03 X0.1894 y-3.4207 R1.2500
+    G1 X0.1000 Y-3.4207
+    (---trichoidal linear slot end---)
+    
+    G0 Z6.0000				(Rapid to safe height)
+    G0 X6.0000 Y-0.8207                 (Rapid to start point)
+    G0 Z-6.0000				(Rapid to cutting height)
+    F181.1     (set cutting feed)
+    
+    (---toolpath_data_frame start---)
+    (---description---)
+    (Imports a 2D dataframe from an excel file, calculates the toolpath adjusted for offset and tool diameter and prints to a txt file the single or trichoidal tool path in G code.)
+    (returns last position of cutter and end position of arc.)
+    (refer to "ALG20220329001 Toolpath Data Frame Algorithm")
+    (start and end points are located at slot arc center points.)
+    (assumes that cutter is at cutting depth.)
+    (does not return to safe z.)
+    (does not set cutting feed.)
+    (---parameter---)            
+    (cutter diameter: 1.000)        
+    (offset: 0.100)
+    (excel_file: vector-01.xlsx)
+    (sheet: Sheet12)
+    G1 X-1.1894 Y-0.8207 F109
+G02 X-1.6722 Y-0.4509 R0.5000 F109
+G02 X1.6722 Y-0.4509 R-1.7319 F109
+G02 X1.1894 Y-0.8207 R0.5000 F109
+G1 X-1.1894 Y-0.8207 F109
+G02 X-1.6722 Y-0.4509 R0.5000 F109
+G02 X1.6722 Y-0.4509 R-1.7319 F109
+G02 X1.1894 Y-0.8207 R0.5000 F109
+G1 X-1.1894 Y-0.8207 F109
+G02 X-1.6722 Y-0.4509 R0.5000 F109
+G02 X1.6722 Y-0.4509 R-1.7319 F109
+G02 X1.1894 Y-0.8207 R0.5000 F109
+G1 X0.1000 Y-0.8207 F109
+
+    G0 Z6.0000				(Rapid to safe height)
+    G0 X0 Y0                 (Rapid to zero point)
+    G92 X7.9638 Y0       (Offset datum)
+    G0 X6.0000 Y-3.4207                 (Rapid to start point)
+    G0 Z-6.0000				(Rapid to cutting height)
+    F181.1     (set cutting feed)
+    
+    (---toolpath_data_frame start---)
+    (---description---)
+    (Imports a 2D dataframe from an excel file, calculates the toolpath adjusted for offset and tool diameter and prints to a txt file the single or trichoidal tool path in G code.)
+    (returns last position of cutter and end position of arc.)
+    (refer to "ALG20220329001 Toolpath Data Frame Algorithm")
+    (start and end points are located at slot arc center points.)
+    (assumes that cutter is at cutting depth.)
+    (does not return to safe z.)
+    (does not set cutting feed.)
+    (---parameter---)            
+    (cutter diameter: 1.000)        
+    (offset: 0.100)
+    (excel_file: vector-01.xlsx)
+    (sheet: Sheet10)
+    
+    (---trichoidal linear slot start---)                                                                                                                                                                                                                     
+    (---description---)
+    (Calculates and prints to a txt file the trichoidal tool path in G code of a straight slot.)                                                                                                         
+    (returns last position of cutter and end position of slot)
+    (start and end points are located along slot arc center/neutral axis)
+    (assumes that cutter is at cutting depth)
+    (does NOT return to safe z)
+    (---parameters---)                                                                                                          
+    (start: X6.000 Y-3.421)
+    (end: X-1.189 Y-3.421)
+    (step over: 0.500)
+    (width of slot: 6.000)                                                                                            
+    (cutter diameter: 1.000)
+    (position of cutter: X6.0000 Y-3.4207)
+    (first slot: True)
+    (last slot: False)                                                                                                  
+    
+    G03 X6.0000 Y-0.9207 R1.2500
+    
+    G1 X5.5000 Y-0.9207
+    G03 X5.5000 Y-5.9207 R2.5000
+    G1 X6.0000 Y-5.9207
+    G03 X6.0000 y-0.9207 R2.5000
+    
+    G1 X5.0000 Y-0.9207
+    G03 X5.0000 Y-5.9207 R2.5000
+    G1 X5.5000 Y-5.9207
+    G03 X5.5000 y-0.9207 R2.5000
+    
+    G1 X4.5000 Y-0.9207
+    G03 X4.5000 Y-5.9207 R2.5000
+    G1 X5.0000 Y-5.9207
+    G03 X5.0000 y-0.9207 R2.5000
+    
+    G1 X4.0000 Y-0.9207
+    G03 X4.0000 Y-5.9207 R2.5000
+    G1 X4.5000 Y-5.9207
+    G03 X4.5000 y-0.9207 R2.5000
+    
+    G1 X3.5000 Y-0.9207
+    G03 X3.5000 Y-5.9207 R2.5000
+    G1 X4.0000 Y-5.9207
+    G03 X4.0000 y-0.9207 R2.5000
+    
+    G1 X3.0000 Y-0.9207
+    G03 X3.0000 Y-5.9207 R2.5000
+    G1 X3.5000 Y-5.9207
+    G03 X3.5000 y-0.9207 R2.5000
+    
+    G1 X2.5000 Y-0.9207
+    G03 X2.5000 Y-5.9207 R2.5000
+    G1 X3.0000 Y-5.9207
+    G03 X3.0000 y-0.9207 R2.5000
+    
+    G1 X2.0000 Y-0.9207
+    G03 X2.0000 Y-5.9207 R2.5000
+    G1 X2.5000 Y-5.9207
+    G03 X2.5000 y-0.9207 R2.5000
+    
+    G1 X1.5000 Y-0.9207
+    G03 X1.5000 Y-5.9207 R2.5000
+    G1 X2.0000 Y-5.9207
+    G03 X2.0000 y-0.9207 R2.5000
+    
+    G1 X1.0000 Y-0.9207
+    G03 X1.0000 Y-5.9207 R2.5000
+    G1 X1.5000 Y-5.9207
+    G03 X1.5000 y-0.9207 R2.5000
+    
+    G1 X0.5000 Y-0.9207
+    G03 X0.5000 Y-5.9207 R2.5000
+    G1 X1.0000 Y-5.9207
+    G03 X1.0000 y-0.9207 R2.5000
+    
+    G1 X0.0000 Y-0.9207
+    G03 X-0.0000 Y-5.9207 R2.5000
+    G1 X0.5000 Y-5.9207
+    G03 X0.5000 y-0.9207 R2.5000
+    
+    G1 X-0.5000 Y-0.9207
+    G03 X-0.5000 Y-5.9207 R2.5000
+    G1 X-0.0000 Y-5.9207
+    G03 X0.0000 y-0.9207 R2.5000
+    
+    G1 X-1.0000 Y-0.9207
+    G03 X-1.0000 Y-5.9207 R2.5000
+    G1 X-0.5000 Y-5.9207
+    G03 X-0.5000 y-0.9207 R2.5000
+    
+    G1 X-1.1894 Y-0.9207
+    G03 X-1.1894 Y-5.9207 R2.5000
+    G1 X-1.0000 Y-5.9207
+    G03 X-1.0000 y-0.9207 R2.5000
+    G1 X-1.1894 Y-0.9207
+    (---trichoidal linear slot end---)
+    (---trichoidal arc slot start---)
+    (---description---)
+    (Calculates and prints to a txt file the trichoidal tool path in G code of a counter clockwise arc.)
+    (returns last position of cutter and end position of arc.)
+    (refer to "PRT20210421001 Trichoidal Arc Calculator", "MEM20210522001 Trichoidal Arc", "MEM20210429002 Trichoidal Notes")
+    (start and end points are located at slot arc center points.)
+    (assumes that cutter is at cutting depth.)
+    (does not return to safe z.)
+    (does not set cutting feed.)
+    (---parameter---)
+    (start: X-1.189 Y-3.421)
+    (end: X-4.182 Y-1.128)
+    (step over: 0.500)                     
+    (width of slot: 6.000) 
+    (slot radius : 3.100)                  
+    (cutter diameter: 1.000)        
+    (position of cutter: X-1.1894 Y-0.9207) 
+    (first slot: False)              
+    (last slot: False)                
+    (clockwise : True)
+    (acute angle: True)
+    
+            G02 X-1.2858 Y-0.9129 R0.6000
+            G03 X-2.0887 Y-5.8480 R2.5000
+            G03 X-1.1894 Y-5.9207 R5.6000
+            G03 X-1.1894 Y-0.9207 R2.5000
+            
+            G02 X-1.2858 Y-0.9129 R0.6000
+            
+            G02 X-1.3796 Y-0.8898 R0.6000
+            G03 X-2.9647 Y-5.6319 R2.5000
+            G03 X-2.0887 Y-5.8480 R5.6000
+            G03 X-1.2858 Y-0.9129 R2.5000
+            
+            G02 X-1.3796 Y-0.8898 R0.6000
+            
+            G02 X-1.4685 Y-0.8518 R0.6000
+            G03 X-3.7946 Y-5.2778 R2.5000
+            G03 X-2.9647 Y-5.6319 R5.6000
+            G03 X-1.3796 Y-0.8898 R2.5000
+            
+            G02 X-1.4685 Y-0.8518 R0.6000
+            
+            G02 X-1.5502 Y-0.8001 R0.6000
+            G03 X-4.5568 Y-4.7951 R2.5000
+            G03 X-3.7946 Y-5.2778 R5.6000
+            G03 X-1.4685 Y-0.8518 R2.5000
+            
+            G02 X-1.5502 Y-0.8001 R0.6000
+            
+            G02 X-1.6225 Y-0.7359 R0.6000
+            G03 X-5.2317 Y-4.1963 R2.5000
+            G03 X-4.5568 Y-4.7951 R5.6000
+            G03 X-1.5502 Y-0.8001 R2.5000
+            
+            G02 X-1.6225 Y-0.7359 R0.6000
+            
+            G02 X-1.6836 Y-0.6610 R0.6000
+            G03 X-5.8016 Y-3.4968 R2.5000
+            G03 X-5.2317 Y-4.1963 R5.6000
+            G03 X-1.6225 Y-0.7359 R2.5000
+            
+            G02 X-1.6836 Y-0.6610 R0.6000
+            
+            G02 X-1.7318 Y-0.5772 R0.6000
+            G03 X-6.2518 Y-2.7149 R2.5000
+            G03 X-5.8016 Y-3.4968 R5.6000
+            G03 X-1.6836 Y-0.6610 R2.5000
+            
+            G02 X-1.7318 Y-0.5772 R0.6000
+            
+            G02 X-1.7660 Y-0.4868 R0.6000
+            G03 X-6.5706 Y-1.8708 R2.5000
+            G03 X-6.2518 Y-2.7149 R5.6000
+            G03 X-1.7318 Y-0.5772 R2.5000
+            
+            G02 X-1.7660 Y-0.4868 R0.6000
+            
+            G02 X-1.7687 Y-0.4769 R0.6000
+            G03 X-6.5962 Y-1.7789 R2.5000
+            G03 X-6.5706 Y-1.8708 R5.6000
+            G03 X-1.7660 Y-0.4868 R2.5000
+            G02 X-1.7687 Y-0.4769 R0.6000
+    (---trichoidal arc slot end---)
+    (---trichoidal arc slot start---)
+    (---description---)
+    (Calculates and prints to a txt file the trichoidal tool path in G code of a counter clockwise arc.)
+    (returns last position of cutter and end position of arc.)
+    (refer to "PRT20210421001 Trichoidal Arc Calculator", "MEM20210522001 Trichoidal Arc", "MEM20210429002 Trichoidal Notes")
+    (start and end points are located at slot arc center points.)
+    (assumes that cutter is at cutting depth.)
+    (does not return to safe z.)
+    (does not set cutting feed.)
+    (---parameter---)
+    (start: X-4.182 Y-1.128)
+    (end: X4.182 Y-1.128)
+    (step over: 0.500)                     
+    (width of slot: 6.000) 
+    (slot radius : 4.332)                  
+    (cutter diameter: 1.000)        
+    (position of cutter: X-1.7687 Y-0.4769) 
+    (first slot: False)              
+    (last slot: False)                
+    (clockwise : True)
+    (acute angle: False)
+    
+            G02 X-1.8119 Y-0.2701 R1.8319
+            G03 X-6.7572 Y-1.0074 R2.5000
+            G03 X-6.5962 Y-1.7789 R6.8319
+            G03 X-1.7687 Y-0.4769 R2.5000
+            
+            G02 X-1.8119 Y-0.2701 R1.8319
+            
+            G02 X-1.8309 Y-0.0596 R1.8319
+            G03 X-6.8283 Y-0.2225 R2.5000
+            G03 X-6.7572 Y-1.0074 R6.8319
+            G03 X-1.8119 Y-0.2701 R2.5000
+            
+            G02 X-1.8309 Y-0.0596 R1.8319
+            
+            G02 X-1.8256 Y0.1517 R1.8319
+            G03 X-6.8085 Y0.5653 R2.5000
+            G03 X-6.8283 Y-0.2225 R6.8319
+            G03 X-1.8309 Y-0.0596 R2.5000
+            
+            G02 X-1.8256 Y0.1517 R1.8319
+            
+            G02 X-1.7960 Y0.3609 R1.8319
+            G03 X-6.6981 Y1.3457 R2.5000
+            G03 X-6.8085 Y0.5653 R6.8319
+            G03 X-1.8256 Y0.1517 R2.5000
+            
+            G02 X-1.7960 Y0.3609 R1.8319
+            
+            G02 X-1.7425 Y0.5653 R1.8319
+            G03 X-6.4985 Y2.1081 R2.5000
+            G03 X-6.6981 Y1.3457 R6.8319
+            G03 X-1.7960 Y0.3609 R2.5000
+            
+            G02 X-1.7425 Y0.5653 R1.8319
+            
+            G02 X-1.6658 Y0.7623 R1.8319
+            G03 X-6.2125 Y2.8425 R2.5000
+            G03 X-6.4985 Y2.1081 R6.8319
+            G03 X-1.7425 Y0.5653 R2.5000
+            
+            G02 X-1.6658 Y0.7623 R1.8319
+            
+            G02 X-1.5670 Y0.9490 R1.8319
+            G03 X-5.8438 Y3.5391 R2.5000
+            G03 X-6.2125 Y2.8425 R6.8319
+            G03 X-1.6658 Y0.7623 R2.5000
+            
+            G02 X-1.5670 Y0.9490 R1.8319
+            
+            G02 X-1.4473 Y1.1232 R1.8319
+            G03 X-5.3974 Y4.1885 R2.5000
+            G03 X-5.8438 Y3.5391 R6.8319
+            G03 X-1.5670 Y0.9490 R2.5000
+            
+            G02 X-1.4473 Y1.1232 R1.8319
+            
+            G02 X-1.3083 Y1.2824 R1.8319
+            G03 X-4.8791 Y4.7823 R2.5000
+            G03 X-5.3974 Y4.1885 R6.8319
+            G03 X-1.4473 Y1.1232 R2.5000
+            
+            G02 X-1.3083 Y1.2824 R1.8319
+            
+            G02 X-1.1519 Y1.4245 R1.8319
+            G03 X-4.2959 Y5.3124 R2.5000
+            G03 X-4.8791 Y4.7823 R6.8319
+            G03 X-1.3083 Y1.2824 R2.5000
+            
+            G02 X-1.1519 Y1.4245 R1.8319
+            
+            G02 X-0.9802 Y1.5477 R1.8319
+            G03 X-3.6555 Y5.7718 R2.5000
+            G03 X-4.2959 Y5.3124 R6.8319
+            G03 X-1.1519 Y1.4245 R2.5000
+            
+            G02 X-0.9802 Y1.5477 R1.8319
+            
+            G02 X-0.7954 Y1.6503 R1.8319
+            G03 X-2.9665 Y6.1544 R2.5000
+            G03 X-3.6555 Y5.7718 R6.8319
+            G03 X-0.9802 Y1.5477 R2.5000
+            
+            G02 X-0.7954 Y1.6503 R1.8319
+            
+            G02 X-0.6001 Y1.7309 R1.8319
+            G03 X-2.2380 Y6.4550 R2.5000
+            G03 X-2.9665 Y6.1544 R6.8319
+            G03 X-0.7954 Y1.6503 R2.5000
+            
+            G02 X-0.6001 Y1.7309 R1.8319
+            
+            G02 X-0.3968 Y1.7885 R1.8319
+            G03 X-1.4797 Y6.6698 R2.5000
+            G03 X-2.2380 Y6.4550 R6.8319
+            G03 X-0.6001 Y1.7309 R2.5000
+            
+            G02 X-0.3968 Y1.7885 R1.8319
+            
+            G02 X-0.1882 Y1.8223 R1.8319
+            G03 X-0.7017 Y6.7959 R2.5000
+            G03 X-1.4797 Y6.6698 R6.8319
+            G03 X-0.3968 Y1.7885 R2.5000
+            
+            G02 X-0.1882 Y1.8223 R1.8319
+            
+            G02 X0.0230 Y1.8319 R1.8319
+            G03 X0.0856 Y6.8315 R2.5000
+            G03 X-0.7017 Y6.7959 R6.8319
+            G03 X-0.1882 Y1.8223 R2.5000
+            
+            G02 X0.0230 Y1.8319 R1.8319
+            
+            G02 X0.2338 Y1.8170 R1.8319
+            G03 X0.8718 Y6.7761 R2.5000
+            G03 X0.0856 Y6.8315 R6.8319
+            G03 X0.0230 Y1.8319 R2.5000
+            
+            G02 X0.2338 Y1.8170 R1.8319
+            
+            G02 X0.4415 Y1.7780 R1.8319
+            G03 X1.6463 Y6.6307 R2.5000
+            G03 X0.8718 Y6.7761 R6.8319
+            G03 X0.2338 Y1.8170 R2.5000
+            
+            G02 X0.4415 Y1.7780 R1.8319
+            
+            G02 X0.6433 Y1.7153 R1.8319
+            G03 X2.3990 Y6.3969 R2.5000
+            G03 X1.6463 Y6.6307 R6.8319
+            G03 X0.4415 Y1.7780 R2.5000
+            
+            G02 X0.6433 Y1.7153 R1.8319
+            
+            G02 X0.8365 Y1.6298 R1.8319
+            G03 X3.1198 Y6.0781 R2.5000
+            G03 X2.3990 Y6.3969 R6.8319
+            G03 X0.6433 Y1.7153 R2.5000
+            
+            G02 X0.8365 Y1.6298 R1.8319
+            
+            G02 X1.0187 Y1.5227 R1.8319
+            G03 X3.7990 Y5.6784 R2.5000
+            G03 X3.1198 Y6.0781 R6.8319
+            G03 X0.8365 Y1.6298 R2.5000
+            
+            G02 X1.0187 Y1.5227 R1.8319
+            
+            G02 X1.1872 Y1.3952 R1.8319
+            G03 X4.4276 Y5.2031 R2.5000
+            G03 X3.7990 Y5.6784 R6.8319
+            G03 X1.0187 Y1.5227 R2.5000
+            
+            G02 X1.1872 Y1.3952 R1.8319
+            
+            G02 X1.3400 Y1.2492 R1.8319
+            G03 X4.9974 Y4.6585 R2.5000
+            G03 X4.4276 Y5.2031 R6.8319
+            G03 X1.1872 Y1.3952 R2.5000
+            
+            G02 X1.3400 Y1.2492 R1.8319
+            
+            G02 X1.4749 Y1.0866 R1.8319
+            G03 X5.5006 Y4.0520 R2.5000
+            G03 X4.9974 Y4.6585 R6.8319
+            G03 X1.3400 Y1.2492 R2.5000
+            
+            G02 X1.4749 Y1.0866 R1.8319
+            
+            G02 X1.5902 Y0.9095 R1.8319
+            G03 X5.9307 Y3.3915 R2.5000
+            G03 X5.5006 Y4.0520 R6.8319
+            G03 X1.4749 Y1.0866 R2.5000
+            
+            G02 X1.5902 Y0.9095 R1.8319
+            
+            G02 X1.6844 Y0.7203 R1.8319
+            G03 X6.2818 Y2.6860 R2.5000
+            G03 X5.9307 Y3.3915 R6.8319
+            G03 X1.5902 Y0.9095 R2.5000
+            
+            G02 X1.6844 Y0.7203 R1.8319
+            
+            G02 X1.7561 Y0.5215 R1.8319
+            G03 X6.5493 Y1.9446 R2.5000
+            G03 X6.2818 Y2.6860 R6.8319
+            G03 X1.6844 Y0.7203 R2.5000
+            
+            G02 X1.7561 Y0.5215 R1.8319
+            
+            G02 X1.8045 Y0.3158 R1.8319
+            G03 X6.7297 Y1.1774 R2.5000
+            G03 X6.5493 Y1.9446 R6.8319
+            G03 X1.7561 Y0.5215 R2.5000
+            
+            G02 X1.8045 Y0.3158 R1.8319
+            
+            G02 X1.8288 Y0.1059 R1.8319
+            G03 X6.8205 Y0.3946 R2.5000
+            G03 X6.7297 Y1.1774 R6.8319
+            G03 X1.8045 Y0.3158 R2.5000
+            
+            G02 X1.8288 Y0.1059 R1.8319
+            
+            G02 X1.8289 Y-0.1055 R1.8319
+            G03 X6.8205 Y-0.3936 R2.5000
+            G03 X6.8205 Y0.3946 R6.8319
+            G03 X1.8288 Y0.1059 R2.5000
+            
+            G02 X1.8289 Y-0.1055 R1.8319
+            
+            G02 X1.8045 Y-0.3154 R1.8319
+            G03 X6.7298 Y-1.1764 R2.5000
+            G03 X6.8205 Y-0.3936 R6.8319
+            G03 X1.8289 Y-0.1055 R2.5000
+            
+            G02 X1.8045 Y-0.3154 R1.8319
+            
+            G02 X1.7687 Y-0.4769 R1.8319
+            G03 X6.5962 Y-1.7789 R2.5000
+            G03 X6.7298 Y-1.1764 R6.8319
+            G03 X1.8045 Y-0.3154 R2.5000
+            G02 X1.7687 Y-0.4769 R1.8319
+    (---trichoidal arc slot end---)
+    (---trichoidal arc slot start---)
+    (---description---)
+    (Calculates and prints to a txt file the trichoidal tool path in G code of a counter clockwise arc.)
+    (returns last position of cutter and end position of arc.)
+    (refer to "PRT20210421001 Trichoidal Arc Calculator", "MEM20210522001 Trichoidal Arc", "MEM20210429002 Trichoidal Notes")
+    (start and end points are located at slot arc center points.)
+    (assumes that cutter is at cutting depth.)
+    (does not return to safe z.)
+    (does not set cutting feed.)
+    (---parameter---)
+    (start: X4.182 Y-1.128)
+    (end: X1.189 Y-3.421)
+    (step over: 0.500)                     
+    (width of slot: 6.000) 
+    (slot radius : 3.100)                  
+    (cutter diameter: 1.000)        
+    (position of cutter: X1.7687 Y-0.4769) 
+    (first slot: False)              
+    (last slot: False)                
+    (clockwise : True)
+    (acute angle: True)
+    
+            G02 X1.7361 Y-0.5679 R0.6000
+            G03 X6.2918 Y-2.6283 R2.5000
+            G03 X6.5962 Y-1.7789 R5.6000
+            G03 X1.7687 Y-0.4769 R2.5000
+            
+            G02 X1.7361 Y-0.5679 R0.6000
+            
+            G02 X1.6893 Y-0.6525 R0.6000
+            G03 X5.8550 Y-3.4178 R2.5000
+            G03 X6.2918 Y-2.6283 R5.6000
+            G03 X1.7361 Y-0.5679 R2.5000
+            
+            G02 X1.6893 Y-0.6525 R0.6000
+            
+            G02 X1.6295 Y-0.7285 R0.6000
+            G03 X5.2971 Y-4.1268 R2.5000
+            G03 X5.8550 Y-3.4178 R5.6000
+            G03 X1.6893 Y-0.6525 R2.5000
+            
+            G02 X1.6295 Y-0.7285 R0.6000
+            
+            G02 X1.5583 Y-0.7939 R0.6000
+            G03 X4.6326 Y-4.7371 R2.5000
+            G03 X5.2971 Y-4.1268 R5.6000
+            G03 X1.6295 Y-0.7285 R2.5000
+            
+            G02 X1.5583 Y-0.7939 R0.6000
+            
+            G02 X1.4775 Y-0.8470 R0.6000
+            G03 X3.8786 Y-5.2327 R2.5000
+            G03 X4.6326 Y-4.7371 R5.6000
+            G03 X1.5583 Y-0.7939 R2.5000
+            
+            G02 X1.4775 Y-0.8470 R0.6000
+            
+            G02 X1.3893 Y-0.8864 R0.6000
+            G03 X3.0549 Y-5.6008 R2.5000
+            G03 X3.8786 Y-5.2327 R5.6000
+            G03 X1.4775 Y-0.8470 R2.5000
+            
+            G02 X1.3893 Y-0.8864 R0.6000
+            
+            G02 X1.2958 Y-0.9112 R0.6000
+            G03 X2.1827 Y-5.8319 R2.5000
+            G03 X3.0549 Y-5.6008 R5.6000
+            G03 X1.3893 Y-0.8864 R2.5000
+            
+            G02 X1.2958 Y-0.9112 R0.6000
+            
+            G02 X1.1996 Y-0.9206 R0.6000
+            G03 X1.2848 Y-5.9199 R2.5000
+            G03 X2.1827 Y-5.8319 R5.6000
+            G03 X1.2958 Y-0.9112 R2.5000
+            
+            G02 X1.1996 Y-0.9206 R0.6000
+            
+            G02 X1.1894 Y-0.9207 R0.6000
+            G03 X1.1894 Y-5.9207 R2.5000
+            G03 X1.2848 Y-5.9199 R5.6000
+            G03 X1.1996 Y-0.9206 R2.5000
+            G02 X1.1894 Y-0.9207 R0.6000
+    (---trichoidal arc slot end---)
+    
+    (---trichoidal linear slot start---)                                                                                                                                                                                                                     
+    (---description---)
+    (Calculates and prints to a txt file the trichoidal tool path in G code of a straight slot.)                                                                                                         
+    (returns last position of cutter and end position of slot)
+    (start and end points are located along slot arc center/neutral axis)
+    (assumes that cutter is at cutting depth)
+    (does NOT return to safe z)
+    (---parameters---)                                                                                                          
+    (start: X1.189 Y-3.421)
+    (end: X0.100 Y-3.421)
+    (step over: 0.500)
+    (width of slot: 6.000)                                                                                            
+    (cutter diameter: 1.000)
+    (position of cutter: X1.1894 Y-0.9207)
+    (first slot: False)
+    (last slot: True)                                                                                                  
+    
+    G1 X0.6894 Y-0.9207
+    G03 X0.6894 Y-5.9207 R2.5000
+    G1 X1.1894 Y-5.9207
+    G03 X1.1894 y-0.9207 R2.5000
+    
+    G1 X0.1894 Y-0.9207
+    G03 X0.1894 Y-5.9207 R2.5000
+    G1 X0.6894 Y-5.9207
+    G03 X0.6894 y-0.9207 R2.5000
+    
+    G1 X0.1000 Y-0.9207
+    G03 X0.1000 Y-5.9207 R2.5000
+    G1 X0.1894 Y-5.9207
+    G03 X0.1894 y-3.4207 R1.2500
+    G1 X0.1000 Y-3.4207
+    (---trichoidal linear slot end---)
+    
+    G0 Z6.0000				(Rapid to safe height)
+    G0 X6.0000 Y-0.8207                 (Rapid to start point)
+    G0 Z-6.0000				(Rapid to cutting height)
+    F181.1     (set cutting feed)
+    
+    (---toolpath_data_frame start---)
+    (---description---)
+    (Imports a 2D dataframe from an excel file, calculates the toolpath adjusted for offset and tool diameter and prints to a txt file the single or trichoidal tool path in G code.)
+    (returns last position of cutter and end position of arc.)
+    (refer to "ALG20220329001 Toolpath Data Frame Algorithm")
+    (start and end points are located at slot arc center points.)
+    (assumes that cutter is at cutting depth.)
+    (does not return to safe z.)
+    (does not set cutting feed.)
+    (---parameter---)            
+    (cutter diameter: 1.000)        
+    (offset: 0.100)
+    (excel_file: vector-01.xlsx)
+    (sheet: Sheet12)
+    G1 X-1.1894 Y-0.8207 F109
+G02 X-1.6722 Y-0.4509 R0.5000 F109
+G02 X1.6722 Y-0.4509 R-1.7319 F109
+G02 X1.1894 Y-0.8207 R0.5000 F109
+G1 X-1.1894 Y-0.8207 F109
+G02 X-1.6722 Y-0.4509 R0.5000 F109
+G02 X1.6722 Y-0.4509 R-1.7319 F109
+G02 X1.1894 Y-0.8207 R0.5000 F109
+G1 X-1.1894 Y-0.8207 F109
+G02 X-1.6722 Y-0.4509 R0.5000 F109
+G02 X1.6722 Y-0.4509 R-1.7319 F109
+G02 X1.1894 Y-0.8207 R0.5000 F109
+G1 X0.1000 Y-0.8207 F109
+
+G0 Z6.0000				(Rapid to safe height)
+G0 X0 Y0                 (Rapid to zero point)
+G92 X-15.9276 Y0       (Offset datum)
+
+(===Main End===)
+
+(end block)
+G0 Z6.0000				(Rapid to safe height)
+G0 X0.0000 Y0.0000        (Rapid to end point)
+M5						    (Spindle Stop)
+M30					        (End & Rewind)

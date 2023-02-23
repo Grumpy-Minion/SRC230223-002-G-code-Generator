@@ -1,0 +1,305 @@
+
+    (==========================)    
+    (file_name: GCE20220414-152121 Rev01 Test-01)
+    (==========================)  
+
+    (---Description---)
+    (This program calculates the tool path to ...)
+(Assumes climb milling.)
+
+    (TOOL/MILL, dia: 3.000, LOC:3.000, 4.0 Flute, carbide, AT)
+    (--X origin: center of right most post--)
+    (--Y origin: center of right most post--)
+    (--Z origin: top surface of vise--)
+    (Part material: ABS)
+    (G-code is generated using Python script "SRC20210420001 Rev01-01-10-09 G-code Generator (Draft-01).py")
+
+    (---Compiler---)
+    (UCCNC v1.2111)\n(DEMO_UC400ETH)
+
+    (---Change History---)
+    (NA)    
+
+    (---Bug List---)
+    (NA)
+    
+    (===General variables===)
+    (clear z             = 6.000)
+    (initial x           = 0.000)
+    (initial y           = 0.000)
+    (start z             = 0.000)
+    (terminal x          = 0.000)
+    (terminal y          = 0.000)
+    (cut feed            = 181.1)
+    (plunge feed         = 27.2)
+    (finish feed         = 108.7)
+    (spindle speed       = 2900)
+    (diameter of cutter  = 3.000)
+    (tolerance of cutter = 0.000)
+    (effective diameter  = 3.000)
+    (Surface Speed       = 15 m/min)
+    (Chipload            = 0.007 mm/tooth)
+    
+    (start block)
+    G90			   (Absolute XYZ)
+    G21G64G17	   (mm, Best Speed Path, XY Plane)
+    M3 S2900.0      (Spindle Speed)
+    G0 Z6.0000   (Go to safe height)
+    G0 X0.0000 Y0.0000   (Rapid to start point)
+
+    (===Main Start===)
+    G0 Z6.0          (Safe Z)
+G0 Z6.0          (Safe Z)
+G0 X23.0 Y-33.0         (Rapid)
+
+(---peck drill start---)
+
+    (---description---)
+    (calculates and prints to a txt file the tool path in G code of a peck drilled hole.)
+    (assumes origin at center of hole.)
+    (assumes z=0 at top surface.)
+    (return to safe z after drilling.)
+    
+    (---parameter---)
+    (Center of hole: X6.0000 Y-0.3207)
+    (hole diameter: 1.0000)
+    (depth: -6.0000)
+    (peck depth: 1.0000)
+    (drilling feed: 27.2)
+    (safe Z: 6.0000)
+    (retract z: 3.0000)
+    (dwell: 0.0 ms)
+    
+    G0 Z6.0000   (Go to safe height)
+    G0 X6.0000 Y-0.3207   (Rapid to start point)
+    
+    G0 Z1.0000 (rapid to 1mm above surface)
+    
+    F27.2 (set drilling feed)
+    
+    G1 Z-1.0000 (drill to peck depth)
+    
+    G0 Z3.0000 (rapid to retract height)
+    G04 P0.0    (dwell ms)
+    
+    G0 Z-0.9000   (rapid to pre-drill depth)
+    
+    G1 Z-2.0000 (drill to peck depth)
+    
+    G0 Z3.0000 (rapid to retract height)
+    G04 P0.0    (dwell ms)
+    
+    G0 Z-1.9000   (rapid to pre-drill depth)
+    
+    G1 Z-3.0000 (drill to peck depth)
+    
+    G0 Z3.0000 (rapid to retract height)
+    G04 P0.0    (dwell ms)
+    
+    G0 Z-2.9000   (rapid to pre-drill depth)
+    
+    G1 Z-4.0000 (drill to peck depth)
+    
+    G0 Z3.0000 (rapid to retract height)
+    G04 P0.0    (dwell ms)
+    
+    G0 Z-3.9000   (rapid to pre-drill depth)
+    
+    G1 Z-5.0000 (drill to peck depth)
+    
+    G0 Z3.0000 (rapid to retract height)
+    G04 P0.0    (dwell ms)
+    
+    G0 Z-4.9000   (rapid to pre-drill depth)
+    
+    G1 Z-6.0000 (drill to peck depth)
+    
+    G0 Z6.0000 (rapid to safe z)
+    (---peck drill end---)
+    
+(---peck drill start---)
+
+    (---description---)
+    (calculates and prints to a txt file the tool path in G code of a peck drilled hole.)
+    (assumes origin at center of hole.)
+    (assumes z=0 at top surface.)
+    (return to safe z after drilling.)
+    
+    (---parameter---)
+    (Center of hole: X10.0000 Y-5.0000)
+    (hole diameter: 1.0000)
+    (depth: -8.0000)
+    (peck depth: 1.0000)
+    (drilling feed: 27.2)
+    (safe Z: 6.0000)
+    (retract z: 3.0000)
+    (dwell: 0.0 ms)
+    
+    G0 Z6.0000   (Go to safe height)
+    G0 X10.0000 Y-5.0000   (Rapid to start point)
+    
+    G0 Z1.0000 (rapid to 1mm above surface)
+    
+    F27.2 (set drilling feed)
+    
+    G1 Z-1.0000 (drill to peck depth)
+    
+    G0 Z3.0000 (rapid to retract height)
+    G04 P0.0    (dwell ms)
+    
+    G0 Z-0.9000   (rapid to pre-drill depth)
+    
+    G1 Z-2.0000 (drill to peck depth)
+    
+    G0 Z3.0000 (rapid to retract height)
+    G04 P0.0    (dwell ms)
+    
+    G0 Z-1.9000   (rapid to pre-drill depth)
+    
+    G1 Z-3.0000 (drill to peck depth)
+    
+    G0 Z3.0000 (rapid to retract height)
+    G04 P0.0    (dwell ms)
+    
+    G0 Z-2.9000   (rapid to pre-drill depth)
+    
+    G1 Z-4.0000 (drill to peck depth)
+    
+    G0 Z3.0000 (rapid to retract height)
+    G04 P0.0    (dwell ms)
+    
+    G0 Z-3.9000   (rapid to pre-drill depth)
+    
+    G1 Z-5.0000 (drill to peck depth)
+    
+    G0 Z3.0000 (rapid to retract height)
+    G04 P0.0    (dwell ms)
+    
+    G0 Z-4.9000   (rapid to pre-drill depth)
+    
+    G1 Z-6.0000 (drill to peck depth)
+    
+    G0 Z3.0000 (rapid to retract height)
+    G04 P0.0    (dwell ms)
+    
+    G0 Z-5.9000   (rapid to pre-drill depth)
+    
+    G1 Z-7.0000 (drill to peck depth)
+    
+    G0 Z3.0000 (rapid to retract height)
+    G04 P0.0    (dwell ms)
+    
+    G0 Z-6.9000   (rapid to pre-drill depth)
+    
+    G1 Z-8.0000 (drill to peck depth)
+    
+    G0 Z6.0000 (rapid to safe z)
+    (---peck drill end---)
+    
+(---peck drill start---)
+
+    (---description---)
+    (calculates and prints to a txt file the tool path in G code of a peck drilled hole.)
+    (assumes origin at center of hole.)
+    (assumes z=0 at top surface.)
+    (return to safe z after drilling.)
+    
+    (---parameter---)
+    (Center of hole: X12.0000 Y4.0000)
+    (hole diameter: 1.0000)
+    (depth: -12.0000)
+    (peck depth: 1.0000)
+    (drilling feed: 27.2)
+    (safe Z: 6.0000)
+    (retract z: 3.0000)
+    (dwell: 0.0 ms)
+    
+    G0 Z6.0000   (Go to safe height)
+    G0 X12.0000 Y4.0000   (Rapid to start point)
+    
+    G0 Z1.0000 (rapid to 1mm above surface)
+    
+    F27.2 (set drilling feed)
+    
+    G1 Z-1.0000 (drill to peck depth)
+    
+    G0 Z3.0000 (rapid to retract height)
+    G04 P0.0    (dwell ms)
+    
+    G0 Z-0.9000   (rapid to pre-drill depth)
+    
+    G1 Z-2.0000 (drill to peck depth)
+    
+    G0 Z3.0000 (rapid to retract height)
+    G04 P0.0    (dwell ms)
+    
+    G0 Z-1.9000   (rapid to pre-drill depth)
+    
+    G1 Z-3.0000 (drill to peck depth)
+    
+    G0 Z3.0000 (rapid to retract height)
+    G04 P0.0    (dwell ms)
+    
+    G0 Z-2.9000   (rapid to pre-drill depth)
+    
+    G1 Z-4.0000 (drill to peck depth)
+    
+    G0 Z3.0000 (rapid to retract height)
+    G04 P0.0    (dwell ms)
+    
+    G0 Z-3.9000   (rapid to pre-drill depth)
+    
+    G1 Z-5.0000 (drill to peck depth)
+    
+    G0 Z3.0000 (rapid to retract height)
+    G04 P0.0    (dwell ms)
+    
+    G0 Z-4.9000   (rapid to pre-drill depth)
+    
+    G1 Z-6.0000 (drill to peck depth)
+    
+    G0 Z3.0000 (rapid to retract height)
+    G04 P0.0    (dwell ms)
+    
+    G0 Z-5.9000   (rapid to pre-drill depth)
+    
+    G1 Z-7.0000 (drill to peck depth)
+    
+    G0 Z3.0000 (rapid to retract height)
+    G04 P0.0    (dwell ms)
+    
+    G0 Z-6.9000   (rapid to pre-drill depth)
+    
+    G1 Z-8.0000 (drill to peck depth)
+    
+    G0 Z3.0000 (rapid to retract height)
+    G04 P0.0    (dwell ms)
+    
+    G0 Z-7.9000   (rapid to pre-drill depth)
+    
+    G1 Z-9.0000 (drill to peck depth)
+    
+    G0 Z3.0000 (rapid to retract height)
+    G04 P0.0    (dwell ms)
+    
+    G0 Z-8.9000   (rapid to pre-drill depth)
+    
+    G1 Z-10.0000 (drill to peck depth)
+    
+    G0 Z3.0000 (rapid to retract height)
+    G04 P0.0    (dwell ms)
+    
+    G0 Z-9.9000   (rapid to pre-drill depth)
+    
+    G1 Z-11.0000 (drill to peck depth)
+    
+    G0 Z3.0000 (rapid to retract height)
+    G04 P0.0    (dwell ms)
+    
+    G0 Z-10.9000   (rapid to pre-drill depth)
+    
+    G1 Z-12.0000 (drill to peck depth)
+    
+    G0 Z6.0000 (rapid to safe z)
+    (---peck drill end---)
+    

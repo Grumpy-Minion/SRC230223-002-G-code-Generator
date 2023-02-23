@@ -1,0 +1,59 @@
+
+(==========================)    
+(file_name: GCE20220412-111838 Rev01 Test-01)
+(==========================)  
+
+(---Description---)
+(This program calculates the tool path to ...)
+(Assumes climb milling.)
+
+(TOOL/MILL, dia: 1.000, LOC:3.000, 4 Flute, carbide, AT)
+(--X origin: center of right most post--)
+(--Y origin: center of right most post--)
+(--Z origin: top surface of vise--)
+(Part material: ABS)
+(G-code is generated using Python script "SRC20210420001 Rev01-01-10-08 G-code Generator (Draft-01).py")
+
+(---Compiler---)
+(UCCNC v1.2111)
+(DEMO_UC400ETH)
+
+(---Change History---)
+(NA)    
+
+(---Bug List---)
+(NA)
+
+(===General variables===)
+(clear z             = 6.000)
+(initial x           = 0.000)
+(initial y           = 0.000)
+(start z             = 0.000)
+(terminal x          = 0.000)
+(terminal y          = 0.000)
+(cut feed            = 181.1)
+(plunge feed         = 27.2)
+(finish feed         = 108.7)
+(spindle speed       = 2900)
+(diameter of cutter  = 1.000)
+(tolerance of cutter = 0.000)
+(effective diameter  = 1.000)
+(Surface Speed       = 15 m/min)
+(Chipload            = 0.007 mm/tooth)
+
+(start block)
+G90			   (Absolute XYZ)
+G21G64G17	   (mm, Best Speed Path, XY Plane)
+M3 S2900      (Spindle Speed)
+G0 Z6.0000   (Go to safe height)
+G0 X0.0000 Y0.0000   (Rapid to start point)
+
+(===Main Start===)
+
+(===Main End===)
+
+(end block)
+G0 Z6.0000				(Rapid to safe height)
+G0 X0.0000 Y0.0000        (Rapid to end point)
+M5						    (Spindle Stop)
+M30					        (End & Rewind)

@@ -1,0 +1,205 @@
+%
+(FILENAME: Trochoidal Slot-20200226-01- v0.01.06.nc)
+
+(---Description---)
+(This program cuts a slot using a trochoidal pathway.)
+(Specify start and end points, slot width, tool dia, tool stepover)
+(Start and end points are locate at arc center points)
+(TOOL/MILL,dia:xx,LOC:xx, x Flute, Carbide, Uncoated)
+(--Y origin defined by user--)
+(--X origin defined by user--)
+(--Z0 at top of part--)
+
+(---Compiler---)
+(UCCNC v1.2111)
+(DEMO_UC400ETH)
+
+(---Notes---)
+(Program uses M98 Pxxx L#xxx for conditional decision making)
+(when #xxx=0, it does not execute)
+(when #xxx=1 or >1, it executes)
+
+(!!!Caution!!!)
+(Rounding error may occur when calculating remainder. Perfect division may still produce remainder close to valude of divisor.)
+(Slots do not return to safe height after each single slot!! Mannually code if needed.)
+
+(---Change History---)
+(v0.01.02 - removed offsets)
+(v0.01.03 - bug fix: error in calculating round down no of cuts)
+(Line 118, changed "#305 = [#304-#307]/#204" to "#305 = [#301-#307]/#204")
+(v0.01.04 - Added Absolute Angle Calculator Sub Routine)
+(v0.01.05 - Changed Trochoidal Path to start in middle of slot as opposed to edge of slot.)
+(v0.01.05 - Changed calculation of reminder cut to address possibility of rounding error.)
+(v0.01.05 - Reorganized trochoidal sub routine to accomodate for multiple slots.)
+
+(---Bug List---)
+(NA)
+
+(---Variable List---)
+(#101 Start depth)
+(#102	Depth of cut)
+(#103 Safe Z)
+(#104 Start X)
+(#105 Start Y)
+(#106 End X)
+(#107 End Y)
+(#108 Width of Slot)
+
+(#201 Cut Feed)
+(#202 Plunge Feed)
+(#203 Diameter of cutter)
+(#204 Cutter Stepover)
+
+(#301 Length of Slot)
+(#302 X Length of Slot)
+(#303 Y Length of Slot)
+(#304 Number of Cuts)
+(#305 Number of cuts rounded down)
+(#307 Remainder Width)
+(#308 Left over cycle flag)
+(#311 Diameter of Cut Arc)
+(#312 Radius of Cut Arc)
+(#313 First Cut Flag)
+
+(#401 Cutter Start Point X)
+(#402 Cutter Start Point Y)
+(#404 Compliment of Cutter Stepover, #204)
+(#411 Compliment of Cut Arc Diameter, #311)
+(#412 Compliment of Cut Arc Radius, #312)
+(#413 Trochoidal Stepover Width)
+
+(#7xx Label Counter for Abs_Angle range: 700-799)
+
+(#8xx Temp Var)
+
+(#907 Abs_Angle Variable Label Counter. Initialize to 700)
+
+(O900 Initialize Variables)
+(O901 Single Slot)
+(O904 Trochiodal Cut)
+(O905 First Cut)
+(O906 Last Cut)
+
+(M20001 Proceed Message Box Macro)
+(M20100 Absolute Angle Calculator Macro)
+
+(===Initialize Variables===)
+
+(---Static Variables---)
+#101 = 0.000	(Start depth)
+#102 = -1.000	(Depth of cut)
+#103 = 1.000	(Safe Z)
+#108 = 6.000	(Width of Slot)
+
+#201 = 162.1	(Cut Feed)
+#202 = 22.4	(Plunge Feed)
+#203 = 3.000	(Diameter of cutter)
+#204 = 0.3 	(Stepover width)
+
+#907=700		(Initialize label counter to 700)
+
+(---Slot-01---)
+#104 = 0.000 	(Start X)
+#105 = -2.000	(Start Y)
+#106 = 0.000	(End X)
+#107 = 6.150	(End Y)
+#907=#907+1	(Label Counter)
+M20100
+
+M20001			(Start/Abort Message Box)
+
+(===Main Start===)
+G90					(Absolute XYZ)
+G69					(Reset Rotation)
+G21G64G17				(mm, Best Speed Path, XY Plane)
+M3 S2900				(Spindle Speed 2900)
+G0 Z#103				(Go to safe height)
+G0 X0 Y0				(Rapid to origin)
+
+(---Slot-01---)
+#104 = 0.000 	(Start X)
+#105 = -2.000	(Start Y)
+#106 = 0.000	(End X)
+#107 = 6.150	(End Y)
+#310=#701		(Transfer Abs Angle using Label Counter)
+M98 P901 L1	(Cut Single Slot)
+
+G0 Z#103				(Go to safe height)
+M5						(Spindle Stop)
+M30					(End & Rewind)
+(===Main End===)
+
+O901
+(---Sub Start: Single Slot---)
+M98 P900 L1			(Initialize Variables)
+
+G0 X#104 Y#105			(start XY)
+G68 R#310				(Rotate Axis)
+
+#401 = -#311/2			(Cutter Start Point X)
+#402 = 0				(Cutter Start Point Y)
+G91					(Relative XYZ)
+#801 = #201/3			(Reduce Feed by half)
+G1 X#401 Y#402 F#801	(Go to Start Point)
+G90					(Absolute XYZ)
+G1 Z#102 F#202			(Plunge to Cut Depth)
+
+#404 = -#204			(Single stepover width backwards)
+#411 = -#311			(cut arc diameter backwards)
+#412 = -#312			(cut arc radius backwards)
+
+F#201					(Cutting Feed)
+G91					(Relative XYZ)
+M98 P905 L#313			(First Cut)
+M98 P904 L#313			(Trochoidal Cut)
+#413 = #204*2			(Double Trochoidal Stepover Width)
+M98 P904 L#305			(Trochoidal Cut)
+M98 P906 L#308			(Left-Over Cut)
+M98 P904 L#308			(Trochoidal Cut)
+G90					(Absolute XYZ)
+
+G69					(Reset Rotated Axis)
+
+#801 = #201/3			(Reduce Feed by half)
+G1 X#106 Y#107 F#801	(Go to End Point)
+(---Sub End---)
+M99
+
+O900
+(---Sub-Intialize Variables: Start---)
+#302 = #106-#104				(X Vector Length of Slot)
+#303 = #107-#105				(Y Vector Length of Slot)
+#301 = SQRT[#302^2+#303^2]		(Length of Slot)
+#304 = #301/#204				(number of cuts-raw)
+#307 = #301%#204				(calculate remainder)
+#308 = 0						(Clear Leftover Cycle Flag)
+#308 = #307/#307				(set Left over cycle flag 0=no 1=yes)
+#305 = [#301-#307]/#204		(number of cuts rounded down)
+#311 = #108-#203				(Diameter of Cut Arc)
+#312 = #311/2					(Radius of Cut Arc)
+#313 = 1						(Set First Cut Flag)
+(---Sub End---)
+M99
+
+O904
+(---Sub-Trochoidal: Start---)
+(Trochoidal Climb Cutting)
+G03 X#312 Y#412 R#312		(Qtr-circle cut)
+G1 X#413					(Advance forward by stepover width)
+G03 X0 Y#311 R#312			(Semi-circle cut)
+G1 X#404					(move backward by stepover width)
+G03 X#412 Y#412 R#312		(Qtr-circle cut)
+(---Sub End---)
+M99
+
+O905
+(---Sub-First Cut: Start---)
+#413 = #204		(Single Stepover width)
+(---Sub End---)
+M99
+
+O906
+(---Sub-Last Cut: Start---)
+#413 = #301-[#305*#204]	(Calculate Leftover Cut Width)
+(---Sub End---)
+M99
