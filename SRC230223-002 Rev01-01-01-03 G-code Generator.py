@@ -2632,6 +2632,7 @@ def peck_drill_data_frame(name, excel_file, sheet):
     # date: 23/Feb/2023
     # description:
     # Fixed bug on repeat g-code generation in peck drill data frame
+    # software test run on 23/Feb/2023
     #
     # rev: 01-01-01-02
     # Added last row detect
