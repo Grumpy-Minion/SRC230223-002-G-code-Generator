@@ -9,6 +9,12 @@
 #
 # ---Change History---
 #
+# rev: 01-01-01-03
+# date: 23/Feb/2023
+# description:
+# Fixed bug on repeat g-code generation in peck drill data frame
+# Fixed bug on last_row_detect sheet  = 'main' in main data frame
+#
 # rev: 01-01-01-02
 # date: 23/Feb/2023
 # description:
@@ -2657,7 +2663,6 @@ def peck_drill_data_frame(name, excel_file, sheet):
         break_flag, text_temp = last_row_detect(df, sheet, last_row_flag, last_row, counter)  # detect last row
         if break_flag == True:  # break if last row
             text = text + text_temp
-            write_to_file(name, text)
             break
 
         counter = counter + 1  # increment counter.
@@ -3056,7 +3061,8 @@ while counter<=last_row:
         rapid(name, df_main, counter)
 
     last_row_flag = format_data_frame_variable(df_main, 'last_row_flag', counter)       # import last_row flag from excel file.
-    break_flag, text = last_row_detect(df_main, sheet, last_row_flag, last_row, counter)        # detect last row
+    sheet = 'main'
+    break_flag, text = last_row_detect(df_main, sheet, last_row_flag, last_row, counter)        # detect last row in main excel tab
     if break_flag == True:                                                  # break if last row
         write_to_file(name, text)
         break
