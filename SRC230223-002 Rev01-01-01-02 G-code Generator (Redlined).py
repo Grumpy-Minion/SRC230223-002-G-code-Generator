@@ -13,6 +13,7 @@
 # date: 23/Feb/2023
 # description:
 # Incorporated into GitHub
+# Added last row detect to peck drill data frame
 #
 # rev: 01-01-01-01
 # date: 23/Feb/2023
@@ -2620,6 +2621,11 @@ def peck_drill_data_frame(name, excel_file, sheet):
     # N/A
 
     # ---Change History---
+    #
+    # rev: 01-01-01-02
+    # Added last row detect
+    # software test run on TBD
+    #
     # rev: 01-01-10-09
     # initial release
     # software test run on 14/Apr/2022
@@ -2633,6 +2639,7 @@ def peck_drill_data_frame(name, excel_file, sheet):
     while counter <= last_row:
 
         # import parameters from excel file.
+        last_row_flag = format_data_frame_variable(df, 'last_row_flag', counter)
         hole_x = format_data_frame_variable(df, 'x', counter)
         hole_y = format_data_frame_variable(df, 'y', counter)
         dia_hole = format_data_frame_variable(df, 'dia_hole', counter)
@@ -2646,6 +2653,13 @@ def peck_drill_data_frame(name, excel_file, sheet):
         # generate G-code
         text_temp = peck_drill(hole_x, hole_y, dia_hole, depth, peck_depth, z_f, safe_z, retract_z, dwell, name)
         text = text + text_temp
+
+        break_flag, text_temp = last_row_detect(df, sheet, last_row_flag, last_row, counter)  # detect last row
+        if break_flag == True:  # break if last row
+            text = text + text_temp
+            write_to_file(name, text)
+            break
+
         counter = counter + 1  # increment counter.
 
     write_to_file(name, text)
@@ -2931,6 +2945,7 @@ def last_row_detect(df_temp, sheet_temp, last_row_flag, last_row, counter):
     # Detects the last row of dataframe.
     # additionally detects unintentional termination of a dataframe.
     # returns break_flag, comments in G-code, and prints to debug window.
+    # break_flag, text = last_row_detect(df_temp, sheet_temp, last_row_flag, last_row, counter)
 
     # ---Variable List---
     # df_temp = active data frame
