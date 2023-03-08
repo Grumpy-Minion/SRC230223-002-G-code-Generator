@@ -158,6 +158,7 @@ import os
 import pandas as pd
 import sys
 from datetime import datetime
+import textwrap
 
 def absolute_angle(start_x, start_y, end_x, end_y, debug = False):
     # calculate absolute angle of a vector with reference to the x axis.
@@ -3006,6 +3007,9 @@ def last_row_detect(df_temp, sheet_temp, last_row_flag, last_row, counter):
         break_flag = True       # set break flag
     return (break_flag, text)
 
+def indent(text, amount, ch=' '):
+    return textwrap.indent(text, amount * ch)
+
 # ---------Import Parameters------------
 
 excel_file = 'LOG20220414001 G-code Parameters.xlsx'       # !!!! identify name of excel file to import data from. !!!!
@@ -3013,6 +3017,8 @@ sheet = 'parameters'                # identify name of excel sheet to import dat
 start_block, end_block, name, name_debug, clear_z, start_z, cut_f, finish_f, z_f, dia = parameters_data_frame(excel_file, sheet)        # generate G-code parameters.
 
 text_debug = 'Parameters successfully read\n'
+write_to_file(name_debug, text_debug)    # write to debug file
+text_debug = indent(text_debug,20)
 write_to_file(name_debug, text_debug)    # write to debug file
 write_to_file(name, start_block)    # write G-code start block
 # ===========================================================================
