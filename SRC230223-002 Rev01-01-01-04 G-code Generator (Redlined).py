@@ -2514,7 +2514,7 @@ def parameters_data_frame(excel_file, sheet):
     file_name = format_data_frame_variable(df, 'value', 'file name')
     rev = str(df['value']['revision'])
     name = prefix + doc_number + f' Rev{rev} ' + file_name  # file name
-    name_debug = prefix + doc_number + f' Rev{rev} ' + file_name + ' Debug' # debug file name
+    name_debug = name + ' Debug' # debug file name
 
     # ---------General Variables------------
 
@@ -3033,11 +3033,13 @@ excel_file = 'LOG20220414001 G-code Parameters.xlsx'       # !!!! identify name 
 sheet = 'parameters'                # identify name of excel sheet to import data from.
 start_block, end_block, name, name_debug, clear_z, start_z, cut_f, finish_f, z_f, dia = parameters_data_frame(excel_file, sheet)        # generate G-code parameters.
 
-text_debug = 'Parameters successfully read\n'
+text_debug = f'read excel {sheet} tab - OK\n'
 write_to_file(name_debug, text_debug)    # write to debug file
-text_debug = indent(text_debug,20)
-write_to_file(name_debug, text_debug)    # write to debug file
+
 write_to_file(name, start_block)    # write G-code start block
+
+text_debug = 'write g-code start_block - OK\n'
+write_to_file(name_debug, text_debug)    # write to debug file
 # ===========================================================================
 # ================================ G-code start =============================
 # ===========================================================================
@@ -3048,10 +3050,19 @@ rows = df_main.shape[0]  # total number of rows in dataframe.
 last_row = rows - 1  # initialize number of last row
 counter = 0  # initialize counter
 
+text_debug = f'read excel {sheet} tab - OK\n'
+write_to_file(name_debug, text_debug)    # write to debug file
+text_debug = f'total number of rows in {sheet} tab = {rows}\n'
+write_to_file(name_debug, text_debug)    # write to debug file
+
 # import content of excel file.
 while counter<=last_row:
 
     operation = format_data_frame_variable(df_main, 'operation', counter)       # import operation from excel file.
+    last_row_flag_debug = format_data_frame_variable(df_main, 'last_row_flag', counter)       # import last_row flag from excel file for debug file.
+    text_debug = f'current tab = {sheet}, row # = {counter}, last_row flag = {last_row_flag_debug}, operation = {operation}\n'
+    text_debug = indent(text_debug,4)
+    write_to_file(name_debug, text_debug)  # write to debug file
 
     if operation == 'line' or operation == 'trochoidal':
         sheet = format_data_frame_variable(df_main, 'sheet_name', counter)
