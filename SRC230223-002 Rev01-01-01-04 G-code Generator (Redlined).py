@@ -3128,6 +3128,10 @@ while counter<=last_row:
         text = f'G0 Z{clear_z}          (Clear Z)\n'
         write_to_file(name, text)
 
+        text_debug = f'\n{operation}\n'
+        text_debug = indent(text_debug, 8)
+        write_to_file(name_debug, text_debug)  # write to debug file
+
     elif operation == 'rapid':
         rapid(name, df_main, counter)
 
@@ -3137,7 +3141,7 @@ while counter<=last_row:
     if break_flag == True:                                                  # break if last row
         write_to_file(name, text)
 
-        text_debug = f'last_row_detect = {break_flag}\n'
+        text_debug = f'\nlast_row_detect = {break_flag}\n'
         text_debug = indent(text_debug, 4)
         write_to_file(name_debug, text_debug)  # write to debug file
         break
@@ -3149,5 +3153,5 @@ while counter<=last_row:
 # ===========================================================================
 
 write_to_file(name, end_block)      # write G-code end block
-text_debug = 'write g-code end_block - OK\n'
+text_debug = '\nwrite g-code end_block - OK\n'
 write_to_file(name_debug, text_debug)    # write to debug file
