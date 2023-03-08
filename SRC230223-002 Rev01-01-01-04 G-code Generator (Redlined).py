@@ -12,7 +12,8 @@
 # rev: 01-01-01-04
 # date: 08/Mar/2023
 # description:
-# Add error text file generator
+# Added error text file generator
+# Added text indent function
 #
 # rev: 01-01-01-03
 # date: 23/Feb/2023
@@ -3008,6 +3009,22 @@ def last_row_detect(df_temp, sheet_temp, last_row_flag, last_row, counter):
     return (break_flag, text)
 
 def indent(text, amount, ch=' '):
+    # ---Description---
+    # Pads a text variable with defined blank spaces.
+    # text = indent(text, amount)
+
+    # ---Variable List---
+    # text = import text string
+    # amount = number of blank spaces to pad
+
+    # ---Return Variable List---
+    # text = import text with padded blank spaces in front
+
+    # ---Change History---
+    # rev: 01-01-01-04
+    # Initial release
+    # software test run on 08/Mar/2023
+
     return textwrap.indent(text, amount * ch)
 
 # ---------Import Parameters------------
