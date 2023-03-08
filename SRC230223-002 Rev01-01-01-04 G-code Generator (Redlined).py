@@ -2640,6 +2640,12 @@ def peck_drill_data_frame(name, excel_file, sheet):
 
     # ---Change History---
     #
+    # rev: 01-01-01-04
+    # date: 08/Mar/2023
+    # description:
+    # Added debug file statements
+    # software test run on 08/Mar/2023
+    #
     # rev: 01-01-01-03
     # date: 23/Feb/2023
     # description:
@@ -2660,6 +2666,11 @@ def peck_drill_data_frame(name, excel_file, sheet):
     counter = 0             # initialize counter
     text = ''             # initialize
 
+    text_debug = f'read excel "{sheet}" tab - OK\n'
+    text_debug = text_debug + f'total number of rows in "{sheet}" tab = {rows}\n\n'
+    text_debug = indent(text_debug, 4)
+    write_to_file(name_debug, text_debug)  # write to debug file
+
     while counter <= last_row:
 
         # import parameters from excel file.
@@ -2678,9 +2689,17 @@ def peck_drill_data_frame(name, excel_file, sheet):
         text_temp = peck_drill(hole_x, hole_y, dia_hole, depth, peck_depth, z_f, safe_z, retract_z, dwell, name)
         text = text + text_temp
 
+        text_debug = f'row # = {counter}, last_row flag = {last_row_flag}\n'
+        text_debug = indent(text_debug, 8)
+        write_to_file(name_debug, text_debug)  # write to debug file
+
         break_flag, text_temp = last_row_detect(df, sheet, last_row_flag, last_row, counter)  # detect last row
         if break_flag == True:  # break if last row
             text = text + text_temp
+
+            text_debug = f'last_row_detect = {break_flag}\n'
+            text_debug = indent(text_debug, 8)
+            write_to_file(name_debug, text_debug)  # write to debug file
             break
 
         counter = counter + 1  # increment counter.
@@ -3060,7 +3079,7 @@ while counter<=last_row:
 
     operation = format_data_frame_variable(df_main, 'operation', counter)       # import operation from excel file.
     last_row_flag_debug = format_data_frame_variable(df_main, 'last_row_flag', counter)       # import last_row flag from excel file for debug file.
-    text_debug = f'current tab = {sheet}, row # = {counter}, last_row flag = {last_row_flag_debug}, operation = {operation}\n'
+    text_debug = f'\nrow # = {counter}, last_row flag = {last_row_flag_debug}, operation = {operation}\n'
     text_debug = indent(text_debug,4)
     write_to_file(name_debug, text_debug)  # write to debug file
 
@@ -3117,6 +3136,10 @@ while counter<=last_row:
     break_flag, text = last_row_detect(df_main, sheet, last_row_flag, last_row, counter)        # detect last row in main excel tab
     if break_flag == True:                                                  # break if last row
         write_to_file(name, text)
+
+        text_debug = f'last_row_detect = {break_flag}\n'
+        text_debug = indent(text_debug, 4)
+        write_to_file(name_debug, text_debug)  # write to debug file
         break
 
     counter = counter+1     # increment counter.
@@ -3126,3 +3149,5 @@ while counter<=last_row:
 # ===========================================================================
 
 write_to_file(name, end_block)      # write G-code end block
+text_debug = 'write g-code end_block - OK\n'
+write_to_file(name_debug, text_debug)    # write to debug file
