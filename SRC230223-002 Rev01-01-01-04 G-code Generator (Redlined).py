@@ -3126,7 +3126,7 @@ write_to_file(name_debug, text_debug)    # write to debug file
 while counter<=last_row:
 
     operation = format_data_frame_variable(df_main, 'operation', counter)       # import operation from excel file.
-
+    operation_valid_flag = False    # initialize flag
 
     last_row_flag_debug = format_data_frame_variable(df_main, 'last_row_flag', counter)       # import last_row flag from excel file for debug file.
     sheet_debug = format_data_frame_variable(df_main, 'sheet_name', counter)       # import sheet_name from excel file for debug file.
@@ -3135,6 +3135,7 @@ while counter<=last_row:
     write_to_file(name_debug, text_debug)  # write to debug file
 
     if operation == 'line' or operation == 'trochoidal':
+        operation_valid_flag = True  # set flag
         sheet = format_data_frame_variable(df_main, 'sheet_name', counter)
         start_safe_z = format_data_frame_variable(df_main, 'start_safe_z', counter)     # pass start_safe_z to toolpath_data_frame. starts from safe z height if set.
         if isinstance(start_safe_z, bool) == False:  # check if start_safe_z is a boolean, if not issue error.
@@ -3160,30 +3161,37 @@ while counter<=last_row:
         write_to_file(name, text)
 
     elif operation == 'drill':
+        operation_valid_flag = True  # set flag
         sheet = format_data_frame_variable(df_main, 'sheet_name', counter)
         peck_drill_data_frame(name, excel_file, sheet)
 
     elif operation == 'surface':
+        operation_valid_flag = True  # set flag
         sheet = format_data_frame_variable(df_main, 'sheet_name', counter)
         surface_data_frame(name, excel_file, sheet)
 
     elif operation == 'spiral_drill':
+        operation_valid_flag = True  # set flag
         sheet = format_data_frame_variable(df_main, 'sheet_name', counter)
         spiral_drill_data_frame(name, excel_file, sheet)
 
     elif operation == 'spiral_surface':
+        operation_valid_flag = True  # set flag
         sheet = format_data_frame_variable(df_main, 'sheet_name', counter)
         spiral_surface_data_frame(name, excel_file, sheet)
 
     elif operation == 'corner_slice':
+        operation_valid_flag = True  # set flag
         sheet = format_data_frame_variable(df_main, 'sheet_name', counter)
         corner_slice_data_frame(name, excel_file, sheet)
 
     elif operation == 'spiral_boss':
+        operation_valid_flag = True  # set flag
         sheet = format_data_frame_variable(df_main, 'sheet_name', counter)
         spiral_boss_data_frame(name, excel_file, sheet)
 
     elif operation == 'clear_z':
+        operation_valid_flag = True  # set flag
         text = f'G0 Z{clear_z}          (Clear Z)\n'
         write_to_file(name, text)
 
@@ -3193,7 +3201,18 @@ while counter<=last_row:
         write_to_file(name_debug, text_debug)  # write to debug file
 
     elif operation == 'rapid':
+        operation_valid_flag = True  # set flag
         rapid(name, df_main, counter)
+
+    if operation_valid_flag == False:  # check for invalid operation.
+        print(f'''!!script aborted!!\ninvalid operation_valid_flag value detected.\noperation = {operation}\n''')
+        text = f'''\n(!!script aborted!!)\n(invalid operation_valid_flag value detected.)\n(operation = {operation})'''  # write error to G-code
+        write_to_file(name, text)
+
+        text_debug = f'!!SCRIPT ABORTED!! invalid operation_valid_flag value detected. operation: {operation}\n'
+        text_debug = indent(text_debug, 4)
+        write_to_file(name_debug, text_debug)  # write to debug file
+        quit()
 
     last_row_flag = format_data_frame_variable(df_main, 'last_row_flag', counter)       # import last_row flag from excel file.
     sheet = 'main'
