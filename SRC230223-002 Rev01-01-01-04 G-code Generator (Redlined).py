@@ -2184,6 +2184,13 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
     # cutter_y_final = y coordinate of cutter position
 
     # ---Change History---
+    #
+    # rev: 01-01-01-04
+    # date: 08/Mar/2023
+    # description:
+    # Added debug file statements
+    # software test run on 08/Mar/2023
+    #
     # rev: 01-01-10-12
     # Added feed rate to move cutter to start point.
     #
@@ -2245,6 +2252,10 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
                 print(f'''!!script aborted!!\ninvalid doc value detected.\ndoc = {doc}\n''')
                 text = f'''\n(!!script aborted!!)\n(invalid doc value detected.)\n(doc = {doc})'''  # write error to G-code
                 write_to_file(name, text)
+
+                text_debug = f'!!SCRIPT ABORTED!! invalid doc value detected. doc: {doc}\n'
+                text_debug = indent(text_debug, 8)
+                write_to_file(name_debug, text_debug)  # write to debug file
                 quit()
 
         return (operation_name, offset, feed, safe_z, z_f, mode, step, wos, doc)  # return values
@@ -2292,6 +2303,10 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
         print(f'''!!script aborted!!\ninvalid operation value detected.\noperation = {operation}\n''')
         text = f'''\n(!!script aborted!!)\n(invalid operation value detected.)\n(operation = {operation})'''  # write error to G-code
         write_to_file(name, text)
+
+        text_debug = f'!!SCRIPT ABORTED!! invalid operation value detected. operation: {operation}\n'
+        text_debug = indent(text_debug, 8)
+        write_to_file(name_debug, text_debug)  # write to debug file
         quit()
 
     df = pd.read_excel(excel_file, sheet_name = sheet, na_filter=False)      # import excel file into dataframe.
@@ -3111,6 +3126,8 @@ write_to_file(name_debug, text_debug)    # write to debug file
 while counter<=last_row:
 
     operation = format_data_frame_variable(df_main, 'operation', counter)       # import operation from excel file.
+
+
     last_row_flag_debug = format_data_frame_variable(df_main, 'last_row_flag', counter)       # import last_row flag from excel file for debug file.
     sheet_debug = format_data_frame_variable(df_main, 'sheet_name', counter)       # import sheet_name from excel file for debug file.
     text_debug = f'\nrow #: {counter}, last_row flag: {last_row_flag_debug}, operation: {operation}, sheet: {sheet_debug}\n'
@@ -3124,12 +3141,20 @@ while counter<=last_row:
             print(f'''!!script aborted!!\ninvalid start_safe_z value detected.\nstart_safe_z = {start_safe_z}\n''')
             text = f'''\n(!!script aborted!!)\n(invalid start_safe_z value detected.)\n(start_safe_z = {start_safe_z})'''  # write error to G-code
             write_to_file(name, text)
+
+            text_debug = f'!!SCRIPT ABORTED!! invalid start_safe_z value detected. start_safe_z: {start_safe_z}\n'
+            text_debug = indent(text_debug, 8)
+            write_to_file(name_debug, text_debug)  # write to debug file
             quit()
         return_safe_z = format_data_frame_variable(df_main, 'return_safe_z', counter)     # pass return_safe_z to toolpath_data_frame. returns to safe z height if set.
         if isinstance(return_safe_z, bool) == False:  # check if return_safe_z is a boolean, if not issue error.
             print(f'''!!script aborted!!\ninvalid return_safe_z value detected.\nreturn_safe_z = {return_safe_z}\n''')
             text = f'''\n(!!script aborted!!)\n(invalid return_safe_z value detected.)\n(return_safe_z = {return_safe_z})'''  # write error to G-code
             write_to_file(name, text)
+
+            text_debug = f'!!SCRIPT ABORTED!! invalid return_safe_z value detected. return_safe_z: {return_safe_z}\n'
+            text_debug = indent(text_debug, 8)
+            write_to_file(name_debug, text_debug)  # write to debug file
             quit()
         first_x_adjusted, first_y_adjusted, end_x, end_y, cutter_x, cutter_y, text = toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, operation, dia, debug = False)
         write_to_file(name, text)
