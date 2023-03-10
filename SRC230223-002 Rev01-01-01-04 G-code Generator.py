@@ -2599,7 +2599,8 @@ def parameters_data_frame(excel_file, sheet):
     parameter_file_name = format_data_frame_variable(df, 'value', 'parameter file name')  # parameter excel file name
     parameter_file_rev = format_data_frame_variable(df, 'value', 'parameter file revision')  # parameter excel file revision
 
-    text_debug = f'file: {parameter_file_name}\n'
+    text_debug = f'python script: {os.path.basename(__file__)}\n'
+    text_debug = text_debug + f'file: {parameter_file_name}\n'
     text_debug = text_debug + f'rev: {parameter_file_rev}\n'
     text_debug = text_debug + f'template: {template_file_name}\n\n'
     write_to_file(name_debug, text_debug)  # write to debug file
