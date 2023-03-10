@@ -1458,6 +1458,10 @@ def peck_drill(hole_x, hole_y, dia_hole, depth, peck_depth, z_f, safe_z, retract
     # text = G-code text
 
     # ---Change History---
+    # rev: 01-01-01-04
+    # Added abort function
+    # software test run on 08/Mar/2023
+    #
     # rev: 01-01-10-07
     # changed from writing G-code directly to txt file to a separate text variable.
     # software test run on 04/04/2022
@@ -1512,9 +1516,7 @@ def peck_drill(hole_x, hole_y, dia_hole, depth, peck_depth, z_f, safe_z, retract
 
     # check if safe_z is above surface.
     if safe_z <= 0:
-        print(f'''!!script aborted!!\npeck_drill\nsafe_z below surface\nsafe_z = {"%.4f" % safe_z}''')
-        text = f'''\n(!!script aborted!!)\n(safe_z below surface)\n(safe_z = {"%.4f" % safe_z})\n'''  # write header for section.
-        quit()
+        abort('safe_z', safe_z, 'safe_z below surface')
 
     text_temp = \
     f'''
@@ -2249,14 +2251,7 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
             doc = format_data_frame_variable(df, 'static_value', 'doc', debug)  # import depth of cut (for trochoidal only)
 
             if isinstance(doc, float) == False:  # check if doc is a number, if not issue error.
-                print(f'''!!script aborted!!\ninvalid doc value detected.\ndoc = {doc}\n''')
-                text = f'''\n(!!script aborted!!)\n(invalid doc value detected.)\n(doc = {doc})'''  # write error to G-code
-                write_to_file(name, text)
-
-                text_debug = f'!!SCRIPT ABORTED!! invalid doc value detected. doc: {doc}\n'
-                text_debug = indent(text_debug, 8)
-                write_to_file(name_debug, text_debug)  # write to debug file
-                quit()
+                abort('doc', doc)
 
         return (operation_name, offset, feed, safe_z, z_f, mode, step, wos, doc)  # return values
 
@@ -3083,7 +3078,7 @@ def indent(text, amount, ch=' '):
 
     return textwrap.indent(text, amount * ch)
 
-def abort(variable_name, variable):
+def abort(variable_name, variable, error_message = None):
     # ---Description---
     # Aborts the program and print an error message on the debug window, G-code text file and debug text file.
     # abort(variable_name, variable)
@@ -3100,12 +3095,16 @@ def abort(variable_name, variable):
     # Initial release
     # software test run on 08/Mar/2023
 
-    print(f'''!!SCRIPT ABORTED!!\ninvalid {variable_name} value detected.\n{variable_name}: {variable}\n''')     # print error message in debug window
+    print(f'''!!SCRIPT ABORTED!!\ninvalid {variable_name} value detected.\n{variable_name}: {variable}\n{error_message}''')     # print error message in debug window
 
-    text = f'''\n(!!SCRIPT ABORTED!!)\n(invalid {variable_name} value detected.)\n{variable_name} = {variable})'''  # write error message to G-code
+    text = f'''\n(!!SCRIPT ABORTED!!)\n(invalid {variable_name} value detected.)\n({variable_name}: {variable})\n'''  # write error message to G-code
+    if error_message != None:
+        text = text + f'({error_message})'
     write_to_file(name, text)
 
     text_debug = f'\n!!SCRIPT ABORTED!!\ninvalid {variable_name} value detected.\n{variable_name}: {variable}\n'         # write error message in debug file
+    if error_message != None:
+        text_debug = text_debug + error_message
     write_to_file(name_debug, text_debug)  # write to debug file
 
     quit()          # quit program
