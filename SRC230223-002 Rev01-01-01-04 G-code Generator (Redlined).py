@@ -2963,6 +2963,11 @@ def rapid(name, df_main, counter):
     # initial release
     # software test run on 11/Aug/2022
 
+    operation_debug = format_data_frame_variable(df_main, 'operation', counter)
+    text_debug = f'\n{operation_debug}\n'
+    text_debug = indent(text_debug, 8)
+    write_to_file(name_debug, text_debug)  # write to debug file
+
     text = f'G0 '  # G0 rapid command
     valid_flag = False  # initialize/clear flag to detect if all x, y and z are invalid/ non-float values.
     x = format_data_frame_variable(df_main, 'x', counter)
@@ -2986,7 +2991,16 @@ def rapid(name, df_main, counter):
         print(f'''!!script aborted!!\nrow #: {"%.0f" % row}\nrapid operation\ninvalid x,y,z values\nx = {x}\ny = {y}\nz = {z}''')
         text = f'''\n(!!script aborted!!)\n(row #: {"%.0f" % row})\n(rapid operation)\n(invalid x,y,z values)\n(x = {x})\n(y = {y})\n(z = {z})'''  # write header for section.
         write_to_file(name, text)
+
+        text_debug = f'!!script aborted!! invalid x,y,z values x: {x}, y:{y}, z:{z}\n'
+        text_debug = indent(text_debug, 8)
+        write_to_file(name_debug, text_debug)  # write to debug file
+
         quit()
+
+    text_debug = f'x: {x}, y:{y}, z:{z}\n'
+    text_debug = indent(text_debug, 8)
+    write_to_file(name_debug, text_debug)  # write to debug file
 
 def last_row_detect(df_temp, sheet_temp, last_row_flag, last_row, counter):
     # ---Description---
