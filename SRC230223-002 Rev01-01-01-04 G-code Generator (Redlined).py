@@ -2959,6 +2959,14 @@ def rapid(name, df_main, counter):
     # N/A
 
     # ---Change History---
+    #
+    # rev: 01-01-01-04
+    # date: 08/Mar/2023
+    # description:
+    # Added debug file statements
+    # found and fixed variable type check bug
+    # software test run on 08/Mar/2023
+    #
     # rev: 01-01-10-10
     # initial release
     # software test run on 11/Aug/2022
@@ -2969,21 +2977,24 @@ def rapid(name, df_main, counter):
     write_to_file(name_debug, text_debug)  # write to debug file
 
     text = f'G0 '  # G0 rapid command
-    valid_flag = False  # initialize/clear flag to detect if all x, y and z are invalid/ non-float values.
+    valid_flag_x = False  # initialize/clear flag to detect if x is an invalid/ non-float values.
+    valid_flag_y = False  # initialize/clear flag to detect if y is an  invalid/ non-float values.
+    valid_flag_z = False  # initialize/clear flag to detect if z is an  invalid/ non-float values.
+
     x = format_data_frame_variable(df_main, 'x', counter)
     if isinstance(x, float) == True:  # check if x is a number, if not skip.
         text = text + f' X{"%.4f" % x}'  # append x position
-        valid_flag = True  # set flag
+        valid_flag_x = True  # set flag
     y = format_data_frame_variable(df_main, 'y', counter)
     if isinstance(y, float) == True:  # check if y is a number, if not skip.
         text = text + f' Y{"%.4f" % y}'  # append y position
-        valid_flag = True  # set flag
+        valid_flag_y = True  # set flag
     z = format_data_frame_variable(df_main, 'z', counter)
     if isinstance(z, float) == True:  # check if z is a number, if not skip.
         text = text + f' Z{"%.4f" % z}'  # append z position
-        valid_flag = True  # set flag
+        valid_flag_z = True  # set flag
     text = text + '         (Rapid)\n'
-    if valid_flag == True:
+    if valid_flag_x == True and valid_flag_y == True and valid_flag_z == True:
         write_to_file(name, text)
     else:
         # invalid x,y,z values detected
@@ -2992,7 +3003,7 @@ def rapid(name, df_main, counter):
         text = f'''\n(!!script aborted!!)\n(row #: {"%.0f" % row})\n(rapid operation)\n(invalid x,y,z values)\n(x = {x})\n(y = {y})\n(z = {z})'''  # write header for section.
         write_to_file(name, text)
 
-        text_debug = f'!!script aborted!! invalid x,y,z values x: {x}, y:{y}, z:{z}\n'
+        text_debug = f'!!SCRIPT ABORTED!! invalid x,y,z values x: {x}, y:{y}, z:{z}\n'
         text_debug = indent(text_debug, 8)
         write_to_file(name_debug, text_debug)  # write to debug file
 
