@@ -3044,7 +3044,7 @@ def rapid(name, df_main, counter):
     z = format_data_frame_variable(df_main, 'z', counter)
     if isinstance(z, float) == True:  # check if z is a number, if not skip.
         text = text + f' Z{"%.4f" % z}'  # append z position
-        text_debug = f'z:{z}\n'
+        text_debug = f'z:{z}'
         write_to_file(name_debug, text_debug)  # write to debug file
     else:
         abort('z', z)
@@ -3096,20 +3096,20 @@ def last_row_detect(df_temp, sheet_temp, last_row_flag, last_row, counter, inden
             row = format_data_frame_variable(df_temp, '#', counter)
             print(f'''early termination of row\nsheet: {sheet_temp}\nrow #: {"%.0f" % row}\n''')   # premature program termination
             text = f'''\n(early termination of row)\n(sheet: {sheet_temp})\n(row #: {"%.0f" % row})\n'''  # to G-code text file
-            text_debug = 'early termination of row\n'
+            text_debug = 'early termination of row'
             text_debug = indent(text_debug, indent_spacing)
             write_to_file(name_debug, text_debug)                                                # write to debug file
         else:
             print(f'''last row processed\nnormal termination of program\nsheet: {sheet_temp}\n''')    # normal expected program termination
             text = f'''\n(last row processed)\n(normal termination of program)\n(sheet: {sheet_temp})\n'''  # to G-code text file
-            text_debug = 'last row processed. normal termination of program.\n'
+            text_debug = 'last row processed. normal termination of program.'
             text_debug = indent(text_debug, indent_spacing)
             write_to_file(name_debug, text_debug)                                                # write to debug file
         break_flag = True       # set break flag
     if counter == last_row and break_flag == False:
         print(f'''last row detected and processed\nlast_row_flag not detected!\nunexpected termination of program\nsheet: {sheet_temp}\n''')  # unexpected program termination. last_row_flag not detected
         text = f'''\n(last row detected and processed)\n(last_row_flag not detected!)\n(unexpected termination of program)\n(sheet: {sheet_temp})\n'''  # to G-code text file
-        text_debug = 'last row detected and processed. last_row_flag not detected!\n'
+        text_debug = 'last row detected and processed. last_row_flag not detected!'
         text_debug = indent(text_debug, indent_spacing)
         write_to_file(name_debug, text_debug)                                                # write to debug file
 
@@ -3259,7 +3259,7 @@ while counter<=last_row:
         write_to_file(name, text)
 
         text_debug = f'\n{operation}\n'
-        text_debug = text_debug + f'z: {clear_z}\n'
+        text_debug = text_debug + f'z: {clear_z}'
         text_debug = indent(text_debug, 8)
         write_to_file(name_debug, text_debug)  # write to debug file
 
@@ -3285,5 +3285,5 @@ while counter<=last_row:
 # ===========================================================================
 
 write_to_file(name, end_block)      # write G-code end block
-text_debug = '\nwrite g-code end_block\n'
+text_debug = '\n\nwrite g-code end_block\n'
 write_to_file(name_debug, text_debug)    # write to debug file
