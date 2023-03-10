@@ -3092,6 +3092,32 @@ def indent(text, amount, ch=' '):
 
     return textwrap.indent(text, amount * ch)
 
+def abort(variable_name, variable):
+    # ---Description---
+    # Aborts the program and print an error message on the debug window, G-code text file and debug text file.
+    # abort(variable_name, variable)
+
+    # ---Variable List---
+    # variable_name = name of variable
+    # variable = value of variable
+
+    # ---Return Variable List---
+    # N/A
+
+    # ---Change History---
+    # rev: 01-01-01-04
+    # Initial release
+    # software test run on 08/Mar/2023
+
+    print(f'''!!SCRIPT ABORTED!!\ninvalid {variable_name} value detected.\n{variable_name}: {variable}\n''')     # print error message in debug window
+
+    text = f'''\n(!!SCRIPT ABORTED!!)\n(invalid {variable_name} value detected.)\n{variable_name} = {variable})'''  # write error message to G-code
+    write_to_file(name, text)
+
+    text_debug = f'\n!!SCRIPT ABORTED!!\ninvalid {variable_name} value detected.\n{variable_name}: {variable}\n'         # write error message in debug file
+    write_to_file(name_debug, text_debug)  # write to debug file
+    quit()          # quit program
+
 # ---------Import Parameters------------
 
 excel_file = 'LOG20220414001 G-code Parameters.xlsx'       # !!!! identify name of excel file to import data from. !!!!
@@ -3205,14 +3231,19 @@ while counter<=last_row:
         rapid(name, df_main, counter)
 
     if operation_valid_flag == False:  # check for invalid operation.
-        print(f'''!!script aborted!!\ninvalid operation_valid_flag value detected.\noperation = {operation}\n''')
-        text = f'''\n(!!script aborted!!)\n(invalid operation_valid_flag value detected.)\n(operation = {operation})'''  # write error to G-code
-        write_to_file(name, text)
 
-        text_debug = f'!!SCRIPT ABORTED!! invalid operation_valid_flag value detected. operation: {operation}\n'
-        text_debug = indent(text_debug, 4)
-        write_to_file(name_debug, text_debug)  # write to debug file
-        quit()
+#        variable_1 = [i for i, j in locals().items() if j == operation][0]
+#        print (f'variable_1 = {variable_1}')
+        abort('operation', operation)
+
+       # print(f'''!!script aborted!!\ninvalid operation_valid_flag value detected.\noperation = {operation}\n''')
+       # text = f'''\n(!!script aborted!!)\n(invalid operation_valid_flag value detected.)\n(operation = {operation})'''  # write error to G-code
+       # write_to_file(name, text)
+
+       # text_debug = f'!!SCRIPT ABORTED!! invalid operation_valid_flag value detected. operation: {operation}\n'
+       # text_debug = indent(text_debug, 4)
+       # write_to_file(name_debug, text_debug)  # write to debug file
+       # quit()
 
     last_row_flag = format_data_frame_variable(df_main, 'last_row_flag', counter)       # import last_row flag from excel file.
     sheet = 'main'
