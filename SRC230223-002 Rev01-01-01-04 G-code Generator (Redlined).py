@@ -2456,7 +2456,7 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
 
         text = text + text_temp      # store G-code into a text variable before printing to a text file.
 
-        break_flag, text_temp = last_row_detect(df, sheet, last_row_flag, last_row, counter)  # detect last row
+        break_flag, text_temp = last_row_detect(df, sheet, last_row_flag, last_row, counter, 8)  # detect last row
         if counter == last_row or break_flag == True:       # detect last row row or last row flag
             if return_safe_z == True:
                 end_cutter = \
@@ -2709,13 +2709,13 @@ def peck_drill_data_frame(name, excel_file, sheet):
         text_debug = indent(text_debug, 8)
         write_to_file(name_debug, text_debug)  # write to debug file
 
-        break_flag, text_temp = last_row_detect(df, sheet, last_row_flag, last_row, counter)  # detect last row
+        break_flag, text_temp = last_row_detect(df, sheet, last_row_flag, last_row, counter, 8)  # detect last row
         if break_flag == True:  # break if last row
             text = text + text_temp
 
-            text_debug = f'last_row_detect: {break_flag}\n'
-            text_debug = indent(text_debug, 8)
-            write_to_file(name_debug, text_debug)  # write to debug file
+#            text_debug = f'last_row_detect: {break_flag}\n'
+#            text_debug = indent(text_debug, 8)
+#            write_to_file(name_debug, text_debug)  # write to debug file
             break
 
         counter = counter + 1  # increment counter.
@@ -3014,7 +3014,7 @@ def rapid(name, df_main, counter):
     text = text + '         (Rapid)\n'
     write_to_file(name, text)       # write g-code
 
-def last_row_detect(df_temp, sheet_temp, last_row_flag, last_row, counter):
+def last_row_detect(df_temp, sheet_temp, last_row_flag, last_row, counter, indent_spacing = 0):
     # ---Description---
     # Detects the last row of dataframe.
     # additionally detects unintentional termination of a dataframe.
@@ -3033,6 +3033,14 @@ def last_row_detect(df_temp, sheet_temp, last_row_flag, last_row, counter):
     # text = returns type of termination
 
     # ---Change History---
+    #
+    # rev: 01-01-01-04
+    # date: 08/Mar/2023
+    # description:
+    # Added debug file statements
+    # Added debug file indent spacing variable.
+    # software test run on 08/Mar/2023
+    #
     # rev: 01-01-10-11
     # fixed data frame bug.
     # added active dataframe and active sheet as pass in variables.
@@ -3049,13 +3057,23 @@ def last_row_detect(df_temp, sheet_temp, last_row_flag, last_row, counter):
             row = format_data_frame_variable(df_temp, '#', counter)
             print(f'''early termination of row\nsheet: {sheet_temp}\nrow #: {"%.0f" % row}\n''')   # premature program termination
             text = f'''\n(early termination of row)\n(sheet: {sheet_temp})\n(row #: {"%.0f" % row})\n'''  # to G-code text file
+            text_debug = 'early termination of row\n'
+            text_debug = indent(text_debug, indent_spacing)
+            write_to_file(name_debug, text_debug)                                                # write to debug file
         else:
             print(f'''last row processed\nnormal termination of program\nsheet: {sheet_temp}\n''')    # normal expected program termination
             text = f'''\n(last row processed)\n(normal termination of program)\n(sheet: {sheet_temp})\n'''  # to G-code text file
+            text_debug = 'last row processed. normal termination of program.\n'
+            text_debug = indent(text_debug, indent_spacing)
+            write_to_file(name_debug, text_debug)                                                # write to debug file
         break_flag = True       # set break flag
     if counter == last_row and break_flag == False:
         print(f'''last row detected and processed\nlast_row_flag not detected!\nunexpected termination of program\nsheet: {sheet_temp}\n''')  # unexpected program termination. last_row_flag not detected
         text = f'''\n(last row detected and processed)\n(last_row_flag not detected!)\n(unexpected termination of program)\n(sheet: {sheet_temp})\n'''  # to G-code text file
+        text_debug = 'last row detected and processed. last_row_flag not detected!\n'
+        text_debug = indent(text_debug, indent_spacing)
+        write_to_file(name_debug, text_debug)                                                # write to debug file
+
         break_flag = True       # set break flag
     return (break_flag, text)
 
@@ -3214,13 +3232,14 @@ while counter<=last_row:
 
     last_row_flag = format_data_frame_variable(df_main, 'last_row_flag', counter)       # import last_row flag from excel file.
     sheet = 'main'
-    break_flag, text = last_row_detect(df_main, sheet, last_row_flag, last_row, counter)        # detect last row in main excel tab
+    write_to_file(name_debug,'\n')  # empty line for debug file readability.
+    break_flag, text = last_row_detect(df_main, sheet, last_row_flag, last_row, counter, 4)        # detect last row in main excel tab
     if break_flag == True:                                                  # break if last row
         write_to_file(name, text)
 
-        text_debug = f'\nlast_row_detect = {break_flag}\n'
-        text_debug = indent(text_debug, 4)
-        write_to_file(name_debug, text_debug)  # write to debug file
+#        text_debug = f'\nlast_row_detect = {break_flag}\n'
+#        text_debug = indent(text_debug, 4)
+#        write_to_file(name_debug, text_debug)  # write to debug file
         break
 
     counter = counter+1     # increment counter.
