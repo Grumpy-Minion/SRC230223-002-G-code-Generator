@@ -2992,41 +2992,32 @@ def rapid(name, df_main, counter):
     write_to_file(name_debug, text_debug)  # write to debug file
 
     text = f'G0 '  # G0 rapid command
-    valid_flag_x = False  # initialize/clear flag to detect if x is an invalid/ non-float values.
-    valid_flag_y = False  # initialize/clear flag to detect if y is an  invalid/ non-float values.
-    valid_flag_z = False  # initialize/clear flag to detect if z is an  invalid/ non-float values.
 
     x = format_data_frame_variable(df_main, 'x', counter)
     if isinstance(x, float) == True:  # check if x is a number, if not skip.
         text = text + f' X{"%.4f" % x}'  # append x position
-        valid_flag_x = True  # set flag
+        text_debug = f'x: {x}, '
+        text_debug = indent(text_debug, 8)
+        write_to_file(name_debug, text_debug)  # write to debug file
+    else:
+        abort('x', x)
     y = format_data_frame_variable(df_main, 'y', counter)
     if isinstance(y, float) == True:  # check if y is a number, if not skip.
         text = text + f' Y{"%.4f" % y}'  # append y position
-        valid_flag_y = True  # set flag
+        text_debug = f'y:{y}, '
+        write_to_file(name_debug, text_debug)  # write to debug file
+    else:
+        abort('y', y)
     z = format_data_frame_variable(df_main, 'z', counter)
     if isinstance(z, float) == True:  # check if z is a number, if not skip.
         text = text + f' Z{"%.4f" % z}'  # append z position
-        valid_flag_z = True  # set flag
-    text = text + '         (Rapid)\n'
-    if valid_flag_x == True and valid_flag_y == True and valid_flag_z == True:
-        write_to_file(name, text)
-    else:
-        # invalid x,y,z values detected
-        row = format_data_frame_variable(df_main, '#', counter)
-        print(f'''!!script aborted!!\nrow #: {"%.0f" % row}\nrapid operation\ninvalid x,y,z values\nx = {x}\ny = {y}\nz = {z}''')
-        text = f'''\n(!!script aborted!!)\n(row #: {"%.0f" % row})\n(rapid operation)\n(invalid x,y,z values)\n(x = {x})\n(y = {y})\n(z = {z})'''  # write header for section.
-        write_to_file(name, text)
-
-        text_debug = f'!!SCRIPT ABORTED!! invalid x,y,z values x: {x}, y:{y}, z:{z}\n'
-        text_debug = indent(text_debug, 8)
+        text_debug = f'z:{z}\n'
         write_to_file(name_debug, text_debug)  # write to debug file
+    else:
+        abort('z', z)
 
-        quit()
-
-    text_debug = f'x: {x}, y:{y}, z:{z}\n'
-    text_debug = indent(text_debug, 8)
-    write_to_file(name_debug, text_debug)  # write to debug file
+    text = text + '         (Rapid)\n'
+    write_to_file(name, text)       # write g-code
 
 def last_row_detect(df_temp, sheet_temp, last_row_flag, last_row, counter):
     # ---Description---
@@ -3116,6 +3107,7 @@ def abort(variable_name, variable):
 
     text_debug = f'\n!!SCRIPT ABORTED!!\ninvalid {variable_name} value detected.\n{variable_name}: {variable}\n'         # write error message in debug file
     write_to_file(name_debug, text_debug)  # write to debug file
+
     quit()          # quit program
 
 # ---------Import Parameters------------
@@ -3165,24 +3157,12 @@ while counter<=last_row:
         sheet = format_data_frame_variable(df_main, 'sheet_name', counter)
         start_safe_z = format_data_frame_variable(df_main, 'start_safe_z', counter)     # pass start_safe_z to toolpath_data_frame. starts from safe z height if set.
         if isinstance(start_safe_z, bool) == False:  # check if start_safe_z is a boolean, if not issue error.
-            print(f'''!!script aborted!!\ninvalid start_safe_z value detected.\nstart_safe_z = {start_safe_z}\n''')
-            text = f'''\n(!!script aborted!!)\n(invalid start_safe_z value detected.)\n(start_safe_z = {start_safe_z})'''  # write error to G-code
-            write_to_file(name, text)
+            abort('start_safe_z', start_safe_z)  # abort. write error message.
 
-            text_debug = f'!!SCRIPT ABORTED!! invalid start_safe_z value detected. start_safe_z: {start_safe_z}\n'
-            text_debug = indent(text_debug, 8)
-            write_to_file(name_debug, text_debug)  # write to debug file
-            quit()
         return_safe_z = format_data_frame_variable(df_main, 'return_safe_z', counter)     # pass return_safe_z to toolpath_data_frame. returns to safe z height if set.
         if isinstance(return_safe_z, bool) == False:  # check if return_safe_z is a boolean, if not issue error.
-            print(f'''!!script aborted!!\ninvalid return_safe_z value detected.\nreturn_safe_z = {return_safe_z}\n''')
-            text = f'''\n(!!script aborted!!)\n(invalid return_safe_z value detected.)\n(return_safe_z = {return_safe_z})'''  # write error to G-code
-            write_to_file(name, text)
+            abort('return_safe_z', return_safe_z)  # abort. write error message.
 
-            text_debug = f'!!SCRIPT ABORTED!! invalid return_safe_z value detected. return_safe_z: {return_safe_z}\n'
-            text_debug = indent(text_debug, 8)
-            write_to_file(name_debug, text_debug)  # write to debug file
-            quit()
         first_x_adjusted, first_y_adjusted, end_x, end_y, cutter_x, cutter_y, text = toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, operation, dia, debug = False)
         write_to_file(name, text)
 
@@ -3231,19 +3211,7 @@ while counter<=last_row:
         rapid(name, df_main, counter)
 
     if operation_valid_flag == False:  # check for invalid operation.
-
-#        variable_1 = [i for i, j in locals().items() if j == operation][0]
-#        print (f'variable_1 = {variable_1}')
-        abort('operation', operation)
-
-       # print(f'''!!script aborted!!\ninvalid operation_valid_flag value detected.\noperation = {operation}\n''')
-       # text = f'''\n(!!script aborted!!)\n(invalid operation_valid_flag value detected.)\n(operation = {operation})'''  # write error to G-code
-       # write_to_file(name, text)
-
-       # text_debug = f'!!SCRIPT ABORTED!! invalid operation_valid_flag value detected. operation: {operation}\n'
-       # text_debug = indent(text_debug, 4)
-       # write_to_file(name_debug, text_debug)  # write to debug file
-       # quit()
+        abort('operation', operation)   # abort. write error message.
 
     last_row_flag = format_data_frame_variable(df_main, 'last_row_flag', counter)       # import last_row flag from excel file.
     sheet = 'main'
