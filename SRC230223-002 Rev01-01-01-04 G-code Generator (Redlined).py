@@ -2490,7 +2490,8 @@ def parameters_data_frame(excel_file, sheet):
     # ---Change History---
     # rev: 01-01-01-04
     # Added debug file name generator
-    # software test run on TBD
+    # Added debug statements
+    # software test run on 12/0/Mar/2023
     #
     # rev: 01-01-10-10
     # Added template file name into parameter description
@@ -2546,6 +2547,11 @@ def parameters_data_frame(excel_file, sheet):
     template_file_name = format_data_frame_variable(df, 'value', 'template file name')  # parameter template excel file name and revision
     parameter_file_name = format_data_frame_variable(df, 'value', 'parameter file name')  # parameter excel file name
     parameter_file_rev = format_data_frame_variable(df, 'value', 'parameter file revision')  # parameter excel file revision
+
+    text_debug = f'file: {parameter_file_name}\n'
+    text_debug = text_debug + f'rev: {parameter_file_rev}\n'
+    text_debug = text_debug + f'template: {template_file_name}\n\n'
+    write_to_file(name_debug, text_debug)  # write to debug file
 
     info = \
         f'''
@@ -2666,9 +2672,9 @@ def peck_drill_data_frame(name, excel_file, sheet):
     counter = 0             # initialize counter
     text = ''             # initialize
 
-    text_debug = f'read excel "{sheet}" tab - OK\n'
-    text_debug = text_debug + f'total number of rows in "{sheet}" tab = {rows}\n\n'
-    text_debug = indent(text_debug, 4)
+    text_debug = f'\n{sheet}\n'
+    text_debug = text_debug + f'total rows: {rows}\n\n'
+    text_debug = indent(text_debug, 8)
     write_to_file(name_debug, text_debug)  # write to debug file
 
     while counter <= last_row:
@@ -2689,7 +2695,7 @@ def peck_drill_data_frame(name, excel_file, sheet):
         text_temp = peck_drill(hole_x, hole_y, dia_hole, depth, peck_depth, z_f, safe_z, retract_z, dwell, name)
         text = text + text_temp
 
-        text_debug = f'row # = {counter}, last_row flag = {last_row_flag}\n'
+        text_debug = f'row: {counter}, last_row_flag: {last_row_flag}, x: {hole_x}, y: {hole_y}, dia_hole: {dia_hole}, depth: {depth}, peck_depth: {peck_depth}, z_f: {z_f}, safe_z: {safe_z}, retract_z: {retract_z}, dwell: {dwell}\n'
         text_debug = indent(text_debug, 8)
         write_to_file(name_debug, text_debug)  # write to debug file
 
@@ -2697,7 +2703,7 @@ def peck_drill_data_frame(name, excel_file, sheet):
         if break_flag == True:  # break if last row
             text = text + text_temp
 
-            text_debug = f'last_row_detect = {break_flag}\n'
+            text_debug = f'last_row_detect: {break_flag}\n'
             text_debug = indent(text_debug, 8)
             write_to_file(name_debug, text_debug)  # write to debug file
             break
@@ -3052,12 +3058,12 @@ excel_file = 'LOG20220414001 G-code Parameters.xlsx'       # !!!! identify name 
 sheet = 'parameters'                # identify name of excel sheet to import data from.
 start_block, end_block, name, name_debug, clear_z, start_z, cut_f, finish_f, z_f, dia = parameters_data_frame(excel_file, sheet)        # generate G-code parameters.
 
-text_debug = f'read excel {sheet} tab - OK\n'
+text_debug = f'read excel {sheet} tab\n'
 write_to_file(name_debug, text_debug)    # write to debug file
 
 write_to_file(name, start_block)    # write G-code start block
 
-text_debug = 'write g-code start_block - OK\n'
+text_debug = 'write g-code start_block\n'
 write_to_file(name_debug, text_debug)    # write to debug file
 # ===========================================================================
 # ================================ G-code start =============================
@@ -3069,9 +3075,11 @@ rows = df_main.shape[0]  # total number of rows in dataframe.
 last_row = rows - 1  # initialize number of last row
 counter = 0  # initialize counter
 
-text_debug = f'read excel {sheet} tab - OK\n'
+text_debug = f'read excel "{sheet}" tab\n\n'
 write_to_file(name_debug, text_debug)    # write to debug file
-text_debug = f'total number of rows in {sheet} tab = {rows}\n'
+text_debug = f'{sheet}\n'
+text_debug = text_debug + f'total rows: {rows}\n'
+text_debug = indent(text_debug, 4)
 write_to_file(name_debug, text_debug)    # write to debug file
 
 # import content of excel file.
@@ -3079,7 +3087,8 @@ while counter<=last_row:
 
     operation = format_data_frame_variable(df_main, 'operation', counter)       # import operation from excel file.
     last_row_flag_debug = format_data_frame_variable(df_main, 'last_row_flag', counter)       # import last_row flag from excel file for debug file.
-    text_debug = f'\nrow # = {counter}, last_row flag = {last_row_flag_debug}, operation = {operation}\n'
+    sheet_debug = format_data_frame_variable(df_main, 'sheet_name', counter)       # import sheet_name from excel file for debug file.
+    text_debug = f'\nrow #: {counter}, last_row flag: {last_row_flag_debug}, operation: {operation}, sheet: {sheet_debug}\n'
     text_debug = indent(text_debug,4)
     write_to_file(name_debug, text_debug)  # write to debug file
 
@@ -3129,6 +3138,7 @@ while counter<=last_row:
         write_to_file(name, text)
 
         text_debug = f'\n{operation}\n'
+        text_debug = text_debug + f'z: {clear_z}\n'
         text_debug = indent(text_debug, 8)
         write_to_file(name_debug, text_debug)  # write to debug file
 
@@ -3153,5 +3163,5 @@ while counter<=last_row:
 # ===========================================================================
 
 write_to_file(name, end_block)      # write G-code end block
-text_debug = '\nwrite g-code end_block - OK\n'
+text_debug = '\nwrite g-code end_block\n'
 write_to_file(name_debug, text_debug)    # write to debug file
