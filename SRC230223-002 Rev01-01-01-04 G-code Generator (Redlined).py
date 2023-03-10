@@ -2294,15 +2294,7 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
     elif operation == 'trochoidal':
         tro = True                          # trochoidal toolpath.
     else:
-        # invalid operation value detected.
-        print(f'''!!script aborted!!\ninvalid operation value detected.\noperation = {operation}\n''')
-        text = f'''\n(!!script aborted!!)\n(invalid operation value detected.)\n(operation = {operation})'''  # write error to G-code
-        write_to_file(name, text)
-
-        text_debug = f'!!SCRIPT ABORTED!! invalid operation value detected. operation: {operation}\n'
-        text_debug = indent(text_debug, 8)
-        write_to_file(name_debug, text_debug)  # write to debug file
-        quit()
+        abort('operation', operation)        # invalid operation value detected.
 
     df = pd.read_excel(excel_file, sheet_name = sheet, na_filter=False)      # import excel file into dataframe.
     operation_name, offset, feed, safe_z, z_f, mode, step, wos, doc = static_variables(df, tro, debug=False)  # assign static parameters.
@@ -2315,8 +2307,40 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
     last_row = rows - 1     # initialize number of last row
     counter = 0             # initialize counter
 
+    # print static variables to debug file
+    text_debug = f'\n{operation}\n'
+    text_debug = text_debug + f'{sheet}\n'
+    text_debug = text_debug + f'total rows: {rows}\n\n'
+    text_debug = text_debug + f'static variables\n' \
+                              f'offset: {offset}\n' \
+                              f'feed: {feed}\n' \
+                              f'safe_z: {safe_z}\n' \
+                              f'z_f: {z_f}\n' \
+                              f'mode: {mode}\n'
+    if tro == True:
+       text_debug = text_debug + f'step: {step}\n' \
+                                  f'wos: {wos}\n' \
+                                  f'doc: {doc}\n'
+    text_debug = text_debug + '\n'
+    text_debug = indent(text_debug, 8)
+    write_to_file(name_debug, text_debug)  # write to debug file
+
+
     # initialize parameters
     last_row_flag, start_x, start_y, start_z, arc_seg, rad, cw, less_180 = extract_row(counter)  # extract row 0 values.
+
+    skip_debug = False  # initialize
+    if arc_seg == False:
+        segment_debug = 'linear'
+    else:
+        segment_debug = 'arc'
+    if tro == False:     # line operation
+        text_debug = f'row: {counter}, last_row_flag: {last_row_flag}, x: {start_x}, y: {start_y}, z: {start_z}, segment: {segment_debug}, rad: {rad}, cw: {cw}, less_180: {less_180}\n'  # row: 0
+    else:
+        text_debug = f'row: {counter}, last_row_flag: {last_row_flag}, x: {start_x}, y: {start_y}, segment: {segment_debug}, rad: {rad}, cw: {cw}, less_180: {less_180}\n'  # row: 0
+    text_debug = indent(text_debug, 8)
+    write_to_file(name_debug, text_debug)  # write to debug file
+
     counter = counter + 1                                           # increment counter
     last_row_flag, end_x, end_y, end_z, arc_seg, rad, cw, less_180 = extract_row(counter)  # extract row 1 values.
 
@@ -2352,6 +2376,21 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
         first_z = start_z       # initialize z height of starting point.
 
     while counter <= last_row:      # recursive loop
+
+        if skip_debug == False:  # skip if True.
+            skip_debug = False  # initialize
+            if arc_seg == False:
+                segment_debug = 'linear'
+            else:
+                segment_debug = 'arc'
+            if tro == False:  # line operation
+                text_debug = f'row: {counter}, last_row_flag: {last_row_flag}, x: {start_x}, y: {start_y}, z: {start_z}, segment: {segment_debug}, rad: {rad}, cw: {cw}, less_180: {less_180}\n'  # row: 0
+            else:
+                text_debug = f'row: {counter}, last_row_flag: {last_row_flag}, x: {start_x}, y: {start_y}, segment: {segment_debug}, rad: {rad}, cw: {cw}, less_180: {less_180}\n'  # row: 0
+            text_debug = indent(text_debug, 8)
+            write_to_file(name_debug, text_debug)  # write to debug file
+        elif skip_debug == True:     # reset flag.
+            skip_debug = False
 
         if counter == last_row or last_row_flag == True:
             last_slot = True        # set last_slot = True for trochodial toolpath.
@@ -2421,6 +2460,8 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
                 print(f'start_y_adjusted = {start_y_adjusted}\n')
 
             counter = counter - 1   # decrement counter.
+
+            skip_debug = True   # readjustment of non-tangent transition. skip debug statement.
 
             # intialize parameters for transition arc.
             last_slot = False       # clear last_slot if set.
@@ -2682,7 +2723,8 @@ def peck_drill_data_frame(name, excel_file, sheet):
     counter = 0             # initialize counter
     text = ''             # initialize
 
-    text_debug = f'\n{sheet}\n'
+    text_debug = f'\n{operation}\n'
+    text_debug = text_debug + f'{sheet}\n'
     text_debug = text_debug + f'total rows: {rows}\n\n'
     text_debug = indent(text_debug, 8)
     write_to_file(name_debug, text_debug)  # write to debug file
@@ -2712,10 +2754,6 @@ def peck_drill_data_frame(name, excel_file, sheet):
         break_flag, text_temp = last_row_detect(df, sheet, last_row_flag, last_row, counter, 8)  # detect last row
         if break_flag == True:  # break if last row
             text = text + text_temp
-
-#            text_debug = f'last_row_detect: {break_flag}\n'
-#            text_debug = indent(text_debug, 8)
-#            write_to_file(name_debug, text_debug)  # write to debug file
             break
 
         counter = counter + 1  # increment counter.
@@ -3019,7 +3057,7 @@ def last_row_detect(df_temp, sheet_temp, last_row_flag, last_row, counter, inden
     # Detects the last row of dataframe.
     # additionally detects unintentional termination of a dataframe.
     # returns break_flag, comments in G-code, and prints to debug window.
-    # break_flag, text = last_row_detect(df_temp, sheet_temp, last_row_flag, last_row, counter)
+    # break_flag, text = last_row_detect(df_temp, sheet_temp, last_row_flag, last_row, counter, indent_spacing)
 
     # ---Variable List---
     # df_temp = active data frame
@@ -3027,6 +3065,7 @@ def last_row_detect(df_temp, sheet_temp, last_row_flag, last_row, counter, inden
     # last_row_flag = last row flag
     # last_row = total number of rows in the dataframe
     # counter = row counter
+    # indent_spacing = indent spacing for debug file statements
 
     # ---Return Variable List---
     # break_flag = flag signalling the detection of the last row.
@@ -3099,11 +3138,12 @@ def indent(text, amount, ch=' '):
 def abort(variable_name, variable, error_message = None):
     # ---Description---
     # Aborts the program and print an error message on the debug window, G-code text file and debug text file.
-    # abort(variable_name, variable)
+    # abort(variable_name, variable, error_message)
 
     # ---Variable List---
     # variable_name = name of variable
     # variable = value of variable
+    # error_message = optional error message
 
     # ---Return Variable List---
     # N/A
@@ -3232,14 +3272,10 @@ while counter<=last_row:
 
     last_row_flag = format_data_frame_variable(df_main, 'last_row_flag', counter)       # import last_row flag from excel file.
     sheet = 'main'
-    write_to_file(name_debug,'\n')  # empty line for debug file readability.
+    write_to_file(name_debug, '\n')  # empty line for debug file readability.
     break_flag, text = last_row_detect(df_main, sheet, last_row_flag, last_row, counter, 4)        # detect last row in main excel tab
     if break_flag == True:                                                  # break if last row
         write_to_file(name, text)
-
-#        text_debug = f'\nlast_row_detect = {break_flag}\n'
-#        text_debug = indent(text_debug, 4)
-#        write_to_file(name_debug, text_debug)  # write to debug file
         break
 
     counter = counter+1     # increment counter.
