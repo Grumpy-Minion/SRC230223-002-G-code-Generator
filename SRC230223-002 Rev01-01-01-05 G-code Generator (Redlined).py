@@ -1308,6 +1308,7 @@ def spiral_drill(origin_x, origin_y, dia_hole, depth, step_depth, dia, z_f, cut_
     # assumes z=0 at top surface.
     # starts at right edge of the hole (i.e. x = diameter of hole-dia of cutter, y = 0).
     # cuts in a counter-clockwise direction from the outside to the center.
+    # starts and returns to safe_z
     # return to origin after surfacing.
     # refer to PRT20210512001 Spiral Drill
     # text = spiral_drill(origin_x, origin_y, dia_hole, depth, step_depth, dia, z_f, cut_f, safe_z, name, debug)
@@ -1396,8 +1397,8 @@ def spiral_drill(origin_x, origin_y, dia_hole, depth, step_depth, dia, z_f, cut_
         abort('safe_z', safe_z, 'safe_z below surface')
 
     # check if hole dia is larger 2x tool dia.
-    if dia_hole >= dia*2:
-        abort('dia_hole',dia_hole,f'hole dia is larger 2x tool dia.\nhole dia = {"%.3f" % dia_hole}\ntool dia = {"%.3f" % dia}')
+#    if dia_hole >= dia*2:
+#        abort('dia_hole',dia_hole,f'hole dia is larger 2x tool dia.\nhole dia = {"%.3f" % dia_hole}\ntool dia = {"%.3f" % dia}')
 
     # check if hole dia is smaller than tool dia.
     if dia_hole <= dia:
