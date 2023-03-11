@@ -12,7 +12,8 @@
 # rev: 01-01-01-05
 # date: 11/Mar/2023
 # description:
-# Added error text file statements to spiral post function.
+# Added error text file statements to spiral boss function.
+# update error checks using abort function in spiral boss function.
 #
 # rev: 01-01-01-04
 # date: 08/Mar/2023
@@ -1973,6 +1974,7 @@ def spiral_boss(origin_x, origin_y, start_dia, end_dia, doc, dia, step, z_f, cut
     #
     # rev: 01-01-01-05
     # added comment on tool entry into cut.
+    # update error checks using abort function.
     # software test run on 11/Mar/2023
     #
     # rev: 01-01-10-07
@@ -2970,6 +2972,10 @@ def spiral_boss_data_frame(name, excel_file, sheet):
     # N/A
 
     # ---Change History---
+    # rev: 01-01-01-05
+    # Added error text file statements to spiral boss function.
+    # software test run on 11/Mar/2023
+    #
     # rev: 01-01-10-09
     # initial release
     # software test run on 14/Apr/2022
@@ -2980,9 +2986,16 @@ def spiral_boss_data_frame(name, excel_file, sheet):
     counter = 0             # initialize counter
     text = ''             # initialize
 
+    text_debug = f'\n{operation}\n'\
+                 f'{sheet}\n'\
+                 f'total rows: {rows}\n\n'
+    text_debug = indent(text_debug, 8)
+    write_to_file(name_debug, text_debug)  # write to debug file
+
     while counter <= last_row:
 
         # import parameters from excel file.
+        last_row_flag = format_data_frame_variable(df, 'last_row_flag', counter)
         origin_x = format_data_frame_variable(df, 'origin_x', counter)
         origin_y = format_data_frame_variable(df, 'origin_y', counter)
         start_dia = format_data_frame_variable(df, 'start_dia', counter)
@@ -2992,12 +3005,21 @@ def spiral_boss_data_frame(name, excel_file, sheet):
         cut_f = format_data_frame_variable(df, 'cut_f', counter)
         finish_f = format_data_frame_variable(df, 'finish_f', counter)
         finish_cuts = format_data_frame_variable(df, 'finish_cuts', counter)
-        safe_z = clear_z
+        safe_z = format_data_frame_variable(df, 'safe_z', counter)
 
         # generate G-code
         text_temp = spiral_boss(origin_x, origin_y, start_dia, end_dia, doc, dia, step, z_f, cut_f, finish_f, finish_cuts, safe_z, name)
-
         text = text + text_temp
+
+        text_debug = f'row: {counter}, last_row_flag: {last_row_flag}, origin_x: {origin_x}, origin_y: {origin_y}, start_dia: {start_dia}, end_dia: {end_dia}, doc: {doc}, step: {step}, cut_f: {cut_f}, finish_f: {finish_f}, finish_cuts: {finish_cuts}, safe_z: {safe_z}\n'
+        text_debug = indent(text_debug, 8)
+        write_to_file(name_debug, text_debug)  # write to debug file
+
+        break_flag, text_temp = last_row_detect(df, sheet, last_row_flag, last_row, counter, 8)  # detect last row
+        if break_flag == True:  # break if last row
+            text = text + text_temp
+            break
+
         counter = counter + 1  # increment counter.
 
     write_to_file(name, text)
