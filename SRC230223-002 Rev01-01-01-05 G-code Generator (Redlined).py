@@ -1621,7 +1621,8 @@ def spiral_surface(origin_x, origin_y, start_dia, end_dia, doc, dia, step, z_f, 
     # calculates and prints to a txt file the tool path in G code of a spiral surface pocket.
     # assumes origin at center of hole.
     # assumes z=0 at top surface.
-    # Does not return to safe z after surfacing.
+    # start at safe_z
+    # Does NOT return to safe z after surfacing!!!
     # text = spiral_surface(origin_x, origin_y, start_dia, end_dia, doc, dia, step, z_f, cut_f, finish_f, finish_cuts, safe_z, name, debug)
 
     # ---Variable List---
@@ -1687,16 +1688,10 @@ def spiral_surface(origin_x, origin_y, start_dia, end_dia, doc, dia, step, z_f, 
 
     # check if safe_z is above surface.
     if safe_z <= 0:
-#        print(f'''!!script aborted!!\nspiral_surface\nsafe_z below surface\nsafe_z = {"%.4f" % safe_z}''')
-#        text = f'''\n(!!script aborted!!)\n(safe_z below surface)\n(safe_z = {"%.4f" % safe_z})\n'''  # write header for section.
-#        quit()
         abort('safe_z', safe_z, 'safe_z below surface')
 
     # check if start dia is larger than tool dia.
     if end_dia < dia:
-#        print(f'''!!script aborted!!\nspiral_surface\nhole dia is larger tool dia.\nend dia = {"%.4f" % end_dia}\ntool dia = {"%.4f" % dia}''')
-#        text = f'\n(!!script aborted!!)\n(end dia is larger tool dia)\n'  # write header for section.
-#        quit()
         abort('end_dia', end_dia, f'end dia is smaller than tool dia.\nend dia = {"%.4f" % end_dia}\ntool dia = {"%.4f" % dia}')
 
     # initialize variables
@@ -2776,13 +2771,13 @@ def peck_drill_data_frame(name, excel_file, sheet):
         retract_z = format_data_frame_variable(df, 'retract_z', counter)
         dwell = format_data_frame_variable(df, 'dwell', counter)
 
-        # generate G-code
-        text_temp = peck_drill(hole_x, hole_y, dia_hole, depth, peck_depth, z_f, safe_z, retract_z, dwell, name)
-        text = text + text_temp
-
         text_debug = f'row: {counter}, last_row_flag: {last_row_flag}, x: {hole_x}, y: {hole_y}, dia_hole: {dia_hole}, depth: {depth}, peck_depth: {peck_depth}, z_f: {z_f}, safe_z: {safe_z}, retract_z: {retract_z}, dwell: {dwell}\n'
         text_debug = indent(text_debug, 8)
         write_to_file(name_debug, text_debug)  # write to debug file
+
+        # generate G-code
+        text_temp = peck_drill(hole_x, hole_y, dia_hole, depth, peck_depth, z_f, safe_z, retract_z, dwell, name)
+        text = text + text_temp
 
         break_flag, text_temp = last_row_detect(df, sheet, last_row_flag, last_row, counter, 8)  # detect last row
         if break_flag == True:  # break if last row
@@ -2888,13 +2883,13 @@ def spiral_drill_data_frame(name, excel_file, sheet):
         cut_f = format_data_frame_variable(df, 'cut_f', counter)
         safe_z = format_data_frame_variable(df, 'safe_z', counter)
 
-        # generate G-code
-        text_temp = spiral_drill(origin_x, origin_y, dia_hole, depth, step_depth, dia, z_f, cut_f, safe_z, name)
-        text = text + text_temp
-
         text_debug = f'row: {counter}, last_row_flag: {last_row_flag}, origin_x: {origin_x}, origin_y: {origin_y}, dia_hole: {dia_hole}, depth: {depth}, step_depth: {step_depth}, cut_f: {cut_f}, safe_z: {safe_z}\n'
         text_debug = indent(text_debug, 8)
         write_to_file(name_debug, text_debug)  # write to debug file
+
+        # generate G-code
+        text_temp = spiral_drill(origin_x, origin_y, dia_hole, depth, step_depth, dia, z_f, cut_f, safe_z, name)
+        text = text + text_temp
 
         break_flag, text_temp = last_row_detect(df, sheet, last_row_flag, last_row, counter, 8)  # detect last row
         if break_flag == True:  # break if last row
@@ -3070,13 +3065,13 @@ def spiral_boss_data_frame(name, excel_file, sheet):
         finish_cuts = format_data_frame_variable(df, 'finish_cuts', counter)
         safe_z = format_data_frame_variable(df, 'safe_z', counter)
 
-        # generate G-code
-        text_temp = spiral_boss(origin_x, origin_y, start_dia, end_dia, doc, dia, step, z_f, cut_f, finish_f, finish_cuts, safe_z, name)
-        text = text + text_temp
-
         text_debug = f'row: {counter}, last_row_flag: {last_row_flag}, origin_x: {origin_x}, origin_y: {origin_y}, start_dia: {start_dia}, end_dia: {end_dia}, doc: {doc}, step: {step}, cut_f: {cut_f}, finish_f: {finish_f}, finish_cuts: {finish_cuts}, safe_z: {safe_z}\n'
         text_debug = indent(text_debug, 8)
         write_to_file(name_debug, text_debug)  # write to debug file
+
+        # generate G-code
+        text_temp = spiral_boss(origin_x, origin_y, start_dia, end_dia, doc, dia, step, z_f, cut_f, finish_f, finish_cuts, safe_z, name)
+        text = text + text_temp
 
         break_flag, text_temp = last_row_detect(df, sheet, last_row_flag, last_row, counter, 8)  # detect last row
         if break_flag == True:  # break if last row
