@@ -1332,6 +1332,7 @@ def spiral_drill(origin_x, origin_y, dia_hole, depth, step_depth, dia, z_f, cut_
     #
     # rev: 01-01-01-05
     # update error checks using abort function.
+    # added hole dia < tool dia check.
     # software test run on 11/Mar/2023
     #
     # rev: 01-01-10-09
@@ -1399,7 +1400,7 @@ def spiral_drill(origin_x, origin_y, dia_hole, depth, step_depth, dia, z_f, cut_
         abort('dia_hole',dia_hole,f'hole dia is larger 2x tool dia.\nhole dia = {"%.3f" % dia_hole}\ntool dia = {"%.3f" % dia}')
 
     # check if hole dia is smaller than tool dia.
-    if dia_hole < dia:
+    if dia_hole <= dia:
         abort('dia_hole', dia_hole, f'hole dia is smaller than tool dia.\nhole dia = {"%.3f" % dia_hole}\ntool dia = {"%.3f" % dia}')
 
     # starting G code block
