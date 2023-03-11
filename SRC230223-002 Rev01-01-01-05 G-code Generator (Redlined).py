@@ -1329,6 +1329,11 @@ def spiral_drill(origin_x, origin_y, dia_hole, depth, step_depth, dia, z_f, cut_
     # text = G-code text
 
     # ---Change History---
+    #
+    # rev: 01-01-01-05
+    # update error checks using abort function.
+    # software test run on 11/Mar/2023
+    #
     # rev: 01-01-10-09
     # added additional finishing cut.
     # software test run on 14/04/2022
@@ -1387,15 +1392,15 @@ def spiral_drill(origin_x, origin_y, dia_hole, depth, step_depth, dia, z_f, cut_
 
     # check if safe_z is above surface.
     if safe_z <= 0:
-        print(f'''!!script aborted!!\nspiral_drill\nsafe_z below surface\nsafe_z = {"%.3f" % safe_z}''')
-        text = f'''\n(!!script aborted!!)\n(safe_z below surface)\n(safe_z = {"%.3f" % safe_z})\n'''  # write header for section.
-        quit()
+        abort('safe_z', safe_z, 'safe_z below surface')
 
     # check if hole dia is larger 2x tool dia.
-    if dia_hole > dia*2:
-        print(f'''!!script aborted!!\nspiral_drill\nhole dia is larger 2x tool dia.\nhole dia = {"%.3f" % dia_hole}\ntool dia = {"%.3f" % dia}''')
-        text = '''\n(!!script aborted!!)\n(hole dia is larger 2x tool dia)\n'''  # write header for section.
-        quit()
+    if dia_hole >= dia*2:
+        abort('dia_hole',dia_hole,f'hole dia is larger 2x tool dia.\nhole dia = {"%.3f" % dia_hole}\ntool dia = {"%.3f" % dia}')
+
+    # check if hole dia is smaller than tool dia.
+    if dia_hole < dia:
+        abort('dia_hole', dia_hole, f'hole dia is smaller than tool dia.\nhole dia = {"%.3f" % dia_hole}\ntool dia = {"%.3f" % dia}')
 
     # starting G code block
     text_temp = \
@@ -2842,6 +2847,10 @@ def spiral_drill_data_frame(name, excel_file, sheet):
     # N/A
 
     # ---Change History---
+    # rev: 01-01-01-05
+    # initial release
+    # software test run on 11/Mar/2023
+    #
     # rev: 01-01-10-09
     # initial release
     # software test run on 14/Apr/2022
@@ -2852,21 +2861,37 @@ def spiral_drill_data_frame(name, excel_file, sheet):
     counter = 0             # initialize counter
     text = ''             # initialize
 
+    text_debug = f'\n{operation}\n'\
+                 f'{sheet}\n'\
+                 f'total rows: {rows}\n\n'
+    text_debug = indent(text_debug, 8)
+    write_to_file(name_debug, text_debug)  # write to debug file
+
     while counter <= last_row:
 
         # import parameters from excel file.
+        last_row_flag = format_data_frame_variable(df, 'last_row_flag', counter)
         origin_x = format_data_frame_variable(df, 'origin_x', counter)
         origin_y = format_data_frame_variable(df, 'origin_y', counter)
         dia_hole = format_data_frame_variable(df, 'dia_hole', counter)
         depth = format_data_frame_variable(df, 'depth', counter)
         step_depth = format_data_frame_variable(df, 'step_depth', counter)
         cut_f = format_data_frame_variable(df, 'cut_f', counter)
-        safe_z = clear_z
+        safe_z = format_data_frame_variable(df, 'safe_z', counter)
 
         # generate G-code
         text_temp = spiral_drill(origin_x, origin_y, dia_hole, depth, step_depth, dia, z_f, cut_f, safe_z, name)
-
         text = text + text_temp
+
+        text_debug = f'row: {counter}, last_row_flag: {last_row_flag}, origin_x: {origin_x}, origin_y: {origin_y}, dia_hole: {dia_hole}, depth: {depth}, step_depth: {step_depth}, cut_f: {cut_f}, safe_z: {safe_z}\n'
+        text_debug = indent(text_debug, 8)
+        write_to_file(name_debug, text_debug)  # write to debug file
+
+        break_flag, text_temp = last_row_detect(df, sheet, last_row_flag, last_row, counter, 8)  # detect last row
+        if break_flag == True:  # break if last row
+            text = text + text_temp
+            break
+
         counter = counter + 1  # increment counter.
 
     write_to_file(name, text)
