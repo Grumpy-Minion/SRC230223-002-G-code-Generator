@@ -3174,21 +3174,21 @@ def rapid(name, df_main, counter):
         text_debug = indent(text_debug, 8)
         write_to_file(name_debug, text_debug)  # write to debug file
     else:
-        abort('x', x)
+        abort('x', x, 'not float')
     y = format_data_frame_variable(df_main, 'y', counter)
     if isinstance(y, float) == True:  # check if y is a number, if not skip.
         text = text + f' Y{"%.4f" % y}'  # append y position
         text_debug = f'y:{y}, '
         write_to_file(name_debug, text_debug)  # write to debug file
     else:
-        abort('y', y)
+        abort('y', y, 'not float')
     z = format_data_frame_variable(df_main, 'z', counter)
     if isinstance(z, float) == True:  # check if z is a number, if not skip.
         text = text + f' Z{"%.4f" % z}'  # append z position
         text_debug = f'z:{z}'
         write_to_file(name_debug, text_debug)  # write to debug file
     else:
-        abort('z', z)
+        abort('z', z, 'not float')
 
     text = text + '         (Rapid)\n'
     write_to_file(name, text)       # write g-code
@@ -3333,8 +3333,8 @@ counter = 0  # initialize counter
 
 text_debug = f'read excel "{sheet}" tab\n\n'
 write_to_file(name_debug, text_debug)    # write to debug file
-text_debug = f'{sheet}\n'
-text_debug = text_debug + f'total rows: {rows}\n'
+text_debug = f'{sheet}\n' \
+             f'total rows: {rows}\n'
 text_debug = indent(text_debug, 4)
 write_to_file(name_debug, text_debug)    # write to debug file
 
@@ -3399,8 +3399,8 @@ while counter<=last_row:
         text = f'G0 Z{clear_z}          (Clear Z)\n'
         write_to_file(name, text)
 
-        text_debug = f'\n{operation}\n'
-        text_debug = text_debug + f'z: {clear_z}'
+        text_debug = f'\n{operation}\n' \
+                     f'z: {clear_z}'
         text_debug = indent(text_debug, 8)
         write_to_file(name_debug, text_debug)  # write to debug file
 
