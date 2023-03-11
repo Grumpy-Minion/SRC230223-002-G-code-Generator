@@ -1796,6 +1796,10 @@ def corner_slice(start_x, start_y, end_x, end_y, start_rad, end_rad, doc, dia, s
     # text = G-code text
 
     # ---Change History---
+    # rev: 01-01-01-05
+    # Added abort function
+    # software test run on 11/Mar/2023
+    #
     # rev: 01-01-10-07
     # changed from writing G-code directly to txt file to a separate text variable.
     # software test run on 04/04/2022
@@ -1836,21 +1840,16 @@ def corner_slice(start_x, start_y, end_x, end_y, start_rad, end_rad, doc, dia, s
 
     # check if safe_z is above surface.
     if safe_z <= 0:
-        print(f'''!!script aborted!!\ncorner_slice\nsafe_z below surface\nsafe_z = {"%.4f" % safe_z}''')
-#        text = f'''\n(!!script aborted!!)\n(safe_z below surface)\n(safe_z = {"%.4f" % safe_z})\n'''  # write header for section.
-        quit()
+        abort('safe_z', safe_z, 'safe_z below surface')
 
     # check if end dia is larger than tool dia.
     if end_rad*2 < dia:
-        print(f'''!!script aborted!!\ncorner_slice\nhole dia is larger tool dia.\nend dia = {"%.4f" % (end_rad*2)}\ntool dia = {"%.4f" % dia}''')
-#        text = '''\n(!!script aborted!!)\n(end dia is larger tool dia)\n'''  # write header for section.
-        quit()
+        abort('end_rad', end_rad, f'end dia is smaller than tool dia.\nend dia = {"%.4f" % (end_rad*2)}\ntool dia = {"%.4f" % dia}')
 
     # check if mode is defined.
     if mode != 1 and mode != 2 and mode != 3 :
-            print(f"!!script aborted!!\ncorner_slice\nmode undefined\nmode = {mode}")
-#            text = '''\n(!!script aborted!!)\n(mode undefined)\n'''  # write header for section.
-            quit()
+        abort('mode', mode, 'mode undefined')
+
     # initialize variables
     vec_x = end_x - start_x     # x vector length of slot
     vec_y = end_y - start_y     # y vector length of slot
@@ -3015,6 +3014,10 @@ def corner_slice_data_frame(name, excel_file, sheet):
     # N/A
 
     # ---Change History---
+    # rev: 01-01-01-05
+    # Added error text file statements to spiral surface dataframe function.
+    # software test run on 11/Mar/2023
+    #
     # rev: 01-01-10-09
     # initial release
     # software test run on 14/Apr/2022
@@ -3025,9 +3028,17 @@ def corner_slice_data_frame(name, excel_file, sheet):
     counter = 0             # initialize counter
     text = ''             # initialize
 
+    text_debug = f'\n{operation}\n'\
+                 f'{sheet}\n'\
+                 f'total rows: {rows}\n\n'
+    text_debug = indent(text_debug, 8)
+    write_to_file(name_debug, text_debug)  # write to debug file
+
+
     while counter <= last_row:
 
         # import parameters from excel file.
+        last_row_flag = format_data_frame_variable(df, 'last_row_flag', counter)
         start_x = format_data_frame_variable(df, 'start_x', counter)
         start_y = format_data_frame_variable(df, 'start_y', counter)
         end_x = format_data_frame_variable(df, 'end_x', counter)
@@ -3038,12 +3049,21 @@ def corner_slice_data_frame(name, excel_file, sheet):
         step = format_data_frame_variable(df, 'step', counter)
         cut_f = format_data_frame_variable(df, 'cut_f', counter)
         mode = format_data_frame_variable(df, 'mode', counter)
-        safe_z = clear_z
+        safe_z = format_data_frame_variable(df, 'safe_z', counter)
+
+        text_debug = f'row: {counter}, last_row_flag: {last_row_flag}, start_x: {start_x}, start_y: {start_y}, end_x: {end_x}, end_y: {end_y}, start_rad: {start_rad}, end_rad: {end_rad}, doc: {doc}, step: {step}, cut_f: {cut_f}, mode: {mode}, safe_z: {safe_z}\n'
+        text_debug = indent(text_debug, 8)
+        write_to_file(name_debug, text_debug)  # write to debug file
 
         # generate G-code
         text_temp = corner_slice(start_x, start_y, end_x, end_y, start_rad, end_rad, doc, dia, step, z_f, cut_f, safe_z, name, mode)
-
         text = text + text_temp
+
+        break_flag, text_temp = last_row_detect(df, sheet, last_row_flag, last_row, counter, 8)  # detect last row
+        if break_flag == True:  # break if last row
+            text = text + text_temp
+            break
+
         counter = counter + 1  # increment counter.
 
     write_to_file(name, text)
