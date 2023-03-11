@@ -1112,6 +1112,7 @@ def surface(origin_x, origin_y, length_x, length_y, doc, dia, step, z_f, cut_f, 
     # starts at x = length_x + 2 * diameter of cutter, y = 0  from bottom left corner.
     # cuts in a clockwise direction from the outside to the center.
     # return to origin after surfacing.
+    # start and ends at safe_z
     # refer to PRT20210510003 Surfacing Calculator
     # text = surface(origin_x, origin_y, length_x, length_y, doc, dia, step, z_f, cut_f, safe_z, name, debug)
 
@@ -1133,6 +1134,10 @@ def surface(origin_x, origin_y, length_x, length_y, doc, dia, step, z_f, cut_f, 
     # text = G-code text
 
     # ---Change History---
+    # rev: 01-01-01-05
+    # added error checks using abort function.
+    # software test run on 11/Mar/2023
+    #
     # rev: 01-01-10-07
     # changed from writing G-code directly to txt file to a separate text variable.
     # software test run on 04/04/2022
@@ -1145,6 +1150,14 @@ def surface(origin_x, origin_y, length_x, length_y, doc, dia, step, z_f, cut_f, 
     # Added variable list
     # Added rounding to 4 decimal places for G-code coordinates, 3 for label coordinates, 1 for feeds
     # physical test run on 09/Sep/2021
+
+    # check if safe_z is above surface.
+    if safe_z <= 0:
+        abort('safe_z', safe_z, 'safe_z below surface')
+
+    # check if step is larger than tool dia.
+    if step > dia:
+        abort('step',step,f'step is larger than tool dia.\nstep = {"%.3f" % step}\ntool dia = {"%.3f" % dia}')
 
     start_block = \
     f'''
@@ -1330,7 +1343,6 @@ def spiral_drill(origin_x, origin_y, dia_hole, depth, step_depth, dia, z_f, cut_
     # text = G-code text
 
     # ---Change History---
-    #
     # rev: 01-01-01-05
     # update error checks using abort function.
     # added hole dia < tool dia check.
@@ -2803,6 +2815,10 @@ def surface_data_frame(name, excel_file, sheet):
     # N/A
 
     # ---Change History---
+    # rev: 01-01-01-05
+    # Added error text file statements to surface dataframe function.
+    # software test run on 11/Mar/2023
+    #
     # rev: 01-01-10-10
     # added cut_f parameter import from excel file.
     # software test run on 13/Aug/2022
@@ -2817,9 +2833,16 @@ def surface_data_frame(name, excel_file, sheet):
     counter = 0             # initialize counter
     text = ''             # initialize
 
+    text_debug = f'\n{operation}\n'\
+                 f'{sheet}\n'\
+                 f'total rows: {rows}\n\n'
+    text_debug = indent(text_debug, 8)
+    write_to_file(name_debug, text_debug)  # write to debug file
+
     while counter <= last_row:
 
         # import parameters from excel file.
+        last_row_flag = format_data_frame_variable(df, 'last_row_flag', counter)
         origin_x = format_data_frame_variable(df, 'origin_x', counter)
         origin_y = format_data_frame_variable(df, 'origin_y', counter)
         length_x = format_data_frame_variable(df, 'length_x', counter)
@@ -2827,11 +2850,21 @@ def surface_data_frame(name, excel_file, sheet):
         doc = format_data_frame_variable(df, 'doc', counter)
         step = format_data_frame_variable(df, 'step', counter)
         cut_f = format_data_frame_variable(df, 'cut_f', counter)
-        safe_z = clear_z
+        safe_z = format_data_frame_variable(df, 'safe_z', counter)
+
+        text_debug = f'row: {counter}, last_row_flag: {last_row_flag}, origin_x: {origin_x}, origin_y: {origin_y}, length_x: {length_x}, length_y: {length_y}, doc: {doc}, step: {step}, cut_f: {cut_f}, safe_z: {safe_z}\n'
+        text_debug = indent(text_debug, 8)
+        write_to_file(name_debug, text_debug)  # write to debug file
 
         # generate G-code
         text_temp = surface(origin_x, origin_y, length_x, length_y, doc, dia, step, z_f, cut_f, safe_z, name)
         text = text + text_temp
+
+        break_flag, text_temp = last_row_detect(df, sheet, last_row_flag, last_row, counter, 8)  # detect last row
+        if break_flag == True:  # break if last row
+            text = text + text_temp
+            break
+
         counter = counter + 1  # increment counter.
 
     write_to_file(name, text)
