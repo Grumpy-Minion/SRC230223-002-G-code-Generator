@@ -1952,7 +1952,8 @@ def spiral_boss(origin_x, origin_y, start_dia, end_dia, doc, dia, step, z_f, cut
     # assumes z=0 at top surface.
     # assumes existing clearance around material.
     # tool enters vertically at the right size of boss.
-    # return to safe z after surfacing.
+    # goes to safe z before cutting.
+    # does NOT return to safe z after cutting!!!
     # text = spiral_boss(origin_x, origin_y, start_dia, end_dia, doc, dia, step, z_f, cut_f, finish_f, finish_cuts, safe_z, name, z_bias_mode = False, z_backlash_bias = 0, debug = False)
 
     # ---Variable List---
