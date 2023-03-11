@@ -2550,6 +2550,7 @@ def parameters_data_frame(excel_file, sheet):
     # ---Change History---
     # rev: 01-01-01-05
     # Added int modifier for rev number.
+    # Added written by and written on to parameters function.
     # software test run on 11/Mar/2023
     #
     # rev: 01-01-01-04
