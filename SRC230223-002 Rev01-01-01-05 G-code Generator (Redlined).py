@@ -1944,6 +1944,7 @@ def spiral_boss(origin_x, origin_y, start_dia, end_dia, doc, dia, step, z_f, cut
     # assumes origin at center of boss.
     # assumes z=0 at top surface.
     # assumes existing clearance around material.
+    # tool enters vertically at the right size of boss.
     # return to safe z after surfacing.
     # text = spiral_boss(origin_x, origin_y, start_dia, end_dia, doc, dia, step, z_f, cut_f, finish_f, finish_cuts, safe_z, name, z_bias_mode = False, z_backlash_bias = 0, debug = False)
 
@@ -1969,6 +1970,11 @@ def spiral_boss(origin_x, origin_y, start_dia, end_dia, doc, dia, step, z_f, cut
     # text = G-code text
 
     # ---Change History---
+    #
+    # rev: 01-01-01-05
+    # added comment on tool entry into cut.
+    # software test run on 11/Mar/2023
+    #
     # rev: 01-01-10-07
     # changed from writing G-code directly to txt file to a separate text variable.
     # software test run on 04/04/2022
@@ -1994,6 +2000,7 @@ def spiral_boss(origin_x, origin_y, start_dia, end_dia, doc, dia, step, z_f, cut
     (assumes origin at center of hole.)
     (assumes z=0 at top surface.)
     (assumes existing clearance around material.)
+    (tool enters vertically at the right size of boss.)
     (return to safe z after surfacing.)
     
     (---parameters---)
@@ -2013,16 +2020,11 @@ def spiral_boss(origin_x, origin_y, start_dia, end_dia, doc, dia, step, z_f, cut
 
     # check if safe_z is above surface.
     if safe_z <= 0:
-        print(f'''!!script aborted!!\nspiral_boss\nsafe_z below surface\nsafe_z = {"%.4f" % safe_z}''')
-#        text = f'''\n(!!script aborted!!)\n(safe_z below surface)\n(safe_z = {"%.4f" % safe_z})\n'''
-#        write_g_code(name, text)
-        quit()
+        abort('safe_z', safe_z, 'safe_z below surface')
 
     # check if end dia is larger than start dia.
     if start_dia < end_dia:
-        print(f'''!!script aborted!!\nspiral_boss\nend dia is larger start dia.\nstart dia = {"%.4f" % start_dia}\nend dia = {"%.4f" % end_dia}''')
-#        text = '''\n(!!script aborted!!)\n(end dia is larger start dia)\n'''
-        quit()
+        abort('start dia', start_dia, f'end dia is larger start dia\nstart dia = {"%.4f" % start_dia}\nend dia = {"%.4f" % end_dia}')
 
     # initialize variables
     length = start_dia/2 + dia/2
