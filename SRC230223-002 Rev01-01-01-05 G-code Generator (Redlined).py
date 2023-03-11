@@ -2548,6 +2548,10 @@ def parameters_data_frame(excel_file, sheet):
     # dia = adjusted cutter tolerance
 
     # ---Change History---
+    # rev: 01-01-01-05
+    # Added int modifier for rev number.
+    # software test run on 11/Mar/2023
+    #
     # rev: 01-01-01-04
     # Added debug file name generator
     # Added debug statements
@@ -2607,6 +2611,8 @@ def parameters_data_frame(excel_file, sheet):
     template_file_name = format_data_frame_variable(df, 'value', 'template file name')  # parameter template excel file name and revision
     parameter_file_name = format_data_frame_variable(df, 'value', 'parameter file name')  # parameter excel file name
     parameter_file_rev = format_data_frame_variable(df, 'value', 'parameter file revision')  # parameter excel file revision
+    written_by = format_data_frame_variable(df, 'value', 'written by')  # author name
+    written_on = format_data_frame_variable(df, 'value', 'written on')  # date
 
     text_debug = f'python script: {os.path.basename(__file__)}\n' \
                  f'file: {parameter_file_name}\n' \
@@ -2630,8 +2636,10 @@ def parameters_data_frame(excel_file, sheet):
     (Part material: {part_material})
     (G-code is generated using Python script "{os.path.basename(__file__)}")
     (Parameter File: {parameter_file_name})
-    (Revision: {parameter_file_rev})
+    (Revision: {int(parameter_file_rev)})
     (Parameter File Template: {template_file_name})
+    (Written by: {written_by})
+    (Written on: {written_on})
 
     (---Compiler---)
     ({compiler})
