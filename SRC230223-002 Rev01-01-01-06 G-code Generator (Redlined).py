@@ -2220,6 +2220,12 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
     # cutter_y_final = y coordinate of cutter position
 
     # ---Change History---
+    # rev: 01-01-01-06
+    # date: 12/Mar/2023
+    # description:
+    # Added shift x y.
+    # changed debug x, y to use end_x, end_y instead of start_x, start_y
+    # software test run on 12/Mar/2023
     #
     # rev: 01-01-01-04
     # date: 08/Mar/2023
@@ -2413,19 +2419,19 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
     while counter <= last_row:      # recursive loop
 
         if skip_debug == False:  # skip if True.
-            skip_debug = False  # initialize
+#            skip_debug = False  # initialize
             if arc_seg == False:
                 segment_debug = 'linear'
             else:
                 segment_debug = 'arc'
             if tro == False:  # line operation
-                text_debug = f'row: {counter}, last_row_flag: {last_row_flag}, x: {start_x}, y: {start_y}, z: {start_z}, segment: {segment_debug}, rad: {rad}, cw: {cw}, less_180: {less_180}\n'  # row: 0
+                text_debug = f'row: {counter}, last_row_flag: {last_row_flag}, x: {end_x}, y: {end_y}, z: {start_z}, segment: {segment_debug}, rad: {rad}, cw: {cw}, less_180: {less_180}\n'  # row: 0
             else:
-                text_debug = f'row: {counter}, last_row_flag: {last_row_flag}, x: {start_x}, y: {start_y}, segment: {segment_debug}, rad: {rad}, cw: {cw}, less_180: {less_180}\n'  # row: 0
+                text_debug = f'row: {counter}, last_row_flag: {last_row_flag}, x: {end_x}, y: {end_y}, segment: {segment_debug}, rad: {rad}, cw: {cw}, less_180: {less_180}\n'  # row: 0
             text_debug = indent(text_debug, 8)
             write_to_file(name_debug, text_debug)  # write to debug file
-        elif skip_debug == True:     # reset flag.
-            skip_debug = False
+        elif skip_debug == True:
+            skip_debug = False      # reset flag.
 
         if counter == last_row or last_row_flag == True:
             last_slot = True        # set last_slot = True for trochodial toolpath.
@@ -2741,6 +2747,11 @@ def peck_drill_data_frame(name, excel_file, sheet):
     # N/A
 
     # ---Change History---
+    # rev: 01-01-01-06
+    # date: 12/Mar/2023
+    # description:
+    # Added shift x y.
+    # software test run on 12/Mar/2023
     #
     # rev: 01-01-01-04
     # date: 08/Mar/2023
@@ -2780,6 +2791,7 @@ def peck_drill_data_frame(name, excel_file, sheet):
         last_row_flag = format_data_frame_variable(df, 'last_row_flag', counter)
         hole_x = format_data_frame_variable(df, 'x', counter)
         hole_y = format_data_frame_variable(df, 'y', counter)
+        hole_x, hole_y = shift(hole_x, hole_y, shift_x, shift_y)   # add shift to x, y value.
         dia_hole = format_data_frame_variable(df, 'dia_hole', counter)
         depth = format_data_frame_variable(df, 'depth', counter)
         peck_depth = format_data_frame_variable(df, 'peck_depth', counter)
