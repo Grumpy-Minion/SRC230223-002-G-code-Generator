@@ -2832,6 +2832,12 @@ def surface_data_frame(name, excel_file, sheet):
     # N/A
 
     # ---Change History---
+    # rev: 01-01-01-06
+    # date: 12/Mar/2023
+    # description:
+    # Added shift x y.
+    # software test run on 12/Mar/2023
+    #
     # rev: 01-01-01-05
     # Added error text file statements to surface dataframe function.
     # software test run on 11/Mar/2023
@@ -2862,6 +2868,7 @@ def surface_data_frame(name, excel_file, sheet):
         last_row_flag = format_data_frame_variable(df, 'last_row_flag', counter)
         origin_x = format_data_frame_variable(df, 'origin_x', counter)
         origin_y = format_data_frame_variable(df, 'origin_y', counter)
+        origin_x, origin_y = shift(origin_x, origin_y, shift_x, shift_y)   # add shift to x, y value.
         length_x = format_data_frame_variable(df, 'length_x', counter)
         length_y = format_data_frame_variable(df, 'length_y', counter)
         doc = format_data_frame_variable(df, 'doc', counter)
