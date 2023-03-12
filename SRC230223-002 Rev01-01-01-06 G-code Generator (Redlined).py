@@ -2225,6 +2225,7 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
     # description:
     # Added shift x y.
     # changed debug x, y to use end_x, end_y instead of start_x, start_y
+    # minor code house cleaning
     # software test run on 12/Mar/2023
     #
     # rev: 01-01-01-04
@@ -2349,15 +2350,15 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
     counter = 0             # initialize counter
 
     # print static variables to debug file
-    text_debug = f'\n{operation}\n'
-    text_debug = text_debug + f'{sheet}\n'
-    text_debug = text_debug + f'total rows: {rows}\n\n'
-    text_debug = text_debug + f'static variables\n' \
-                              f'offset: {offset}\n' \
-                              f'feed: {feed}\n' \
-                              f'safe_z: {safe_z}\n' \
-                              f'z_f: {z_f}\n' \
-                              f'mode: {mode}\n'
+    text_debug = f'\n{operation}\n' \
+                 f'{sheet}\n' \
+                 f'total rows: {rows}\n' \
+                 f'static variables\n' \
+                 f'offset: {offset}\n' \
+                 f'feed: {feed}\n' \
+                 f'safe_z: {safe_z}\n' \
+                 f'z_f: {z_f}\n' \
+                 f'mode: {mode}\n'
     if tro == True:
        text_debug = text_debug + f'step: {step}\n' \
                                   f'wos: {wos}\n' \
