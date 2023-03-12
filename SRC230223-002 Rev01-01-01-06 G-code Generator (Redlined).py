@@ -3053,6 +3053,12 @@ def corner_slice_data_frame(name, excel_file, sheet):
     # N/A
 
     # ---Change History---
+    # rev: 01-01-01-06
+    # date: 12/Mar/2023
+    # description:
+    # Added shift x y.
+    # software test run on 12/Mar/2023
+    #
     # rev: 01-01-01-05
     # Added error text file statements to spiral surface dataframe function.
     # software test run on 11/Mar/2023
@@ -3080,8 +3086,10 @@ def corner_slice_data_frame(name, excel_file, sheet):
         last_row_flag = format_data_frame_variable(df, 'last_row_flag', counter)
         start_x = format_data_frame_variable(df, 'start_x', counter)
         start_y = format_data_frame_variable(df, 'start_y', counter)
+        start_x, start_y = shift(start_x, start_y, shift_x, shift_y)   # add shift to x, y value.
         end_x = format_data_frame_variable(df, 'end_x', counter)
         end_y = format_data_frame_variable(df, 'end_y', counter)
+        end_x, end_y = shift(end_x, end_y, shift_x, shift_y)   # add shift to x, y value.
         start_rad = format_data_frame_variable(df, 'start_rad', counter)
         end_rad = format_data_frame_variable(df, 'end_rad', counter)
         doc = format_data_frame_variable(df, 'doc', counter)
