@@ -9,6 +9,11 @@
 #
 # ---Change History---
 #
+# rev: 01-01-01-06
+# date: 12/Mar/2023
+# description:
+# Added shift operation into dataframe.
+#
 # rev: 01-01-01-05
 # date: 11/Mar/2023
 # description:
@@ -2297,6 +2302,7 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
         last_row_flag = format_data_frame_variable(df, 'last_row_flag', counter, debug)  # import last_row_flag value.
         x = format_data_frame_variable(df, 'x', counter, debug)  # import x value.
         y = format_data_frame_variable(df, 'y', counter, debug)  # import y value.
+        x, y = shift(x, y, shift_x, shift_y)   # add shift to x, y value.
 
         if tro == False:
             z = format_data_frame_variable(df, 'z', counter, debug)  # import z value if line toolpath.
@@ -3148,6 +3154,12 @@ def rapid(name, df_main, counter):
     # N/A
 
     # ---Change History---
+    # rev: 01-01-01-06
+    # date: 12/Mar/2023
+    # description:
+    # Added 'None' as a valid variable.
+    # detect of x,y,z are all None then do not print g-code G0
+    # software test run on 12/Mar/2023
     #
     # rev: 01-01-01-04
     # date: 08/Mar/2023
@@ -3165,30 +3177,47 @@ def rapid(name, df_main, counter):
     text_debug = indent(text_debug, 8)
     write_to_file(name_debug, text_debug)  # write to debug file
 
-    text = f'G0 '  # G0 rapid command
-
     x = format_data_frame_variable(df_main, 'x', counter)
+    y = format_data_frame_variable(df_main, 'y', counter)
+    z = format_data_frame_variable(df_main, 'z', counter)
+    x, y = shift(x, y, shift_x, shift_y)  # add shift to x,y value.
+
+    if x == None and y == None and z ==None:
+        text = ''   #
+    else:
+        text = f'G0 '  # G0 rapid command
+
     if isinstance(x, float) == True:  # check if x is a number, if not skip.
         text = text + f' X{"%.4f" % x}'  # append x position
         text_debug = f'x: {x}, '
         text_debug = indent(text_debug, 8)
         write_to_file(name_debug, text_debug)  # write to debug file
+    elif x == None: # check if x is 'None', if not skip.
+        text_debug = f'x: {x}, '
+        text_debug = indent(text_debug, 8)
+        write_to_file(name_debug, text_debug)  # write to debug file
     else:
-        abort('x', x, 'not float')
-    y = format_data_frame_variable(df_main, 'y', counter)
+        abort('x', x, 'not float or None')
+
     if isinstance(y, float) == True:  # check if y is a number, if not skip.
         text = text + f' Y{"%.4f" % y}'  # append y position
         text_debug = f'y:{y}, '
         write_to_file(name_debug, text_debug)  # write to debug file
+    elif y == None:  # check if y is 'None', if not skip.
+        text_debug = f'y: {y}, '
+        write_to_file(name_debug, text_debug)  # write to debug file
     else:
-        abort('y', y, 'not float')
-    z = format_data_frame_variable(df_main, 'z', counter)
+        abort('y', y, 'not float or None')
+
     if isinstance(z, float) == True:  # check if z is a number, if not skip.
         text = text + f' Z{"%.4f" % z}'  # append z position
         text_debug = f'z:{z}'
         write_to_file(name_debug, text_debug)  # write to debug file
+    elif z == None: # check if z is 'None', if not skip.
+        text_debug = f'z: {z}'
+        write_to_file(name_debug, text_debug)  # write to debug file
     else:
-        abort('z', z, 'not float')
+        abort('z', z, 'not float or None')
 
     text = text + '         (Rapid)\n'
     write_to_file(name, text)       # write g-code
@@ -3308,6 +3337,40 @@ def abort(variable_name, variable, error_message = None):
 
     quit()          # quit program
 
+def shift(x, y, shift_x, shift_y):
+    # ---Description---
+    # Shift origin point by x and y distance.
+    # Shift is accumulative.
+
+    # ---Variable List---
+    # x = x value as read.
+    # y = y value as read.
+    # shift_x = distance to shift x by
+    # shift_y = distance to shift y by
+
+    # ---Return Variable List---
+    # shifted_x = adjusted/shifted x
+    # shifted_y = adjusted/shifted y
+
+    # ---Change History---
+    #
+    # rev: 01-01-01-06
+    # date: 12/Mar/2023
+    # description:
+    # initial release
+    # software test run on 12/Mar/2023
+
+    if x == None or shift_x == None:
+        shifted_x = x                  # do nothing
+    else:
+        shifted_x = x + shift_x         # shift x
+    if y == None or shift_y == None:
+        shifted_y = y                   # do nothing
+    else:
+        shifted_y = y + shift_y         # shift y
+
+    return (shifted_x, shifted_y)
+
 # ---------Import Parameters------------
 
 excel_file = 'LOG20220414001 G-code Parameters.xlsx'       # !!!! identify name of excel file to import data from. !!!!
@@ -3330,6 +3393,8 @@ df_main = pd.read_excel(excel_file, sheet_name=sheet, na_filter=False)  # import
 rows = df_main.shape[0]  # total number of rows in dataframe.
 last_row = rows - 1  # initialize number of last row
 counter = 0  # initialize counter
+shift_x = 0  # initialize shift x
+shift_y = 0  # initialize shift y
 
 text_debug = f'read excel "{sheet}" tab\n\n'
 write_to_file(name_debug, text_debug)    # write to debug file
@@ -3407,6 +3472,40 @@ while counter<=last_row:
     elif operation == 'rapid':
         operation_valid_flag = True  # set flag
         rapid(name, df_main, counter)
+
+    elif operation == 'shift':
+
+        temp_x = format_data_frame_variable(df_main, 'x', counter)
+        if temp_x == None:
+            shift_x = shift_x    # do nothing
+        elif isinstance(temp_x, float) == True:  # check if temp_x is a number
+            shift_x = temp_x + shift_x    # distance to adjust x with. accumulative.
+        else:
+            abort('shift_x', temp_x, 'not float or None')
+
+        temp_y = format_data_frame_variable(df_main, 'y', counter)
+        if temp_y == None:
+            shift_y = shift_y    # do nothing
+        elif isinstance(temp_y, float) == True:  # check if temp_y is a number
+            shift_y = temp_y + shift_y    # distance to adjust y with. accumulative.
+        else:
+            abort('shift_y', temp_y, 'not float or None')
+
+        operation_valid_flag = True  # set flag
+        text_debug = f'\n{operation}\n' \
+                     f'x: {temp_x}, y: {temp_y}\n' \
+                     f'shift_x: {shift_x}, shift_y: {shift_y}'
+        text_debug = indent(text_debug, 8)
+        write_to_file(name_debug, text_debug)  # write to debug file
+
+    elif operation == 'clear_shift':
+        shift_x = 0    # clear shift x value.
+        shift_y = 0    # clear shift y value.
+        operation_valid_flag = True  # set flag
+        text_debug = f'\n{operation}\n' \
+                     f'shift_x: {shift_x}, shift_y: {shift_y}'
+        text_debug = indent(text_debug, 8)
+        write_to_file(name_debug, text_debug)  # write to debug file
 
     if operation_valid_flag == False:  # check for invalid operation.
         abort('operation', operation)   # abort. write error message.
