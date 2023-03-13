@@ -3468,6 +3468,38 @@ def shift_data_frame(df_main, counter, shift_x, shift_y):
 
     return (shift_x, shift_y)
 
+def repeat_data_frame(df_main, counter):
+    # ---Description---
+    # Imports a 2D dataframe from an excel file
+    # repeats a single row and then returns.
+    # stored_counter, counter, repeat_flag = repeat_data_frame(df_main, counter)
+
+    # ---Variable List---
+    # df_main = data frame. main tab
+    # counter = row counter
+
+    # ---Return Variable List---
+    # stored_counter = store original counter for next row.
+    # counter = set counter to run row on next loop.
+    # repeat_flag = repeat_flag
+
+    # ---Change History---
+    # rev: 01-01-01-07
+    # initial release
+    # software test run on 11/Aug/2022
+
+    repeat_row = int(format_data_frame_variable(df_main, 'repeat_row', counter))
+    stored_counter = counter + 1  # store original counter for next row.
+    counter = repeat_row - 1  # set counter to run row on next loop.
+    repeat_flag = True  # set repeat_flag
+
+    text_debug = f'\n{operation}\n' \
+                     f'repeat row: {repeat_row}'
+    text_debug = indent(text_debug, 8)
+    write_to_file(name_debug, text_debug)  # write to debug file
+
+    return (stored_counter, counter, repeat_flag)
+
 # ---------Import Parameters------------
 
 excel_file = 'LOG20220414001 G-code Parameters.xlsx'       # !!!! identify name of excel file to import data from. !!!!
@@ -3595,18 +3627,7 @@ while counter<=last_row:
 
     elif operation == 'repeat':
         operation_valid_flag = True  # set flag
-
-        if repeat_flag == False:
-
-            repeat_row = int(format_data_frame_variable(df_main, 'repeat_row', counter))
-            stored_counter = counter + 1          # store original counter for next row.
-            counter = repeat_row - 1            # set counter to run row on next loop.
-            repeat_flag = True          # set repeat_flag
-
-            text_debug = f'\n{operation}\n' \
-                         f'repeat row: {repeat_row}'
-            text_debug = indent(text_debug, 8)
-            write_to_file(name_debug, text_debug)  # write to debug file
+        stored_counter, counter, repeat_flag = repeat_data_frame(df_main, counter)
 
     if operation_valid_flag == False:  # check for invalid operation.
         abort('operation', operation)   # abort. write error message.
