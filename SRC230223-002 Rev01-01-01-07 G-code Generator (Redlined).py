@@ -3426,20 +3426,19 @@ def shift(x, y, shift_x, shift_y):
 
     return (shifted_x, shifted_y)
 
-def shift_data_frame(name, df_main, counter):
+def shift_data_frame(df_main, counter, shift_x, shift_y):
     # ---Description---
     # Imports a 2D dataframe from an excel file
     # Shift origin point by x and y distance.
     # Shift is accumulative.
 
     # ---Variable List---
-    # name = name of file
     # df_main = data frame. main tab
     # counter = row counter
 
     # ---Return Variable List---
-    # N/A
-
+    # shift_x = amount to shift x by.
+    # shift_y = amount to shift y by.
     # ---Change History---
     # rev: 01-01-01-07
     # initial release
@@ -3461,65 +3460,13 @@ def shift_data_frame(name, df_main, counter):
     else:
         abort('shift_y', temp_y, 'not float or None')
 
-    operation_valid_flag = True  # set flag
     text_debug = f'\n{operation}\n' \
                  f'x: {temp_x}, y: {temp_y}\n' \
                  f'shift_x: {shift_x}, shift_y: {shift_y}'
     text_debug = indent(text_debug, 8)
     write_to_file(name_debug, text_debug)  # write to debug file
 
-
-
-
-    operation_debug = format_data_frame_variable(df_main, 'operation', counter)
-    text_debug = f'\n{operation_debug}\n'
-    text_debug = indent(text_debug, 8)
-    write_to_file(name_debug, text_debug)  # write to debug file
-
-    x = format_data_frame_variable(df_main, 'x', counter)
-    y = format_data_frame_variable(df_main, 'y', counter)
-    z = format_data_frame_variable(df_main, 'z', counter)
-    x, y = shift(x, y, shift_x, shift_y)  # add shift to x,y value.
-
-    if x == None and y == None and z ==None:
-        text = ''   #
-    else:
-        text = f'G0 '  # G0 rapid command
-
-    if isinstance(x, float) == True:  # check if x is a number, if not skip.
-        text = text + f' X{"%.4f" % x}'  # append x position
-        text_debug = f'x: {x}, '
-        text_debug = indent(text_debug, 8)
-        write_to_file(name_debug, text_debug)  # write to debug file
-    elif x == None: # check if x is 'None', if not skip.
-        text_debug = f'x: {x}, '
-        text_debug = indent(text_debug, 8)
-        write_to_file(name_debug, text_debug)  # write to debug file
-    else:
-        abort('x', x, 'not float or None')
-
-    if isinstance(y, float) == True:  # check if y is a number, if not skip.
-        text = text + f' Y{"%.4f" % y}'  # append y position
-        text_debug = f'y:{y}, '
-        write_to_file(name_debug, text_debug)  # write to debug file
-    elif y == None:  # check if y is 'None', if not skip.
-        text_debug = f'y: {y}, '
-        write_to_file(name_debug, text_debug)  # write to debug file
-    else:
-        abort('y', y, 'not float or None')
-
-    if isinstance(z, float) == True:  # check if z is a number, if not skip.
-        text = text + f' Z{"%.4f" % z}'  # append z position
-        text_debug = f'z:{z}'
-        write_to_file(name_debug, text_debug)  # write to debug file
-    elif z == None: # check if z is 'None', if not skip.
-        text_debug = f'z: {z}'
-        write_to_file(name_debug, text_debug)  # write to debug file
-    else:
-        abort('z', z, 'not float or None')
-
-    text = text + '         (Rapid)\n'
-    write_to_file(name, text)       # write g-code
+    return (shift_x, shift_y)
 
 # ---------Import Parameters------------
 
@@ -3624,8 +3571,8 @@ while counter<=last_row:
         rapid(name, df_main, counter)
 
     elif operation == 'shift':
-
-
+        operation_valid_flag = True  # set flag
+        shift_x, shift_y = shift_data_frame(df_main, counter, shift_x, shift_y)
 
     elif operation == 'clear_shift':
         shift_x = 0    # clear shift x value.
