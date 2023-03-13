@@ -3492,6 +3492,8 @@ last_row = rows - 1  # initialize number of last row
 counter = 0  # initialize counter
 shift_x = 0  # initialize shift x
 shift_y = 0  # initialize shift y
+repeat_flag = False  # initialize repeat_flag
+repeat_done_flag = False  # initialize repeat_done_flag
 
 text_debug = f'read excel "{sheet}" tab\n\n'
 write_to_file(name_debug, text_debug)    # write to debug file
@@ -3502,6 +3504,14 @@ write_to_file(name_debug, text_debug)    # write to debug file
 
 # import content of excel file.
 while counter<=last_row:
+
+    if repeat_flag == True:             # check for repeat_flag.
+        if repeat_done_flag == True:    # check for repeat_done_flag.
+            repeat_done_flag = False    # reset repeat_done_flag.
+            repeat_flag = False         # reset and clear repeat flag.
+            counter = stored_counter    # restore original counter
+        else:
+            repeat_done_flag = True     # set repeat_done_flag.
 
     operation = format_data_frame_variable(df_main, 'operation', counter)       # import operation from excel file.
     operation_valid_flag = False    # initialize flag
@@ -3582,6 +3592,21 @@ while counter<=last_row:
                      f'shift_x: {shift_x}, shift_y: {shift_y}'
         text_debug = indent(text_debug, 8)
         write_to_file(name_debug, text_debug)  # write to debug file
+
+    elif operation == 'repeat':
+        operation_valid_flag = True  # set flag
+
+        if repeat_flag == False:
+
+            repeat_row = int(format_data_frame_variable(df_main, 'repeat_row', counter))
+            stored_counter = counter + 1          # store original counter for next row.
+            counter = repeat_row - 1            # set counter to run row on next loop.
+            repeat_flag = True          # set repeat_flag
+
+            text_debug = f'\n{operation}\n' \
+                         f'repeat row: {repeat_row}'
+            text_debug = indent(text_debug, 8)
+            write_to_file(name_debug, text_debug)  # write to debug file
 
     if operation_valid_flag == False:  # check for invalid operation.
         abort('operation', operation)   # abort. write error message.
