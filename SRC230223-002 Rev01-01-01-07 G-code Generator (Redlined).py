@@ -3500,6 +3500,37 @@ def repeat_data_frame(df_main, counter):
 
     return (stored_counter, counter, repeat_flag)
 
+def repeat_check(repeat_flag, repeat_done_flag, stored_counter, counter):
+    # ---Description---
+    # check if repeat row has been repeated.
+    # repeat_flag, repeat_done_flag, counter = repeat_check(repeat_flag, repeat_done_flag, stored_counter)
+
+    # ---Variable List---
+    # repeat_flag = repeat flag set if repeat has been called.
+    # repeat_done_flag = repeat_done_flag set if repeat has been performed.
+    # stored_counter = counter position to resume.
+    # counter = current counter position.
+
+    # ---Return Variable List---
+    # repeat_flag = repeat flag set if repeat has been called.
+    # repeat_done_flag = repeat_done_flag set if repeat has been performed.
+    # counter = set counter to run row on next loop.
+
+    # ---Change History---
+    # rev: 01-01-01-07
+    # initial release
+    # software test run on 11/Aug/2022
+
+    if repeat_flag == True:             # check for repeat_flag.
+        if repeat_done_flag == True:    # check for repeat_done_flag.
+            repeat_done_flag = False    # reset repeat_done_flag.
+            repeat_flag = False         # reset and clear repeat flag.
+            counter = stored_counter    # restore original counter
+        else:
+            repeat_done_flag = True     # set repeat_done_flag.
+
+    return (repeat_flag, repeat_done_flag, counter)
+
 # ---------Import Parameters------------
 
 excel_file = 'LOG20220414001 G-code Parameters.xlsx'       # !!!! identify name of excel file to import data from. !!!!
@@ -3526,6 +3557,7 @@ shift_x = 0  # initialize shift x
 shift_y = 0  # initialize shift y
 repeat_flag = False  # initialize repeat_flag
 repeat_done_flag = False  # initialize repeat_done_flag
+stored_counter = int(0)  # initialize stored_counter
 
 text_debug = f'read excel "{sheet}" tab\n\n'
 write_to_file(name_debug, text_debug)    # write to debug file
@@ -3537,14 +3569,7 @@ write_to_file(name_debug, text_debug)    # write to debug file
 # import content of excel file.
 while counter<=last_row:
 
-    if repeat_flag == True:             # check for repeat_flag.
-        if repeat_done_flag == True:    # check for repeat_done_flag.
-            repeat_done_flag = False    # reset repeat_done_flag.
-            repeat_flag = False         # reset and clear repeat flag.
-            counter = stored_counter    # restore original counter
-        else:
-            repeat_done_flag = True     # set repeat_done_flag.
-
+    repeat_flag, repeat_done_flag, counter = repeat_check(repeat_flag, repeat_done_flag, stored_counter, counter)
     operation = format_data_frame_variable(df_main, 'operation', counter)       # import operation from excel file.
     operation_valid_flag = False    # initialize flag
 
