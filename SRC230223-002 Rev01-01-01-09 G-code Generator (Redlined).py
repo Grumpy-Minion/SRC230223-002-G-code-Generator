@@ -1235,38 +1235,34 @@ def surface(origin_x, origin_y, length_x, length_y, doc, dia, step, z_f, cut_f, 
     text = text + text_temp
 
     # length decremental function
-    def length_dec(length, step, dia):
+    def length_dec(length, step):
         length = length - step
-        rad = 0         # initialize rad
+#        rad = 0         # initialize rad
         last = False    # initialize/clear last cut flag
         if length <= 0:
             last = True     # set last cut flag
-            length = step + length  # calculate end point of length of a remaining cut
+#            length = step + length  # calculate end point of length of a remaining cut
             length = step   # set last cut to length of single step
 #            hy = math.sqrt((dia/2)**2+length**2)  # calculate hypotenuse. refer to PRT20210510002 Tangential Curve Caluculator
 #            ang = math.asin(dia/2/hy)   # calculate angle
 #            rad = hy/2/math.cos(ang)    # calculate radius of tangential curve tool path
 
-        return (length, rad, last)
+        return (length, last)
 
     last = False    # initialize last cut flag
 
     while last == False:
 
         # bottom length
-        length_x, rad, last = length_dec(length_x, step, dia)
+        length_x, last = length_dec(length_x, step)
         if last == True:
             text_temp = \
                 f'''   
         G02 X{"%.4f" % (-dia / 2)} Y{"%.4f" % (dia / 2)} R{"%.4f" % (dia / 2)}
-        (G02 X{"%.4f" % (-length_x)} Y{"%.4f" % (dia / 2)} R{"%.4f" % rad})
-        (G1 Y{"%.4f" % (length_y - step + dia / 2)})
         G1 Y{"%.4f" % (length_y - step + dia / 4)}
-        (G1 X{"%.4f" % length_x})
         G02 X{"%.4f" % (dia / 4)} Y{"%.4f" % (dia / 4)} R{"%.4f" % (dia / 4)}      
         G02 X{"%.4f" % (dia / 4)} Y{"%.4f" % (-dia / 4)} R{"%.4f" % (dia / 4)}     
         G1 Y{"%.4f" % (-(length_y - step + dia / 4))}        
-        (G1 Y{"%.4f" % (-length_y)})
         '''
             text = text + text_temp
             break
@@ -1279,18 +1275,14 @@ def surface(origin_x, origin_y, length_x, length_y, doc, dia, step, z_f, cut_f, 
             text = text + text_temp
 
         # left length
-        length_y, rad, last = length_dec(length_y, step, dia)   # changed length_x to length_y
+        length_y, last = length_dec(length_y, step)   # changed length_x to length_y
         if last == True:
             text_temp = \
     f'''
     G02 X{"%.4f" % (dia/2)} Y{"%.4f" % (dia/2)} R{"%.4f" % (dia/2)}
-    (G02 X{"%.4f" % (dia/2)} Y{"%.4f" % length_y} R{"%.4f" % rad})
-    (G1 X{"%.4f" % (length_x-step+dia/2)})
     G1 X{"%.4f" % (length_x-step+dia/4)}
-    (G1 Y{"%.4f" % (-length_y)})
     G02 X{"%.4f" % (dia/4)} Y{"%.4f" % (-dia/4)} R{"%.4f" % (dia/4)}
     G02 X{"%.4f" % (-dia/4)} Y{"%.4f" % (-dia/4)} R{"%.4f" % (dia/4)}
-    (G1 X{"%.4f" % (-length_x)})
     G1 X{"%.4f" % (-(length_x-step+dia/4))}
     '''
             text = text + text_temp
@@ -1304,19 +1296,15 @@ def surface(origin_x, origin_y, length_x, length_y, doc, dia, step, z_f, cut_f, 
             text = text + text_temp
 
         # top length
-        length_x, rad, last = length_dec(length_x, step, dia)
+        length_x, last = length_dec(length_x, step)
         if last == True:
             text_temp = \
     f'''
     G02 X{"%.4f" % (dia/2)} Y{"%.4f" % (-dia/2)} R{"%.4f" % (dia/2)}
-    (G02 X{"%.4f" % length_x} Y{"%.4f" % (-dia/2)} R{"%.4f" % rad})
-    (G1 Y{"%.4f" % (-(length_y-step+dia/2))} )   
     G1 Y{"%.4f" % (-(length_y-step+dia/4))}
-    (G1 X{"%.4f" % (-length_x)})
     G02 X{"%.4f" % (-dia/4)} Y{"%.4f" % (-dia/4)} R{"%.4f" % (dia/4)}
     G02 X{"%.4f" % (-dia/4)} Y{"%.4f" % (dia/4)} R{"%.4f" % (dia/4)}
     G1 Y{"%.4f" % (length_y-step+dia/4)}
-    (G1 Y{"%.4f" % length_y})
     '''
             text = text + text_temp
             break
@@ -1329,19 +1317,15 @@ def surface(origin_x, origin_y, length_x, length_y, doc, dia, step, z_f, cut_f, 
             text = text + text_temp
 
         # right length
-        length_y, rad, last = length_dec(length_y, step, dia)    # changed length_x to length_y
+        length_y, last = length_dec(length_y, step)    # changed length_x to length_y
         if last == True:
             text_temp = \
     f'''
     G02 X{"%.4f" % (-dia/2)} Y{"%.4f" % (-dia/2)} R{"%.4f" % (dia/2)}
-    (G02 X{"%.4f" % (-dia/2)} Y{"%.4f" % (-length_y)} R{"%.4f" % rad})
-    (G1 X{"%.4f" % (-(length_x-step+dia/2))})
     G1 X{"%.4f" % (-(length_x-step+dia/4))}
-    (G1 Y{"%.4f" % length_y})
     G02 X{"%.4f" % (-dia/4)} Y{"%.4f" % (dia/4)} R{"%.4f" % (dia/4)}
     G02 X{"%.4f" % (dia/4)} Y{"%.4f" % (dia/4)} R{"%.4f" % (dia/4)}
     G1 X{"%.4f" % (length_x-step+dia/4)}
-    (G1 X{"%.4f" % length_x})
     '''
             text = text + text_temp
             break
