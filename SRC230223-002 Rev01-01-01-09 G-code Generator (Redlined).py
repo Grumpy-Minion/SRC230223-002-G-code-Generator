@@ -1335,9 +1335,13 @@ def surface(origin_x, origin_y, length_x, length_y, doc, dia, step, z_f, cut_f, 
     f'''
     G02 X{"%.4f" % (-dia/2)} Y{"%.4f" % (-dia/2)} R{"%.4f" % (dia/2)}
     (G02 X{"%.4f" % (-dia/2)} Y{"%.4f" % (-length_y)} R{"%.4f" % rad})
-    G1 X{"%.4f" % (-(length_x-step+dia/2))}
-    G1 Y{"%.4f" % length_y}
-    G1 X{"%.4f" % length_x}
+    (G1 X{"%.4f" % (-(length_x-step+dia/2))})
+    G1 X{"%.4f" % (-(length_x-step+dia/4))}
+    (G1 Y{"%.4f" % length_y})
+    G02 X{"%.4f" % (-dia/4)} Y{"%.4f" % (dia/4)} R{"%.4f" % (dia/4)}
+    G02 X{"%.4f" % (dia/4)} Y{"%.4f" % (dia/4)} R{"%.4f" % (dia/4)}
+    G1 X{"%.4f" % (length_x-step+dia/4)}
+    (G1 X{"%.4f" % length_x})
     '''
             text = text + text_temp
             break
