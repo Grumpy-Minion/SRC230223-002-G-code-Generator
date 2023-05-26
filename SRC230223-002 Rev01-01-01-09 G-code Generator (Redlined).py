@@ -1218,7 +1218,7 @@ def surface(origin_x, origin_y, length_x, length_y, doc, dia, step, z_f, cut_f, 
     # initialize starting point
     start_x = origin_x + length_x + dia
     start_y = origin_y - dia/2 + step
-    length_y = length_y - step  # initiatize length_y to compensate for off by one error.(OBOE)
+    length_y = length_y - step  # initialize length_y to compensate for off by one error.(OBOE)
 
     # starting G code block
     text_temp = \
