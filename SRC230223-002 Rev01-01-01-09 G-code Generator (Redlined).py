@@ -1159,7 +1159,8 @@ def surface(origin_x, origin_y, length_x, length_y, doc, dia, step, z_f, cut_f, 
 
     # ---Change History---
     # rev: 01-01-01-09
-    #
+    # simplified last cut to a line to line cut followed by a straight center line cut.
+    # added starting point options on 4 different corners.
     #
     # rev: 01-01-01-08
     # Bug fix.
@@ -1241,9 +1242,10 @@ def surface(origin_x, origin_y, length_x, length_y, doc, dia, step, z_f, cut_f, 
         if length <= 0:
             last = True     # set last cut flag
             length = step + length  # calculate end point of length of a remaining cut
-            hy = math.sqrt((dia/2)**2+length**2)  # calculate hypotenuse. refer to PRT20210510002 Tangential Curve Caluculator
-            ang = math.asin(dia/2/hy)   # calculate angle
-            rad = hy/2/math.cos(ang)    # calculate radius of tangential curve tool path
+            length = step   # set last cut to length of single step
+#            hy = math.sqrt((dia/2)**2+length**2)  # calculate hypotenuse. refer to PRT20210510002 Tangential Curve Caluculator
+#            ang = math.asin(dia/2/hy)   # calculate angle
+#            rad = hy/2/math.cos(ang)    # calculate radius of tangential curve tool path
 
         return (length, rad, last)
 
@@ -1256,7 +1258,8 @@ def surface(origin_x, origin_y, length_x, length_y, doc, dia, step, z_f, cut_f, 
         if last == True:
             text_temp = \
                 f'''   
-        G02 X{"%.4f" % (-length_x)} Y{"%.4f" % (dia / 2)} R{"%.4f" % rad}
+        G02 X{"%.4f" % (-dia / 2)} Y{"%.4f" % (dia / 2)} R{"%.4f" % (dia / 2)}
+        (G02 X{"%.4f" % (-length_x)} Y{"%.4f" % (dia / 2)} R{"%.4f" % rad})
         G1 Y{"%.4f" % (length_y - step + dia / 2)}
         G1 X{"%.4f" % length_x}
         G1 Y{"%.4f" % (-length_y)}
@@ -1276,7 +1279,8 @@ def surface(origin_x, origin_y, length_x, length_y, doc, dia, step, z_f, cut_f, 
         if last == True:
             text_temp = \
     f'''
-    G02 X{"%.4f" % (dia/2)} Y{"%.4f" % length_y} R{"%.4f" % rad}
+    G02 X{"%.4f" % (dia/2)} Y{"%.4f" % (dia/2)} R{"%.4f" % (dia/2)}
+    (G02 X{"%.4f" % (dia/2)} Y{"%.4f" % length_y} R{"%.4f" % rad})
     G1 X{"%.4f" % (length_x-step+dia/2)}
     G1 Y{"%.4f" % (-length_y)}
     G1 X{"%.4f" % (-length_x)}
@@ -1296,10 +1300,15 @@ def surface(origin_x, origin_y, length_x, length_y, doc, dia, step, z_f, cut_f, 
         if last == True:
             text_temp = \
     f'''
-    G02 X{"%.4f" % length_x} Y{"%.4f" % (-dia/2)} R{"%.4f" % rad}
-    G1 Y{"%.4f" % (-(length_y-step+dia/2))}    
-    G1 X{"%.4f" % (-length_x)}
-    G1 Y{"%.4f" % length_y}
+    G02 X{"%.4f" % (dia/2)} Y{"%.4f" % (-dia/2)} R{"%.4f" % (dia/2)}
+    (G02 X{"%.4f" % length_x} Y{"%.4f" % (-dia/2)} R{"%.4f" % rad})
+    (G1 Y{"%.4f" % (-(length_y-step+dia/2))} )   
+    G1 Y{"%.4f" % (-(length_y-step+dia/4))}
+    (G1 X{"%.4f" % (-length_x)})
+    G02 X{"%.4f" % (-dia/4)} Y{"%.4f" % (-dia/4)} R{"%.4f" % (dia/4)}
+    G02 X{"%.4f" % (-dia/4)} Y{"%.4f" % (dia/4)} R{"%.4f" % (dia/4)}
+    G1 Y{"%.4f" % (length_y-step+dia/4)}
+    (G1 Y{"%.4f" % length_y})
     '''
             text = text + text_temp
             break
@@ -1316,7 +1325,8 @@ def surface(origin_x, origin_y, length_x, length_y, doc, dia, step, z_f, cut_f, 
         if last == True:
             text_temp = \
     f'''
-    G02 X{"%.4f" % (-dia/2)} Y{"%.4f" % (-length_y)} R{"%.4f" % rad}
+    G02 X{"%.4f" % (-dia/2)} Y{"%.4f" % (-dia/2)} R{"%.4f" % (dia/2)}
+    (G02 X{"%.4f" % (-dia/2)} Y{"%.4f" % (-length_y)} R{"%.4f" % rad})
     G1 X{"%.4f" % (-(length_x-step+dia/2))}
     G1 Y{"%.4f" % length_y}
     G1 X{"%.4f" % length_x}
