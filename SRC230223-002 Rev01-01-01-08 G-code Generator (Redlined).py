@@ -9,6 +9,14 @@
 #
 # ---Change History---
 #
+# rev: 01-01-01-08
+# date: 26/May/2023
+# description:
+# Bug fix.
+# fixed off by one error on first top length.
+# fixed "length_y" mislabelled as "length_x" on left and right length segments.
+# reduced starting point offset from dia*2 to dia.
+#
 # rev: 01-01-01-07
 # date: 13/Mar/2023
 # description:
@@ -1145,6 +1153,12 @@ def surface(origin_x, origin_y, length_x, length_y, doc, dia, step, z_f, cut_f, 
     # text = G-code text
 
     # ---Change History---
+    # rev: 01-01-01-08
+    # Bug fix.
+    # fixed off by one error on first top length.
+    # fixed "length_y" mislabelled as "length_x" on left and right length segments.
+    # reduced starting point offset from dia*2 to dia.
+    #
     # rev: 01-01-01-05
     # added error checks using abort function.
     # software test run on 11/Mar/2023
@@ -1193,8 +1207,9 @@ def surface(origin_x, origin_y, length_x, length_y, doc, dia, step, z_f, cut_f, 
     text = start_block          # initialize text variable
 
     # initialize starting point
-    start_x = origin_x + length_x + dia*2
+    start_x = origin_x + length_x + dia
     start_y = origin_y - dia/2 + step
+    length_y = length_y - step  # initiatize length_y to compensate for off by one error.(OBOE)
 
     # starting G code block
     text_temp = \
@@ -1206,7 +1221,7 @@ def surface(origin_x, origin_y, length_x, length_y, doc, dia, step, z_f, cut_f, 
     F{"%.1f" % cut_f}  (set to cutting feed)
 
     G91 (incremental positioning)
-    G1 X{"%.4f" % (-dia*2)} (go to starting corner)
+    G1 X{"%.4f" % (-dia)} (go to starting corner)
     '''
     text = text + text_temp
 
@@ -1249,7 +1264,7 @@ def surface(origin_x, origin_y, length_x, length_y, doc, dia, step, z_f, cut_f, 
             text = text + text_temp
 
         # left length
-        length_y, rad, last = length_dec(length_x, step, dia)
+        length_y, rad, last = length_dec(length_y, step, dia)   # changed length_x to length_y
         if last == True:
             text_temp = \
     f'''
@@ -1289,7 +1304,7 @@ def surface(origin_x, origin_y, length_x, length_y, doc, dia, step, z_f, cut_f, 
             text = text + text_temp
 
         # right length
-        length_y, rad, last = length_dec(length_x, step, dia)
+        length_y, rad, last = length_dec(length_y, step, dia)    # changed length_x to length_y
         if last == True:
             text_temp = \
     f'''
