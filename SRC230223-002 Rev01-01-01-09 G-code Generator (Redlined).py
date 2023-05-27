@@ -12,7 +12,9 @@
 # rev: 01-01-01-09
 # date: 26/May/2023
 # description:
-#
+# simplified last cut to a line to line cut followed by a straight center line cut.
+# added starting point options on 4 different corners.
+# added entry parameter on surface dataframe.
 #
 # rev: 01-01-01-08
 # date: 26/May/2023
@@ -1214,13 +1216,6 @@ def surface(origin_x, origin_y, length_x, length_y, doc, dia, step, z_f, cut_f, 
     (safe Z: {"%.3f" % safe_z})
     '''
     text = start_block          # initialize text variable
-
-    # initialize entry point
-
-#    entry = 'bottom_right'
-#    entry = 'bottom_left'
-#    entry = 'top_left'
-#    entry = 'top_right'
 
     # initialize starting point
     if entry == 'bottom_right':
