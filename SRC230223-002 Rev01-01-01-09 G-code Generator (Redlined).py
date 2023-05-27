@@ -1126,7 +1126,7 @@ def tro_arc(start_x, start_y, end_x, end_y, step, wos, dia, rad_slot, cw, less_1
 
     return (end_x_original, end_y_original, cutter_x_final, cutter_y_final, text)
 
-def surface(origin_x, origin_y, length_x, length_y, doc, dia, step, z_f, cut_f, safe_z, name, debug = False):
+def surface(origin_x, origin_y, length_x, length_y, doc, dia, step, z_f, cut_f, safe_z, entry, name, debug = False):
 
     # ---description---
     # calculates and prints to a txt file the tool path in G code to surface a rectangular part.
@@ -1138,7 +1138,7 @@ def surface(origin_x, origin_y, length_x, length_y, doc, dia, step, z_f, cut_f, 
     # return to origin after surfacing.
     # start and ends at safe_z
     # refer to PRT20210510003 Surfacing Calculator
-    # text = surface(origin_x, origin_y, length_x, length_y, doc, dia, step, z_f, cut_f, safe_z, name, debug)
+    # text = surface(origin_x, origin_y, length_x, length_y, doc, dia, step, z_f, cut_f, safe_z, entry, name, debug)
 
     # ---Variable List---
     # origin_x = x of bottom left corner
@@ -1217,7 +1217,7 @@ def surface(origin_x, origin_y, length_x, length_y, doc, dia, step, z_f, cut_f, 
 
     # initialize entry point
 
-    entry = 'bottom_right'
+#    entry = 'bottom_right'
 #    entry = 'bottom_left'
 #    entry = 'top_left'
 #    entry = 'top_right'
@@ -1234,7 +1234,7 @@ def surface(origin_x, origin_y, length_x, length_y, doc, dia, step, z_f, cut_f, 
     elif entry == 'top_left':
         start_x = origin_x - dia
         start_y = origin_y + length_y + dia/2 - step
-        length_x = length_y - step  # initialize length_y to compensate for off by one error.(OBOE)
+        length_y = length_y - step  # initialize length_y to compensate for off by one error.(OBOE)
     elif entry == 'top_right':
         start_x = origin_x + length_x + dia/2 - step
         start_y = origin_y + length_y + dia
@@ -2904,6 +2904,11 @@ def surface_data_frame(name, excel_file, sheet):
     # N/A
 
     # ---Change History---
+    # rev: 01-01-01-09
+    # date: 26/May/2023
+    # description:
+    # Added entry parameter
+    #
     # rev: 01-01-01-06
     # date: 12/Mar/2023
     # description:
@@ -2947,13 +2952,14 @@ def surface_data_frame(name, excel_file, sheet):
         step = format_data_frame_variable(df, 'step', counter)
         cut_f = format_data_frame_variable(df, 'cut_f', counter)
         safe_z = format_data_frame_variable(df, 'safe_z', counter)
+        entry = format_data_frame_variable(df, 'entry', counter)
 
-        text_debug = f'row: {counter}, last_row_flag: {last_row_flag}, origin_x: {origin_x}, origin_y: {origin_y}, length_x: {length_x}, length_y: {length_y}, doc: {doc}, step: {step}, cut_f: {cut_f}, safe_z: {safe_z}\n'
+        text_debug = f'row: {counter}, last_row_flag: {last_row_flag}, origin_x: {origin_x}, origin_y: {origin_y}, length_x: {length_x}, length_y: {length_y}, doc: {doc}, step: {step}, cut_f: {cut_f}, safe_z: {safe_z}, entry:{entry}\n'
         text_debug = indent(text_debug, 8)
         write_to_file(name_debug, text_debug)  # write to debug file
 
         # generate G-code
-        text_temp = surface(origin_x, origin_y, length_x, length_y, doc, dia, step, z_f, cut_f, safe_z, name)
+        text_temp = surface(origin_x, origin_y, length_x, length_y, doc, dia, step, z_f, cut_f, safe_z, entry, name)
         text = text + text_temp
 
         break_flag, text_temp = last_row_detect(df, sheet, last_row_flag, last_row, counter, 8)  # detect last row
