@@ -1215,10 +1215,30 @@ def surface(origin_x, origin_y, length_x, length_y, doc, dia, step, z_f, cut_f, 
     '''
     text = start_block          # initialize text variable
 
+    # initialize entry point
+
+    entry = 'bottom_right'
+#    entry = 'bottom_left'
+#    entry = 'top_left'
+#    entry = 'top_right'
+
     # initialize starting point
-    start_x = origin_x + length_x + dia
-    start_y = origin_y - dia/2 + step
-    length_y = length_y - step  # initialize length_y to compensate for off by one error.(OBOE)
+    if entry == 'bottom_right':
+        start_x = origin_x + length_x + dia
+        start_y = origin_y - dia/2 + step
+        length_y = length_y - step  # initialize length_y to compensate for off by one error.(OBOE)
+    elif entry == 'bottom_left':
+        start_x = origin_x - dia/2 + step
+        start_y = origin_y - dia
+        length_x = length_x - step  # initialize length_x to compensate for off by one error.(OBOE)
+    elif entry == 'top_left':
+        start_x = origin_x - dia
+        start_y = origin_y + length_y + dia/2 - step
+        length_x = length_y - step  # initialize length_y to compensate for off by one error.(OBOE)
+    elif entry == 'top_right':
+        start_x = origin_x + length_x + dia/2 - step
+        start_y = origin_y + length_y + dia
+        length_x = length_x - step  # initialize length_x to compensate for off by one error.(OBOE)
 
     # starting G code block
     text_temp = \
@@ -1230,18 +1250,42 @@ def surface(origin_x, origin_y, length_x, length_y, doc, dia, step, z_f, cut_f, 
     F{"%.1f" % cut_f}  (set to cutting feed)
 
     G91 (incremental positioning)
-    G1 X{"%.4f" % (-dia)} (go to starting corner)
+    '''
+    text = text + text_temp
+
+    if entry == 'bottom_right':
+        text_temp = \
+    f'''
+        G1 X{"%.4f" % (-dia)} (go to starting corner)
+    '''
+    elif entry == 'bottom_left':
+        text_temp = \
+    f'''
+        G1 Y{"%.4f" % (dia)} (go to starting corner)
+    '''
+    elif entry == 'top_left':
+        text_temp = \
+    f'''
+        G1 X{"%.4f" % (dia)} (go to starting corner)
+    '''
+    elif entry == 'top_right':
+        text_temp = \
+    f'''
+        G1 Y{"%.4f" % (-dia)} (go to starting corner)
     '''
     text = text + text_temp
 
     last = False    # initialize last cut flag
+    first = True    # initialize first cut flag
 
     while last == False:
 
         # bottom length
-        length_x = length_x - step  # decrement length_x
-        if length_x <= 0:
-            text_temp = \
+        if ((first == True) and (entry == 'bottom_right')) or (first == False):     # select segment based on starting point
+
+            length_x = length_x - step  # decrement length_x
+            if length_x <= 0:
+                text_temp = \
     f'''   
     G02 X{"%.4f" % (-dia / 2)} Y{"%.4f" % (dia / 2)} R{"%.4f" % (dia / 2)}
     G1 Y{"%.4f" % (length_y - step + dia / 4)}
@@ -1249,20 +1293,22 @@ def surface(origin_x, origin_y, length_x, length_y, doc, dia, step, z_f, cut_f, 
     G02 X{"%.4f" % (dia / 4)} Y{"%.4f" % (-dia / 4)} R{"%.4f" % (dia / 4)}     
     G1 Y{"%.4f" % (-(length_y - step + dia / 4))}        
     '''
-            text = text + text_temp
-            break
-        else:
-            text_temp = \
+                text = text + text_temp
+                break
+            else:
+                text_temp = \
     f'''
     G1 X{"%.4f" % (-length_x)}
     G02 X{"%.4f" % (-dia / 2)} Y{"%.4f" % (dia / 2)} R{"%.4f" % (dia / 2)}
     '''
-            text = text + text_temp
+                text = text + text_temp
+            first = False       # clear first flag
 
         # left length
-        length_y = length_y - step  # decrement length_y
-        if length_y <= 0:
-            text_temp = \
+        if ((first == True) and (entry == 'bottom_left')) or (first == False):     # select segment based on starting point
+            length_y = length_y - step  # decrement length_y
+            if length_y <= 0:
+                text_temp = \
     f'''
     G02 X{"%.4f" % (dia/2)} Y{"%.4f" % (dia/2)} R{"%.4f" % (dia/2)}
     G1 X{"%.4f" % (length_x-step+dia/4)}
@@ -1270,20 +1316,22 @@ def surface(origin_x, origin_y, length_x, length_y, doc, dia, step, z_f, cut_f, 
     G02 X{"%.4f" % (-dia/4)} Y{"%.4f" % (-dia/4)} R{"%.4f" % (dia/4)}
     G1 X{"%.4f" % (-(length_x-step+dia/4))}
     '''
-            text = text + text_temp
-            break
-        else:
-            text_temp = \
+                text = text + text_temp
+                break
+            else:
+                text_temp = \
     f'''
     G1 Y{"%.4f" % length_y}
     G02 X{"%.4f" % (dia/2)} Y{"%.4f" % (dia/2)} R{"%.4f" % (dia/2)}
     '''
-            text = text + text_temp
+                text = text + text_temp
+            first = False       # clear first flag
 
         # top length
-        length_x = length_x - step  # decrement length_x
-        if length_x <= 0:
-            text_temp = \
+        if ((first == True) and (entry == 'top_left')) or (first == False):     # select segment based on starting point
+            length_x = length_x - step  # decrement length_x
+            if length_x <= 0:
+                text_temp = \
     f'''
     G02 X{"%.4f" % (dia/2)} Y{"%.4f" % (-dia/2)} R{"%.4f" % (dia/2)}
     G1 Y{"%.4f" % (-(length_y-step+dia/4))}
@@ -1291,20 +1339,22 @@ def surface(origin_x, origin_y, length_x, length_y, doc, dia, step, z_f, cut_f, 
     G02 X{"%.4f" % (-dia/4)} Y{"%.4f" % (dia/4)} R{"%.4f" % (dia/4)}
     G1 Y{"%.4f" % (length_y-step+dia/4)}
     '''
-            text = text + text_temp
-            break
-        else:
-            text_temp = \
+                text = text + text_temp
+                break
+            else:
+                text_temp = \
     f'''
     G1 X{"%.4f" % length_x}
     G02 X{"%.4f" % (dia/2)} Y{"%.4f" % (-dia/2)} R{"%.4f" % (dia/2)}
     '''
-            text = text + text_temp
+                text = text + text_temp
+            first = False       # clear first flag
 
         # right length
-        length_y = length_y - step  # decrement length_y
-        if length_y <= 0:
-            text_temp = \
+        if ((first == True) and (entry == 'top_right')) or (first == False):     # select segment based on starting point
+            length_y = length_y - step  # decrement length_y
+            if length_y <= 0:
+                text_temp = \
     f'''
     G02 X{"%.4f" % (-dia/2)} Y{"%.4f" % (-dia/2)} R{"%.4f" % (dia/2)}
     G1 X{"%.4f" % (-(length_x-step+dia/4))}
@@ -1312,15 +1362,16 @@ def surface(origin_x, origin_y, length_x, length_y, doc, dia, step, z_f, cut_f, 
     G02 X{"%.4f" % (dia/4)} Y{"%.4f" % (dia/4)} R{"%.4f" % (dia/4)}
     G1 X{"%.4f" % (length_x-step+dia/4)}
     '''
-            text = text + text_temp
-            break
-        else:
-            text_temp = \
+                text = text + text_temp
+                break
+            else:
+                text_temp = \
     f'''
     G1 Y{"%.4f" % (-length_y)}
     G02 X{"%.4f" % (-dia/2)} Y{"%.4f" % (-dia/2)} R{"%.4f" % (dia/2)}
     '''
-            text = text + text_temp
+                text = text + text_temp
+            first = False       # clear first flag
 
     text_temp = \
     f'''
