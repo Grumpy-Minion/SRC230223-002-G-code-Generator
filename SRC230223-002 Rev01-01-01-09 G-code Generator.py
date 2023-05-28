@@ -1140,6 +1140,7 @@ def surface(origin_x, origin_y, length_x, length_y, doc, dia, step, z_f, cut_f, 
     # return to origin after surfacing.
     # start and ends at safe_z
     # refer to PRT20210510003 Surfacing Calculator
+    # refer to ALG230526-001 Surface Algorithm
     # text = surface(origin_x, origin_y, length_x, length_y, doc, dia, step, z_f, cut_f, safe_z, entry, name, debug)
 
     # ---Variable List---
