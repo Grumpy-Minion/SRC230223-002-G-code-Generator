@@ -2298,6 +2298,11 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
     # cutter_y_final = y coordinate of cutter position
 
     # ---Change History---
+    # rev: 01-01-01-11
+    # date: 29/May/2023
+    # description:
+    # Bug fix.toolpath_data_frame. Fixed row# 0 arc_seg able to read and print "None" on Debug txt file.
+    #
     # rev: 01-01-01-06
     # date: 12/Mar/2023
     # description:
@@ -2406,7 +2411,7 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
             arc_seg = True
         else:
             arc_seg = None
-        print('arc_seg = ' +str(arc_seg))
+
         return (last_row_flag, x, y, z, arc_seg, rad, cw, less_180)  # return values
 
     if operation == 'line':                 # initialize tro flag.
@@ -2500,9 +2505,7 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
     while counter <= last_row:      # recursive loop
 
         if skip_debug == False:  # skip if True.
-#            skip_debug = False  # initialize
-            print('counter = ' + str(counter))
-            print('segment_debug = ' + str(segment_debug))
+
             if arc_seg == False:
                 segment_debug = 'linear'
             elif arc_seg == True:
