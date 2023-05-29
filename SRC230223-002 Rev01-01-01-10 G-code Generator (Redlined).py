@@ -9,12 +9,6 @@
 #
 # ---Change History---
 #
-# rev: 01-01-01-10
-# date: 29/May/2023
-# description:
-# create supporting document "ALG20220411004 Rev02 Main Algorithm" for repeat_check function.
-# Bug fix.Resolved last_row_flag detection on repeat operation.
-#
 # rev: 01-01-01-09
 # date: 26/May/2023
 # description:
@@ -3566,8 +3560,6 @@ def repeat_data_frame(df_main, counter):
     counter = repeat_row - 1  # set counter to run row on next loop.
     repeat_flag = True  # set repeat_flag
 
-
-
     text_debug = f'\n{operation}\n' \
                      f'repeat row: {repeat_row}'
     text_debug = indent(text_debug, 8)
@@ -3579,7 +3571,6 @@ def repeat_check(repeat_flag, repeat_done_flag, stored_counter, counter):
     # ---Description---
     # check if repeat row has been repeated.
     # repeat_flag, repeat_done_flag, counter = repeat_check(repeat_flag, repeat_done_flag, stored_counter)
-    # refer to ALG20220411004 Main Algorithm
 
     # ---Variable List---
     # repeat_flag = repeat flag set if repeat has been called.
@@ -3593,9 +3584,6 @@ def repeat_check(repeat_flag, repeat_done_flag, stored_counter, counter):
     # counter = set counter to run row on next loop.
 
     # ---Change History---
-    # rev: 01-01-01-10
-    # create supporting document "ALG20220411004 Rev02 Main Algorithm"
-    #
     # rev: 01-01-01-07
     # initial release
     # software test run on 11/Aug/2022
@@ -3740,12 +3728,6 @@ while counter<=last_row:
     sheet = 'main'
     write_to_file(name_debug, '\n')  # empty line for debug file readability.
     break_flag, text = last_row_detect(df_main, sheet, last_row_flag, last_row, counter, 4)        # detect last row in main excel tab
-
-    if repeat_done_flag == True:
-        last_row_flag = format_data_frame_variable(df_main, 'last_row_flag', stored_counter-1)  # import last_row flag from repeat row. check if repeat row is designated as last row.
-        if last_row_flag == True:
-            break_flag = True      # set break_flag
-
     if break_flag == True:                                                  # break if last row
         write_to_file(name, text)
         break
