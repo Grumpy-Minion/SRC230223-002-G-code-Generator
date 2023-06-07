@@ -208,6 +208,10 @@ import pandas as pd
 import sys
 from datetime import datetime
 import textwrap
+import numpy as np
+#from IPython.display import display
+#from tabulate import tabulate
+#from sklearn.datasets import load_iris
 
 def absolute_angle(start_x, start_y, end_x, end_y, debug = False):
     # calculate absolute angle of a vector with reference to the x axis.
@@ -2362,6 +2366,14 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
         # wos = width of trochoidal slot
         # doc = depth of cut (for trochoidal only)
 
+        df_temp = df[df.columns.drop(['Notes'])]
+        df_temp = df_temp.to_markdown(index=False, tablefmt='pipe', colalign=['center'] * len(df_temp.columns))
+        text_debug = str(df_temp)
+        text_debug = indent(text_debug, 4)
+        text_debug = text_debug + '\n'  # spacing
+        write_to_file(name_debug, text_debug)  # write to debug file
+        #print(df_temp)
+
         df.set_index('static_variable', inplace=True)  # replace index default column with static_variable column
 
         operation_name = format_data_frame_variable(df, 'static_value', 'operation_name', debug)  # import name of operation.
@@ -2452,7 +2464,7 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
                                   f'wos: {wos}\n' \
                                   f'doc: {doc}\n'
     text_debug = text_debug + '\n'
-    text_debug = indent(text_debug, 8)
+    text_debug = indent(text_debug, 8) 
     write_to_file(name_debug, text_debug)  # write to debug file
 
 
@@ -2467,6 +2479,27 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
     elif arc_seg == None:
         segment_debug = 'None'
     if tro == False:     # line operation
+
+        df_temp_01 = df[['static_variable', 'static_value']]    # create temp dataframe consisting of 'static_variable', 'static_value' columns only.
+        df_temp_01.set_index('static_variable', inplace=True)  # replace default index column with static_variable column as index
+        df_temp_01.at['offset', 'static_value'] = 'davaeb'  # test entry
+        df_temp_01.reset_index(inplace=True, drop=False)    # restore original numbered index.
+
+        df_temp = df[df.columns.drop(['Notes','static_variable', 'static_value'])]  # create temp dataframe consisting sans 'Notes','static_variable', 'static_value' columns
+        df_temp = df_temp.where(df_temp == '','')   # write blanks into all cells
+
+        df_temp = pd.concat([df_temp, df_temp_01], axis=1).reindex(df_temp.index)   # join the 2 temp dataframes
+        df_temp['shift_x'] = ''         # create additional column
+        df_temp['shift_y'] = ''         # create additional column
+        df_temp['repeat_flag'] = ''     # create additional column
+        df_temp.iloc[0 , 0] = counter      # test write counter to # column
+        df_temp = df_temp.to_markdown(index=False, tablefmt='pipe', colalign=['center'] * len(df_temp.columns))     # tabulate df in txt format
+        text_debug = str(df_temp)       # convert to text str
+        text_debug = indent(text_debug, 4)  # indent table
+
+        text_debug = text_debug + '\n\n'    # spacing
+        write_to_file(name_debug, text_debug)  # write to debug file
+
         text_debug = f'row: {counter}, last_row_flag: {last_row_flag}, x: {start_x}, y: {start_y}, z: {start_z}, segment: {segment_debug}, rad: {rad}, cw: {cw}, less_180: {less_180}\n'  # row: 0
     else:
         text_debug = f'row: {counter}, last_row_flag: {last_row_flag}, x: {start_x}, y: {start_y}, segment: {segment_debug}, rad: {rad}, cw: {cw}, less_180: {less_180}\n'  # row: 0
@@ -3635,12 +3668,20 @@ excel_file = 'LOG20220414001 G-code Parameters.xlsx'       # !!!! identify name 
 sheet = 'parameters'                # identify name of excel sheet to import data from.
 start_block, end_block, name, name_debug, clear_z, start_z, cut_f, finish_f, z_f, dia = parameters_data_frame(excel_file, sheet)        # generate G-code parameters.
 
-text_debug = f'read excel {sheet} tab\n'
-write_to_file(name_debug, text_debug)    # write to debug file
+df_temp = pd.read_excel(excel_file, sheet_name=sheet, na_filter=False)  # import excel file into dataframe.
+#df_temp = df[df.columns.drop(['Notes'])]
+df_temp = df_temp.to_markdown(index=False, tablefmt='pipe', colalign=['center'] * len(df_temp.columns))
+text_debug = str(df_temp)
+text_debug = indent(text_debug,0)
+write_to_file(name_debug, text_debug)  # write to debug file
+print(df_temp)
+
+#text_debug = f'read excel {sheet} tab\n'
+#write_to_file(name_debug, text_debug)    # write to debug file
 
 write_to_file(name, start_block)    # write G-code start block
 
-text_debug = 'write g-code start_block\n'
+text_debug = '\n\nwrite g-code start_block\n'
 write_to_file(name_debug, text_debug)    # write to debug file
 # ===========================================================================
 # ================================ G-code start =============================
@@ -3657,14 +3698,17 @@ repeat_flag = False  # initialize repeat_flag
 repeat_done_flag = False  # initialize repeat_done_flag
 stored_counter = int(0)  # initialize stored_counter
 
-text_debug = f'read excel "{sheet}" tab\n\n'
-write_to_file(name_debug, text_debug)    # write to debug file
-text_debug = f'{sheet}\n' \
-             f'total rows: {rows}\n'
-text_debug = indent(text_debug, 4)
+#text_debug = f'read excel "{sheet}" tab\n\n'
+#write_to_file(name_debug, text_debug)    # write to debug file
+text_debug = f'\ntab: {sheet}\n' \
+             f'total rows: {rows}\n\n'
+text_debug = indent(text_debug, 0)
 write_to_file(name_debug, text_debug)    # write to debug file
 
-text_debug = indent(text_debug, 4)
+df_temp = df_main[df_main.columns.drop(['Notes'])]      # create main df. exclude Notes column
+df_temp = df_temp.to_markdown(index=False, tablefmt='pipe', colalign=['center']*len(df_temp.columns))   # tabulate main df
+text_debug = str(df_temp)
+text_debug = indent(text_debug, 0)
 write_to_file(name_debug, text_debug)    # write to debug file
 
 # import content of excel file.
