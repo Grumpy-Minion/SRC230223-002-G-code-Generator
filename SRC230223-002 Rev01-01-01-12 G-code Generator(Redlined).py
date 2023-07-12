@@ -2434,7 +2434,36 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
 
         # ---Return Variable List---
         # text_debug_temp = tabulated row
-        text_debug_temp = ''    # intialize
+
+        df_temp = df[df.columns.drop(['Notes','static_variable', 'static_value'])]  # create temp dataframe consisting sans 'Notes','static_variable', 'static_value' columns
+        df_temp = df_temp.where(df_temp == '','')   # write blanks into all cells
+
+        df_temp['adjusted_x'] = ''      # create additional column
+        df_temp['adjusted_y'] = ''      # create additional column
+        df_temp['shift_x'] = ''         # create additional column
+        df_temp['shift_y'] = ''         # create additional column
+        df_temp['repeat_flag'] = ''     # create additional column
+        df_temp = df_temp.drop(df_temp.index[1:])  # remove all rows except for the first row.
+        df_temp.iloc[[0],] = 'raw'   # initialize cells by writing 'raw' into all cells
+
+        df_temp.at[0, '#'] = counter  # write counter to # column
+        df_temp.at[0, 'last_row_flag'] = last_row_flag
+        df_temp.at[0, 'x'] = df.at[counter, 'x']
+        df_temp.at[0, 'y'] = df.at[counter, 'y']
+        df_temp.at[0, 'z'] = df.at[counter, 'z']
+        df_temp.at[0, 'segment'] = segment_debug
+        df_temp.at[0, 'rad'] = rad
+        df_temp.at[0, 'cw'] = cw
+        df_temp.at[0, 'less_180'] = less_180
+        df_temp.at[0, 'comments'] = df.at[counter, 'comments']
+        df_temp.at[0, 'adjusted_x'] = start_x
+        df_temp.at[0, 'adjusted_y'] = start_y
+        df_temp.at[0, 'shift_x'] = shift_x
+        df_temp.at[0, 'shift_y'] = shift_y
+        df_temp.at[0, 'repeat_flag'] = repeat_flag
+
+        df_temp = df_temp.to_markdown(index=False, tablefmt='pipe', colalign=['center'] * len(df_temp.columns))     # tabulate df in txt format
+        text_debug_temp = str(df_temp)       # convert to text str
         return (text_debug_temp)  # return values
 
     if operation == 'line':                 # initialize tro flag.
@@ -2462,11 +2491,9 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
     df_temp = df[df.columns.drop(['Notes'])]  # remove notes column
     df_temp = df_temp.to_markdown(index=False, tablefmt='pipe', colalign=['center'] * len(df_temp.columns))  # tabulate dataframe
     text_debug = text_debug + str(df_temp)
-    text_debug = indent(text_debug, 8)
+    text_debug = indent(text_debug, 8)  # indent spacing
     text_debug = text_debug + '\n\n'  # spacing
     write_to_file(name_debug, text_debug)  # write to debug file
-
-
 
     # print static variables to debug file
     text_debug = f'static variables\n' \
@@ -2483,7 +2510,6 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
     text_debug = indent(text_debug, 8) 
     write_to_file(name_debug, text_debug)  # write to debug file
 
-
     # initialize parameters
     last_row_flag, start_x, start_y, start_z, arc_seg, rad, cw, less_180 = extract_row(counter)  # extract row 0 values.
 
@@ -2496,31 +2522,8 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
         segment_debug = 'None'
     if tro == False:     # line operation
 
-        df_temp_01 = df[['static_variable', 'static_value']]    # create temp dataframe consisting of 'static_variable', 'static_value' columns only.
-        df_temp_01.set_index('static_variable', inplace=True)  # replace default index column with static_variable column as index
-        df_temp_01.at['offset', 'static_value'] = 'davaeb'  # test entry
-        df_temp_01.reset_index(inplace=True, drop=False)    # restore original numbered index.
-
-        df_temp = df[df.columns.drop(['Notes','static_variable', 'static_value'])]  # create temp dataframe consisting sans 'Notes','static_variable', 'static_value' columns
-        df_temp = df_temp.where(df_temp == '','')   # write blanks into all cells
-
-#        df_temp = df_temp.to_markdown(index=False, tablefmt='pipe', colalign=['center'] * len(df_temp.columns))     # tabulate df in txt format
-#        text_debug = str(df_temp)       # convert to text str
-#        text_debug = indent(text_debug, 4)  # indent table
-#        text_debug = text_debug + '\n\n'    # spacing
-#        write_to_file(name_debug, text_debug)  # write to debug file
-
-#        df_temp = pd.concat([df_temp, df_temp_01], axis=1).reindex(df_temp.index)   # join the 2 temp dataframes
-        df_temp['adjusted_x'] = ''      # create additional column
-        df_temp['adjusted_y'] = ''      # create additional column
-        df_temp['shift_x'] = ''         # create additional column
-        df_temp['shift_y'] = ''         # create additional column
-        df_temp['repeat_flag'] = ''     # create additional column
-        df_temp.iloc[0 , 0] = counter      # test write counter to # column
-        df_temp_tab = df_temp.to_markdown(index=False, tablefmt='pipe', colalign=['center'] * len(df_temp.columns))     # tabulate df in txt format
-        text_debug = str(df_temp_tab)       # convert to text str
-        text_debug = indent(text_debug, 4)  # indent table
-
+        text_debug = debug_print_row(df, counter)   # tabulate single row
+        text_debug = indent(text_debug, 8)  # indent table
         text_debug = text_debug + '\n\n'    # spacing
         write_to_file(name_debug, text_debug)  # write to debug file
 
@@ -2528,41 +2531,6 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
     else:
         text_debug = f'row: {counter}, last_row_flag: {last_row_flag}, x: {start_x}, y: {start_y}, segment: {segment_debug}, rad: {rad}, cw: {cw}, less_180: {less_180}\n'  # row: 0
     text_debug = indent(text_debug, 8)
-    write_to_file(name_debug, text_debug)  # write to debug file
-
-    df_temp = df_temp.drop(df_temp.index[1:])   # remove all rows except for the first row.
-    df_temp = df_temp.where(df_temp == '', 'raw')  # write 'raw' into all cells
-    df_temp.iloc[[0],] = 'raw'
-
-    df_temp_02 = df_temp.to_markdown(index=False, tablefmt='pipe', colalign=['center'] * len(df_temp.columns))  # tabulate df in txt format
-    text_debug = str(df_temp_02)  # convert to text str
-    text_debug = indent(text_debug, 4)  # indent table
-    text_debug = text_debug + '\n\n'  # spacing
-    write_to_file(name_debug, text_debug)  # write to debug file
-
-#    df_temp.iloc[0,0] = counter  # test write counter to # column
-    df_temp.at[0,'#'] = counter  # test write counter to # column
-    df_temp.at[0,'last_row_flag'] = last_row_flag
-    df_temp.at[0,'x'] = df.at[counter,'x']
-    df_temp.at[0,'y'] = df.at[counter,'y']
-    df_temp.at[0,'z'] = df.at[counter,'z']
-    if segment_debug == None:
-        df_temp.at[0, 'segment'] = 'None'
-    else:
-        df_temp.at[0,'segment'] = segment_debug
-    df_temp.at[0,'rad'] = rad
-    df_temp.at[0,'cw'] = cw
-    df_temp.at[0,'less_180'] = less_180
-    df_temp.at[0,'comments'] = df.at[counter,'comments']
-    df_temp.at[0,'adjusted_x'] = start_x
-    df_temp.at[0,'adjusted_y'] = start_y
-    df_temp.at[0,'shift_x'] = shift_x
-    df_temp.at[0,'shift_y'] = shift_y
-    df_temp.at[0,'repeat_flag'] = repeat_flag
-    df_temp_02 = df_temp.to_markdown(index=False, tablefmt='pipe', colalign=['center'] * len(df_temp.columns))  # tabulate df in txt format
-    text_debug = str(df_temp_02)  # convert to text str
-    text_debug = indent(text_debug, 4)  # indent table
-    text_debug = text_debug + '\n\n'  # spacing
     write_to_file(name_debug, text_debug)  # write to debug file
 
     counter = counter + 1                                           # increment counter
