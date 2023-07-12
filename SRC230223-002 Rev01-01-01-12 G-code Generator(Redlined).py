@@ -2423,14 +2423,15 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
 
         return (last_row_flag, x, y, z, arc_seg, rad, cw, less_180)  # return values
 
-    def debug_print_row(df_temp, counter):
+    def debug_print_row(df_temp, counter, tro):
         # ---Description---
         # Tabulates single, current row to text format.
-        # text_debug_temp = debug_print_row(df_temp, counter)
+        # text_debug_temp = debug_print_row(df_temp, counter, tro)
 
         # ---Variable List---
         # df_temp = data frame
         # counter = row counter
+        # tro = trochoidal flag
 
         # ---Return Variable List---
         # text_debug_temp = tabulated row
@@ -2450,14 +2451,21 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
         df_temp.at[0, 'last_row_flag'] = last_row_flag
         df_temp.at[0, 'x'] = df.at[counter, 'x']
         df_temp.at[0, 'y'] = df.at[counter, 'y']
-        df_temp.at[0, 'z'] = df.at[counter, 'z']
+        if tro == False:
+            df_temp.at[0, 'z'] = df.at[counter, 'z']
         df_temp.at[0, 'segment'] = segment_debug
         df_temp.at[0, 'rad'] = rad
         df_temp.at[0, 'cw'] = cw
         df_temp.at[0, 'less_180'] = less_180
         df_temp.at[0, 'comments'] = df.at[counter, 'comments']
-        df_temp.at[0, 'adjusted_x'] = start_x
-        df_temp.at[0, 'adjusted_y'] = start_y
+        if counter == 0:
+            temp_x = start_x
+            temp_y = start_y
+        else:
+            temp_x = end_x
+            temp_y = end_y
+        df_temp.at[0, 'adjusted_x'] = temp_x
+        df_temp.at[0, 'adjusted_y'] = temp_y
         df_temp.at[0, 'shift_x'] = shift_x
         df_temp.at[0, 'shift_y'] = shift_y
         df_temp.at[0, 'repeat_flag'] = repeat_flag
@@ -2520,18 +2528,17 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
         segment_debug = 'arc'
     elif arc_seg == None:
         segment_debug = 'None'
-    if tro == False:     # line operation
+#    if tro == False:     # line operation
+#        text_debug = f'row: {counter}, last_row_flag: {last_row_flag}, x: {start_x}, y: {start_y}, z: {start_z}, segment: {segment_debug}, rad: {rad}, cw: {cw}, less_180: {less_180}\n'  # row: 0
+#    else:
+#        text_debug = f'row: {counter}, last_row_flag: {last_row_flag}, x: {start_x}, y: {start_y}, segment: {segment_debug}, rad: {rad}, cw: {cw}, less_180: {less_180}\n'  # row: 0
+#    text_debug = indent(text_debug, 8)
+#    write_to_file(name_debug, text_debug)  # write to debug file
 
-        text_debug = debug_print_row(df, counter)   # tabulate single row
+        text_debug = debug_print_row(df, counter, tro)  # tabulate single row
         text_debug = indent(text_debug, 8)  # indent table
-        text_debug = text_debug + '\n\n'    # spacing
+        text_debug = text_debug + '\n\n'  # spacing
         write_to_file(name_debug, text_debug)  # write to debug file
-
-        text_debug = f'row: {counter}, last_row_flag: {last_row_flag}, x: {start_x}, y: {start_y}, z: {start_z}, segment: {segment_debug}, rad: {rad}, cw: {cw}, less_180: {less_180}\n'  # row: 0
-    else:
-        text_debug = f'row: {counter}, last_row_flag: {last_row_flag}, x: {start_x}, y: {start_y}, segment: {segment_debug}, rad: {rad}, cw: {cw}, less_180: {less_180}\n'  # row: 0
-    text_debug = indent(text_debug, 8)
-    write_to_file(name_debug, text_debug)  # write to debug file
 
     counter = counter + 1                                           # increment counter
     last_row_flag, end_x, end_y, end_z, arc_seg, rad, cw, less_180 = extract_row(counter)  # extract row 1 values.
@@ -2577,10 +2584,11 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
                 segment_debug = 'arc'
             elif arc_seg == None:
                 segment_debug = 'None'
-            if tro == False:  # line operation
-                text_debug = f'row: {counter}, last_row_flag: {last_row_flag}, x: {end_x}, y: {end_y}, z: {start_z}, segment: {segment_debug}, rad: {rad}, cw: {cw}, less_180: {less_180}\n'  # row: 0
-            else:
-                text_debug = f'row: {counter}, last_row_flag: {last_row_flag}, x: {end_x}, y: {end_y}, segment: {segment_debug}, rad: {rad}, cw: {cw}, less_180: {less_180}\n'  # row: 0
+#            if tro == False:  # line operation
+#                text_debug = f'row: {counter}, last_row_flag: {last_row_flag}, x: {end_x}, y: {end_y}, z: {start_z}, segment: {segment_debug}, rad: {rad}, cw: {cw}, less_180: {less_180}\n'  # row: 0
+#            else:
+#                text_debug = f'row: {counter}, last_row_flag: {last_row_flag}, x: {end_x}, y: {end_y}, segment: {segment_debug}, rad: {rad}, cw: {cw}, less_180: {less_180}\n'  # row: 0
+            text_debug = debug_print_row(df, counter, tro) + '\n\n'  # tabulate single row
             text_debug = indent(text_debug, 8)
             write_to_file(name_debug, text_debug)  # write to debug file
         elif skip_debug == True:
