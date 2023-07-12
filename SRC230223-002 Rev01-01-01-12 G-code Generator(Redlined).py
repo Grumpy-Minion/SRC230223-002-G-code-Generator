@@ -2510,15 +2510,15 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
     df_temp = df_temp.assign(static_value='raw')    # initialize cells by writing 'raw' into all cells in static_value column
 
     df_temp.at['offset', 'static_value'] = offset  # write offset
-    df_temp.at['feed', 'static_value'] = feed
-    df_temp.at['safe_z', 'static_value'] = safe_z
-    df_temp.at['z_f', 'static_value'] = z_f
-    df_temp.at['mode', 'static_value'] = mode
+    df_temp.at['feed', 'static_value'] = feed  # feed
+    df_temp.at['safe_z', 'static_value'] = safe_z  # write safe_z
+    df_temp.at['z_f', 'static_value'] = z_f  # write z_f
+    df_temp.at['mode', 'static_value'] = mode  # write mode
 
     if tro == True:
-        df_temp.at['step', 'static_value'] = step  # write offset
-        df_temp.at['wos', 'static_value'] = wos
-        df_temp.at['doc', 'static_value'] = doc
+        df_temp.at['step', 'static_value'] = step  # write step
+        df_temp.at['wos', 'static_value'] = wos  # write wos
+        df_temp.at['doc', 'static_value'] = doc  # write doc
 
     df_temp = df_temp.to_markdown(index=False, tablefmt='pipe', colalign=['center'] * len(df_temp.columns))  # tabulate dataframe
     text_debug = text_debug + str(df_temp)
