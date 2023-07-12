@@ -2504,18 +2504,26 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
     write_to_file(name_debug, text_debug)  # write to debug file
 
     # print static variables to debug file
-    text_debug = f'static variables\n' \
-                 f'offset: {offset}\n' \
-                 f'feed: {feed}\n' \
-                 f'safe_z: {safe_z}\n' \
-                 f'z_f: {z_f}\n' \
-                 f'mode: {mode}\n'
+    df_temp = df[['static_variable', 'static_value']]  # drop all columns except 'static_variable'and 'static_value'
+    df_temp['static_variable_index'] = df_temp.loc[:, 'static_variable']    # create static_variable_index column. duplicate of static_variable column
+    df_temp.set_index('static_variable_index', inplace=True)  # replace index default column with static_variable_index column
+    df_temp = df_temp.assign(static_value='raw')    # initialize cells by writing 'raw' into all cells in static_value column
+
+    df_temp.at['offset', 'static_value'] = offset  # write offset
+    df_temp.at['feed', 'static_value'] = feed
+    df_temp.at['safe_z', 'static_value'] = safe_z
+    df_temp.at['z_f', 'static_value'] = z_f
+    df_temp.at['mode', 'static_value'] = mode
+
     if tro == True:
-       text_debug = text_debug + f'step: {step}\n' \
-                                  f'wos: {wos}\n' \
-                                  f'doc: {doc}\n'
-    text_debug = text_debug + '\n'
-    text_debug = indent(text_debug, 8) 
+        df_temp.at['step', 'static_value'] = step  # write offset
+        df_temp.at['wos', 'static_value'] = wos
+        df_temp.at['doc', 'static_value'] = doc
+
+    df_temp = df_temp.to_markdown(index=False, tablefmt='pipe', colalign=['center'] * len(df_temp.columns))  # tabulate dataframe
+    text_debug = text_debug + str(df_temp)
+    text_debug = indent(text_debug, 8)  # indent spacing
+    text_debug = text_debug + '\n\n'  # spacing
     write_to_file(name_debug, text_debug)  # write to debug file
 
     # initialize parameters
