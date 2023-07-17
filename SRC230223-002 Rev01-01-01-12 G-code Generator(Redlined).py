@@ -2324,7 +2324,7 @@ def debug_single_row_df(df_temp):
     single_df_temp['shift_y'] = ''  # create additional column
     single_df_temp['repeat_flag'] = ''  # create additional column
     single_df_temp = single_df_temp.drop(single_df_temp.index[1:])  # remove all rows except for the first row.
-    single_df_temp.iloc[[0],] = '--raw--'  # initialize cells by writing '--raw--' into all cells
+    single_df_temp.iloc[[0],:] = '--raw--'  # initialize cells by writing '--raw--' into all cells
 
     return (single_df_temp)  # return values
 
