@@ -2281,7 +2281,10 @@ def format_data_frame_variable(df, var_name, row, debug=False):
 
 def debug_print_table(df_temp, operation_temp, sheet_temp, rows_temp):
     # ---Description---
-    # Tabulates table to text format.
+    # imports a dataframe and tabulates the dataframe to text format.
+    # assumes the format of a typical excel operation tab.
+    # removes the notes column.
+    # intended to display excel tab as read from the excel file.
     # text_debug_temp = debug_print_table(df_temp, operation_temp, sheet_temp, rows_temp)
 
     # ---Variable List---
@@ -2966,12 +2969,13 @@ def peck_drill_data_frame(name, excel_file, sheet):
     counter = 0             # initialize counter
     text = ''             # initialize
 
-    text_debug = f'\n{operation}\n'
-    text_debug = text_debug + f'{sheet}\n'
-    text_debug = text_debug + f'total rows: {rows}\n\n'
+#    text_debug = f'\n{operation}\n'
+#    text_debug = text_debug + f'{sheet}\n'
+#    text_debug = text_debug + f'total rows: {rows}\n\n'
 
     text_debug = debug_print_table(df, operation, sheet, rows)
-    text_debug = indent(text_debug, 8)
+    text_debug = indent(text_debug, 8) # indent
+    text_debug = text_debug + '\n\n'  # spacing
     write_to_file(name_debug, text_debug)  # write to debug file
 
     while counter <= last_row:
@@ -3050,10 +3054,12 @@ def surface_data_frame(name, excel_file, sheet):
     counter = 0             # initialize counter
     text = ''             # initialize
 
-    text_debug = f'\n{operation}\n'\
-                 f'{sheet}\n'\
-                 f'total rows: {rows}\n\n'
-    text_debug = indent(text_debug, 8)
+#    text_debug = f'\n{operation}\n'\
+#                 f'{sheet}\n'\
+#                 f'total rows: {rows}\n\n'
+    text_debug = debug_print_table(df, operation, sheet, rows)
+    text_debug = indent(text_debug, 8) # indent
+    text_debug = text_debug + '\n\n'  # spacing
     write_to_file(name_debug, text_debug)  # write to debug file
 
     while counter <= last_row:
@@ -3123,10 +3129,14 @@ def spiral_drill_data_frame(name, excel_file, sheet):
     counter = 0             # initialize counter
     text = ''             # initialize
 
-    text_debug = f'\n{operation}\n'\
-                 f'{sheet}\n'\
-                 f'total rows: {rows}\n\n'
-    text_debug = indent(text_debug, 8)
+#    text_debug = f'\n{operation}\n'\
+#                 f'{sheet}\n'\
+#                 f'total rows: {rows}\n\n'
+#    text_debug = indent(text_debug, 8)
+
+    text_debug = debug_print_table(df, operation, sheet, rows)
+    text_debug = indent(text_debug, 8) # indent
+    text_debug = text_debug + '\n\n'  # spacing
     write_to_file(name_debug, text_debug)  # write to debug file
 
     while counter <= last_row:
@@ -3194,10 +3204,13 @@ def spiral_surface_data_frame(name, excel_file, sheet):
     counter = 0             # initialize counter
     text = ''             # initialize
 
-    text_debug = f'\n{operation}\n'\
-                 f'{sheet}\n'\
-                 f'total rows: {rows}\n\n'
-    text_debug = indent(text_debug, 8)
+#    text_debug = f'\n{operation}\n'\
+#                 f'{sheet}\n'\
+#                 f'total rows: {rows}\n\n'
+
+    text_debug = debug_print_table(df, operation, sheet, rows)
+    text_debug = indent(text_debug, 8) # indent
+    text_debug = text_debug + '\n\n'  # spacing
     write_to_file(name_debug, text_debug)  # write to debug file
 
     while counter <= last_row:
@@ -3268,10 +3281,13 @@ def corner_slice_data_frame(name, excel_file, sheet):
     counter = 0             # initialize counter
     text = ''             # initialize
 
-    text_debug = f'\n{operation}\n'\
-                 f'{sheet}\n'\
-                 f'total rows: {rows}\n\n'
-    text_debug = indent(text_debug, 8)
+#    text_debug = f'\n{operation}\n'\
+#                 f'{sheet}\n'\
+#                 f'total rows: {rows}\n\n'
+
+    text_debug = debug_print_table(df, operation, sheet, rows)
+    text_debug = indent(text_debug, 8)  # indent
+    text_debug = text_debug + '\n\n'  # spacing
     write_to_file(name_debug, text_debug)  # write to debug file
 
 
@@ -3345,10 +3361,13 @@ def spiral_boss_data_frame(name, excel_file, sheet):
     counter = 0             # initialize counter
     text = ''             # initialize
 
-    text_debug = f'\n{operation}\n'\
-                 f'{sheet}\n'\
-                 f'total rows: {rows}\n\n'
-    text_debug = indent(text_debug, 8)
+#    text_debug = f'\n{operation}\n'\
+#                 f'{sheet}\n'\
+#                 f'total rows: {rows}\n\n'
+
+    text_debug = debug_print_table(df, operation, sheet, rows)
+    text_debug = indent(text_debug, 8) # indent
+    text_debug = text_debug + '\n\n'  # spacing
     write_to_file(name_debug, text_debug)  # write to debug file
 
     while counter <= last_row:
