@@ -2461,15 +2461,15 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
         # ---Return Variable List---
         # text_debug_temp = tabulated row
 
-        df_temp = df_temp.loc[:, :'comments']  # create temp dataframe up to 'comments' columns
-        df_temp = df_temp.where(df_temp == '','')   # write blanks into all cells
+#        df_temp = df_temp.loc[:, :'comments']  # create temp dataframe up to 'comments' columns
+#        df_temp = df_temp.where(df_temp == '','')   # write blanks into all cells
 
-        df_temp['adjusted_x'] = ''      # create additional column
-        df_temp['adjusted_y'] = ''      # create additional column
-        df_temp['shift_x'] = ''         # create additional column
-        df_temp['shift_y'] = ''         # create additional column
-        df_temp['repeat_flag'] = ''     # create additional column
-        df_temp = df_temp.drop(df_temp.index[1:])  # remove all rows except for the first row.
+#        df_temp['adjusted_x'] = ''      # create additional column
+#        df_temp['adjusted_y'] = ''      # create additional column
+#        df_temp['shift_x'] = ''         # create additional column
+#        df_temp['shift_y'] = ''         # create additional column
+#        df_temp['repeat_flag'] = ''     # create additional column
+#        df_temp = df_temp.drop(df_temp.index[1:])  # remove all rows except for the first row.
         df_temp.iloc[[0],] = '--raw--'   # initialize cells by writing '--raw--' into all cells
 
         df_temp.at[0, '#'] = counter  # write counter to # column
@@ -2516,6 +2516,7 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
     rows = df.shape[0]      # total number of rows in dataframe.
     last_row = rows - 1     # initialize number of last row
     counter = 0             # initialize counter
+    row_df = debug_single_row_df(df)    # initialize single row data frame.
 
     text_debug = debug_print_table(df, operation, sheet, rows)    # print dataframe as read from excel file
     text_debug = indent(text_debug, 8)  # indent spacing
@@ -2562,7 +2563,7 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
 #    text_debug = indent(text_debug, 8)
 #    write_to_file(name_debug, text_debug)  # write to debug file
 
-        text_debug = debug_print_row(df, counter, tro)  # tabulate single row
+        text_debug = debug_print_row(row_df, counter, tro)  # tabulate single row
         text_debug = indent(text_debug, 8)  # indent table
         text_debug = text_debug + '\n\n'  # spacing
         write_to_file(name_debug, text_debug)  # write to debug file
@@ -2616,7 +2617,7 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
 #            else:
 #                text_debug = f'row: {counter}, last_row_flag: {last_row_flag}, x: {end_x}, y: {end_y}, segment: {segment_debug}, rad: {rad}, cw: {cw}, less_180: {less_180}\n'  # row: 0
 
-            text_debug = debug_print_row(df, counter, tro) + '\n\n'  # tabulate single row
+            text_debug = debug_print_row(row_df, counter, tro) + '\n\n'  # tabulate single row
             text_debug = indent(text_debug, 8)
             write_to_file(name_debug, text_debug)  # write to debug file
 
@@ -2922,6 +2923,30 @@ def parameters_data_frame(excel_file, sheet):
 
     return (start_block, end_block, name, name_debug, clear_z, start_z, cut_f, finish_f, z_f, dia)
 
+def debug_single_row_df(df_temp):
+    # ---Description---
+    # imports a dataframe and creates a single row data frame with the basic formatted columns.
+    # single_df_temp = debug_single_row_df(df_temp)
+
+    # ---Variable List---
+    # df_temp = data frame
+
+    # ---Return Variable List---
+    # single_df_temp = single row data frame
+
+    single_df_temp = df_temp.loc[:, :'comments']  # create temp dataframe up to 'comments' columns
+    single_df_temp = single_df_temp.where(single_df_temp == '', '')  # write blanks into all cells
+
+    single_df_temp['adjusted_x'] = ''  # create additional column
+    single_df_temp['adjusted_y'] = ''  # create additional column
+    single_df_temp['shift_x'] = ''  # create additional column
+    single_df_temp['shift_y'] = ''  # create additional column
+    single_df_temp['repeat_flag'] = ''  # create additional column
+    single_df_temp = single_df_temp.drop(single_df_temp.index[1:])  # remove all rows except for the first row.
+    single_df_temp.iloc[[0],] = '--raw--'  # initialize cells by writing '--raw--' into all cells
+
+    return (single_df_temp)  # return values
+
 def peck_drill_data_frame(name, excel_file, sheet):
     # ---Description---
     # Imports a 2D dataframe from an excel file, calculates the toolpath for peck drilling multiple holes in G code.
@@ -2963,11 +2988,48 @@ def peck_drill_data_frame(name, excel_file, sheet):
     # initial release
     # software test run on 14/Apr/2022
 
+    def debug_print_row(df_temp, counter):
+        # ---Description---
+        # Tabulates single, current row to text format.
+        # text_debug_temp = debug_print_row(df_temp, counter)
+
+        # ---Variable List---
+        # df_temp = data frame
+        # counter = row counter
+
+        # ---Return Variable List---
+        # text_debug_temp = tabulated row
+
+        df_temp.iloc[[0],] = '--raw--'  # initialize cells by writing '--raw--' into all cells
+        df_temp.at[0, '#'] = counter  # write counter to # column
+        df_temp.at[0, 'last_row_flag'] = last_row_flag
+        df_temp.at[0, 'x'] = df.at[counter, 'x']
+        df_temp.at[0, 'y'] = df.at[counter, 'y']
+        df_temp.at[0, 'dia_hole'] = dia_hole
+        df_temp.at[0, 'depth'] = depth
+        df_temp.at[0, 'peck_depth'] = peck_depth
+        df_temp.at[0, 'z_f'] = z_f
+        df_temp.at[0, 'safe_z'] = safe_z
+        df_temp.at[0, 'retract_z'] = retract_z
+        df_temp.at[0, 'dwell'] = dwell
+        df_temp.at[0, 'comments'] = df.at[counter, 'comments']
+
+        df_temp.at[0, 'adjusted_x'] = hole_x
+        df_temp.at[0, 'adjusted_y'] = hole_y
+        df_temp.at[0, 'shift_x'] = shift_x
+        df_temp.at[0, 'shift_y'] = shift_y
+        df_temp.at[0, 'repeat_flag'] = repeat_flag
+
+        df_temp = df_temp.to_markdown(index=False, tablefmt='pipe', colalign=['center'] * len(df_temp.columns))     # tabulate df in txt format
+        text_debug_temp = str(df_temp)       # convert to text str
+        return (text_debug_temp)  # return values
+
     df = pd.read_excel(excel_file, sheet_name=sheet, na_filter=False)
     rows = df.shape[0]      # total number of rows in dataframe.
     last_row = rows - 1     # initialize number of last row
     counter = 0             # initialize counter
     text = ''             # initialize
+    row_df = debug_single_row_df(df)    # initialize single row data frame.
 
 #    text_debug = f'\n{operation}\n'
 #    text_debug = text_debug + f'{sheet}\n'
@@ -2994,6 +3056,8 @@ def peck_drill_data_frame(name, excel_file, sheet):
         dwell = format_data_frame_variable(df, 'dwell', counter)
 
         text_debug = f'row: {counter}, last_row_flag: {last_row_flag}, x: {hole_x}, y: {hole_y}, dia_hole: {dia_hole}, depth: {depth}, peck_depth: {peck_depth}, z_f: {z_f}, safe_z: {safe_z}, retract_z: {retract_z}, dwell: {dwell}\n'
+        text_debug_temp = debug_print_row(row_df, counter)
+        text_debug = text_debug + text_debug_temp + '\n\n'
         text_debug = indent(text_debug, 8)
         write_to_file(name_debug, text_debug)  # write to debug file
 
