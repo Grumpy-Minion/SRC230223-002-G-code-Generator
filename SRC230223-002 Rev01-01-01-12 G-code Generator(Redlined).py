@@ -12,7 +12,7 @@
 # rev: 01-01-01-12
 # date: 04/Jun/2023
 # description:
-#
+# updated debug text to print tabulated tables and rows.
 #
 # rev: 01-01-01-11
 # date: 29/May/2023
@@ -209,9 +209,6 @@ import sys
 from datetime import datetime
 import textwrap
 import numpy as np
-#from IPython.display import display
-#from tabulate import tabulate
-#from sklearn.datasets import load_iris
 
 def absolute_angle(start_x, start_y, end_x, end_y, debug = False):
     # calculate absolute angle of a vector with reference to the x axis.
@@ -2296,6 +2293,11 @@ def debug_print_table(df_temp, operation_temp, sheet_temp, rows_temp):
     # ---Return Variable List---
     # text_debug_temp = tabulated table
 
+    # ---Change History---
+    # rev: 01-01-10-12
+    # initial release
+    # software test run on 18/Jul/2023
+
     text_debug_temp = '\noperation:' + operation_temp + '\n'
     text_debug_temp = text_debug_temp + 'tab:' + sheet_temp + '\n'
     text_debug_temp = text_debug_temp + 'total rows: ' + str(rows_temp) + '\n\n'
@@ -2314,6 +2316,11 @@ def debug_single_row_df(df_temp):
 
     # ---Return Variable List---
     # single_df_temp = single row data frame
+
+    # ---Change History---
+    # rev: 01-01-10-12
+    # initial release
+    # software test run on 18/Jul/2023
 
     single_df_temp = df_temp.loc[:, :'comments']  # create temp dataframe up to 'comments' columns
     single_df_temp = single_df_temp.where(single_df_temp == '', '')  # write blanks into all cells
@@ -2356,6 +2363,11 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
     # cutter_y_final = y coordinate of cutter position
 
     # ---Change History---
+    #
+    # rev: 01-01-10-12
+    # updated debug text to print tabulated tables and rows.
+    # software test run on 18/Jul/2023
+    #
     # rev: 01-01-01-11
     # date: 29/May/2023
     # description:
@@ -2485,16 +2497,7 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
         # ---Return Variable List---
         # text_debug_temp = tabulated row
 
-#        df_temp = df_temp.loc[:, :'comments']  # create temp dataframe up to 'comments' columns
-#        df_temp = df_temp.where(df_temp == '','')   # write blanks into all cells
-
-#        df_temp['adjusted_x'] = ''      # create additional column
-#        df_temp['adjusted_y'] = ''      # create additional column
-#        df_temp['shift_x'] = ''         # create additional column
-#        df_temp['shift_y'] = ''         # create additional column
-#        df_temp['repeat_flag'] = ''     # create additional column
-#        df_temp = df_temp.drop(df_temp.index[1:])  # remove all rows except for the first row.
-        df_temp.iloc[[0],] = '--raw--'   # initialize cells by writing '--raw--' into all cells
+        df_temp.iloc[[0],:] = '--raw--'   # initialize cells by writing '--raw--' into all cells
 
         df_temp.at[0, '#'] = counter  # write counter to # column
         df_temp.at[0, 'last_row_flag'] = last_row_flag
@@ -2580,12 +2583,6 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
         segment_debug = 'arc'
     elif arc_seg == None:
         segment_debug = 'None'
-#    if tro == False:     # line operation
-#        text_debug = f'row: {counter}, last_row_flag: {last_row_flag}, x: {start_x}, y: {start_y}, z: {start_z}, segment: {segment_debug}, rad: {rad}, cw: {cw}, less_180: {less_180}\n'  # row: 0
-#    else:
-#        text_debug = f'row: {counter}, last_row_flag: {last_row_flag}, x: {start_x}, y: {start_y}, segment: {segment_debug}, rad: {rad}, cw: {cw}, less_180: {less_180}\n'  # row: 0
-#    text_debug = indent(text_debug, 8)
-#    write_to_file(name_debug, text_debug)  # write to debug file
 
         text_debug = debug_print_row(row_df, counter, tro)  # tabulate single row
         text_debug = indent(text_debug, 8)  # indent table
@@ -2636,10 +2633,6 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
                 segment_debug = 'arc'
             elif arc_seg == None:
                 segment_debug = 'None'
-#            if tro == False:  # line operation
-#                text_debug = f'row: {counter}, last_row_flag: {last_row_flag}, x: {end_x}, y: {end_y}, z: {start_z}, segment: {segment_debug}, rad: {rad}, cw: {cw}, less_180: {less_180}\n'  # row: 0
-#            else:
-#                text_debug = f'row: {counter}, last_row_flag: {last_row_flag}, x: {end_x}, y: {end_y}, segment: {segment_debug}, rad: {rad}, cw: {cw}, less_180: {less_180}\n'  # row: 0
 
             text_debug = debug_print_row(row_df, counter, tro) + '\n\n'  # tabulate single row
             text_debug = indent(text_debug, 8)
@@ -2962,6 +2955,11 @@ def peck_drill_data_frame(name, excel_file, sheet):
     # N/A
 
     # ---Change History---
+    #
+    # rev: 01-01-10-12
+    # updated debug text to print tabulated tables and rows.
+    # software test run on 18/Jul/2023
+    #
     # rev: 01-01-01-06
     # date: 12/Mar/2023
     # description:
@@ -3000,7 +2998,7 @@ def peck_drill_data_frame(name, excel_file, sheet):
         # ---Return Variable List---
         # text_debug_temp = tabulated row
 
-        df_temp.iloc[[0],] = '--raw--'  # initialize cells by writing '--raw--' into all cells
+        df_temp.iloc[[0],:] = '--raw--'  # initialize cells by writing '--raw--' into all cells
         df_temp.at[0, '#'] = counter  # write counter to # column
         df_temp.at[0, 'last_row_flag'] = last_row_flag
         df_temp.at[0, 'x'] = df.at[counter, 'x']
@@ -3031,10 +3029,6 @@ def peck_drill_data_frame(name, excel_file, sheet):
     text = ''             # initialize
     row_df = debug_single_row_df(df)    # initialize single row data frame.
 
-#    text_debug = f'\n{operation}\n'
-#    text_debug = text_debug + f'{sheet}\n'
-#    text_debug = text_debug + f'total rows: {rows}\n\n'
-
     text_debug = debug_print_table(df, operation, sheet, rows)
     text_debug = indent(text_debug, 8) # indent
     text_debug = text_debug + '\n\n'  # spacing
@@ -3055,7 +3049,6 @@ def peck_drill_data_frame(name, excel_file, sheet):
         retract_z = format_data_frame_variable(df, 'retract_z', counter)
         dwell = format_data_frame_variable(df, 'dwell', counter)
 
-#        text_debug = f'row: {counter}, last_row_flag: {last_row_flag}, x: {hole_x}, y: {hole_y}, dia_hole: {dia_hole}, depth: {depth}, peck_depth: {peck_depth}, z_f: {z_f}, safe_z: {safe_z}, retract_z: {retract_z}, dwell: {dwell}\n'
         text_debug = debug_print_row(row_df, counter)   # populate debug row.
         text_debug = text_debug + '\n\n'
         text_debug = indent(text_debug, 8)
@@ -3089,6 +3082,10 @@ def surface_data_frame(name, excel_file, sheet):
     # N/A
 
     # ---Change History---
+    # rev: 01-01-10-12
+    # updated debug text to print tabulated tables and rows.
+    # software test run on 18/Jul/2023
+    #
     # rev: 01-01-01-09
     # date: 26/May/2023
     # description:
@@ -3124,7 +3121,7 @@ def surface_data_frame(name, excel_file, sheet):
         # ---Return Variable List---
         # text_debug_temp = tabulated row
 
-        df_temp.iloc[[0],] = '--raw--'  # initialize cells by writing '--raw--' into all cells
+        df_temp.iloc[[0],:] = '--raw--'  # initialize cells by writing '--raw--' into all cells
         df_temp.at[0, '#'] = counter  # write counter to # column
         df_temp.at[0, 'last_row_flag'] = last_row_flag
         df_temp.at[0, 'origin_x'] = df.at[counter, 'origin_x']
@@ -3155,9 +3152,6 @@ def surface_data_frame(name, excel_file, sheet):
     text = ''             # initialize
     row_df = debug_single_row_df(df)    # initialize single row data frame.
 
-#    text_debug = f'\n{operation}\n'\
-#                 f'{sheet}\n'\
-#                 f'total rows: {rows}\n\n'
     text_debug = debug_print_table(df, operation, sheet, rows)
     text_debug = indent(text_debug, 8) # indent
     text_debug = text_debug + '\n\n'  # spacing
@@ -3178,7 +3172,6 @@ def surface_data_frame(name, excel_file, sheet):
         safe_z = format_data_frame_variable(df, 'safe_z', counter)
         entry = format_data_frame_variable(df, 'entry', counter)
 
-#        text_debug = f'row: {counter}, last_row_flag: {last_row_flag}, origin_x: {origin_x}, origin_y: {origin_y}, length_x: {length_x}, length_y: {length_y}, doc: {doc}, step: {step}, cut_f: {cut_f}, safe_z: {safe_z}, entry:{entry}\n'
         text_debug = debug_print_row(row_df, counter)   # populate debug row.
         text_debug = text_debug + '\n\n'
         text_debug = indent(text_debug, 8)
@@ -3212,6 +3205,10 @@ def spiral_drill_data_frame(name, excel_file, sheet):
     # N/A
 
     # ---Change History---
+    # rev: 01-01-10-12
+    # updated debug text to print tabulated tables and rows.
+    # software test run on 18/Jul/2023
+    #
     # rev: 01-01-01-06
     # date: 12/Mar/2023
     # description:
@@ -3238,7 +3235,7 @@ def spiral_drill_data_frame(name, excel_file, sheet):
         # ---Return Variable List---
         # text_debug_temp = tabulated row
 
-        df_temp.iloc[[0],] = '--raw--'  # initialize cells by writing '--raw--' into all cells
+        df_temp.iloc[[0],:] = '--raw--'  # initialize cells by writing '--raw--' into all cells
         df_temp.at[0, '#'] = counter  # write counter to # column
         df_temp.at[0, 'last_row_flag'] = last_row_flag
         df_temp.at[0, 'origin_x'] = df.at[counter, 'origin_x']
@@ -3268,11 +3265,6 @@ def spiral_drill_data_frame(name, excel_file, sheet):
     text = ''             # initialize
     row_df = debug_single_row_df(df)    # initialize single row data frame.
 
-#    text_debug = f'\n{operation}\n'\
-#                 f'{sheet}\n'\
-#                 f'total rows: {rows}\n\n'
-#    text_debug = indent(text_debug, 8)
-
     text_debug = debug_print_table(df, operation, sheet, rows)
     text_debug = indent(text_debug, 8) # indent
     text_debug = text_debug + '\n\n'  # spacing
@@ -3291,7 +3283,6 @@ def spiral_drill_data_frame(name, excel_file, sheet):
         cut_f = format_data_frame_variable(df, 'cut_f', counter)
         safe_z = format_data_frame_variable(df, 'safe_z', counter)
 
-#        text_debug = f'row: {counter}, last_row_flag: {last_row_flag}, origin_x: {origin_x}, origin_y: {origin_y}, dia_hole: {dia_hole}, depth: {depth}, step_depth: {step_depth}, cut_f: {cut_f}, safe_z: {safe_z}\n'
         text_debug = debug_print_row(row_df, counter)   # populate debug row.
         text_debug = text_debug + '\n\n'
         text_debug = indent(text_debug, 8)
@@ -3325,6 +3316,10 @@ def spiral_surface_data_frame(name, excel_file, sheet):
     # N/A
 
     # ---Change History---
+    # rev: 01-01-10-12
+    # updated debug text to print tabulated tables and rows.
+    # software test run on 18/Jul/2023
+    #
     # rev: 01-01-01-06
     # date: 12/Mar/2023
     # description:
@@ -3384,10 +3379,6 @@ def spiral_surface_data_frame(name, excel_file, sheet):
     text = ''             # initialize
     row_df = debug_single_row_df(df)    # initialize single row data frame.
 
-#    text_debug = f'\n{operation}\n'\
-#                 f'{sheet}\n'\
-#                 f'total rows: {rows}\n\n'
-
     text_debug = debug_print_table(df, operation, sheet, rows)
     text_debug = indent(text_debug, 8) # indent
     text_debug = text_debug + '\n\n'  # spacing
@@ -3409,7 +3400,6 @@ def spiral_surface_data_frame(name, excel_file, sheet):
         finish_cuts = format_data_frame_variable(df, 'finish_cuts', counter)
         safe_z = format_data_frame_variable(df, 'safe_z', counter)
 
-#        text_debug = f'row: {counter}, last_row_flag: {last_row_flag}, origin_x: {origin_x}, origin_y: {origin_y}, start_dia: {start_dia}, end_dia: {end_dia}, doc: {doc}, step: {step}, cut_f: {cut_f}, finish_f: {finish_f}, finish_cuts: {finish_cuts}, safe_z: {safe_z}\n'
         text_debug = debug_print_row(row_df, counter)   # populate debug row.
         text_debug = text_debug + '\n\n'
         text_debug = indent(text_debug, 8)
@@ -3443,6 +3433,10 @@ def corner_slice_data_frame(name, excel_file, sheet):
     # N/A
 
     # ---Change History---
+    # rev: 01-01-10-12
+    # updated debug text to print tabulated tables and rows.
+    # software test run on 18/Jul/2023
+    #
     # rev: 01-01-01-06
     # date: 12/Mar/2023
     # description:
@@ -3502,15 +3496,9 @@ def corner_slice_data_frame(name, excel_file, sheet):
     counter = 0             # initialize counter
     text = ''             # initialize
     row_df = debug_single_row_df(df)    # initialize single row data frame.
-    row_df.insert(loc= len(row_df.columns)-3, column='adjusted_end_x', value='--raw--')    # insert new column 3rd from end into single row data frame.
-    row_df.insert(loc= len(row_df.columns)-3, column='adjusted_end_y', value='--raw--')    # insert new column 3rd from end into single row data frame.
-#    row_df['adjusted_end_x'] = '--rawe--'  # create additional column for end_x
-#    row_df['adjusted_end_y'] = '--rawe--'  # create additional column for end_y
+    row_df.insert(loc= len(row_df.columns)-3, column='adjusted_end_x', value='--raw--')    # insert new column 'adjusted_end_x' 3rd from end into single row data frame.
+    row_df.insert(loc= len(row_df.columns)-3, column='adjusted_end_y', value='--raw--')    # insert new column 'adjusted_end_y' 3rd from end into single row data frame.
     row_df.rename(columns={"adjusted_x": "adjusted_start_x", "adjusted_y": "adjusted_start_y"}, inplace=True)   # rename adjusted start columns
-
-#    text_debug = f'\n{operation}\n'\
-#                 f'{sheet}\n'\
-#                 f'total rows: {rows}\n\n'
 
     text_debug = debug_print_table(df, operation, sheet, rows)
     text_debug = indent(text_debug, 8)  # indent
@@ -3536,7 +3524,6 @@ def corner_slice_data_frame(name, excel_file, sheet):
         mode = format_data_frame_variable(df, 'mode', counter)
         safe_z = format_data_frame_variable(df, 'safe_z', counter)
 
-#        text_debug = f'row: {counter}, last_row_flag: {last_row_flag}, start_x: {start_x}, start_y: {start_y}, end_x: {end_x}, end_y: {end_y}, start_rad: {start_rad}, end_rad: {end_rad}, doc: {doc}, step: {step}, cut_f: {cut_f}, mode: {mode}, safe_z: {safe_z}\n'
         text_debug = debug_print_row(row_df , counter)   # populate debug row.
         text_debug = text_debug + '\n\n'
         text_debug = indent(text_debug, 8)
