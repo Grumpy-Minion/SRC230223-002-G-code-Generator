@@ -12,7 +12,7 @@
 # rev: 01-01-01-12
 # date: 04/Jun/2023
 # description:
-# updated debug text to print tabulated tables and rows.
+# updated debug text to print tabulated tables and rows for all operations and main program.
 #
 # rev: 01-01-01-11
 # date: 29/May/2023
@@ -3583,7 +3583,7 @@ def spiral_boss_data_frame(name, excel_file, sheet):
         # ---Return Variable List---
         # text_debug_temp = tabulated row
 
-        df_temp.iloc[[0],] = '--raw--'  # initialize cells by writing '--raw--' into all cells
+        df_temp.iloc[[0],:] = '--raw--'  # initialize cells by writing '--raw--' into all cells
         df_temp.at[0, '#'] = counter  # write counter to # column
         df_temp.at[0, 'last_row_flag'] = last_row_flag
         df_temp.at[0, 'origin_x'] = df.at[counter, 'origin_x']
@@ -3604,8 +3604,7 @@ def spiral_boss_data_frame(name, excel_file, sheet):
         df_temp.at[0, 'shift_y'] = shift_y
         df_temp.at[0, 'repeat_flag'] = repeat_flag
 
-        df_temp = df_temp.to_markdown(index=False, tablefmt='pipe',
-                                      colalign=['center'] * len(df_temp.columns))  # tabulate df in txt format
+        df_temp = df_temp.to_markdown(index=False, tablefmt='pipe', colalign=['center'] * len(df_temp.columns))  # tabulate df in txt format
         text_debug_temp = str(df_temp)  # convert to text str
         return (text_debug_temp)  # return values
 
@@ -3615,10 +3614,6 @@ def spiral_boss_data_frame(name, excel_file, sheet):
     counter = 0             # initialize counter
     text = ''             # initialize
     row_df = debug_single_row_df(df)    # initialize single row data frame.
-
-#    text_debug = f'\n{operation}\n'\
-#                 f'{sheet}\n'\
-#                 f'total rows: {rows}\n\n'
 
     text_debug = debug_print_table(df, operation, sheet, rows)
     text_debug = indent(text_debug, 8) # indent
@@ -3641,7 +3636,6 @@ def spiral_boss_data_frame(name, excel_file, sheet):
         finish_cuts = format_data_frame_variable(df, 'finish_cuts', counter)
         safe_z = format_data_frame_variable(df, 'safe_z', counter)
 
-#        text_debug = f'row: {counter}, last_row_flag: {last_row_flag}, origin_x: {origin_x}, origin_y: {origin_y}, start_dia: {start_dia}, end_dia: {end_dia}, doc: {doc}, step: {step}, cut_f: {cut_f}, finish_f: {finish_f}, finish_cuts: {finish_cuts}, safe_z: {safe_z}\n'
         text_debug = debug_print_row(row_df, counter)   # populate debug row.
         text_debug = text_debug + '\n\n'
         text_debug = indent(text_debug, 8)
@@ -3663,6 +3657,7 @@ def spiral_boss_data_frame(name, excel_file, sheet):
 def rapid(name, df_main, counter):
     # ---Description---
     # Imports a 2D dataframe from an excel file, calculates the toolpath for a rapid movement in G code.
+    # x, y, z = rapid(name, df_main, counter)
 
     # ---Variable List---
     # name = name of file
@@ -3670,9 +3665,15 @@ def rapid(name, df_main, counter):
     # counter = row counter
 
     # ---Return Variable List---
-    # N/A
+    # x = x position
+    # y = y position
+    # z = z position
 
     # ---Change History---
+    # rev: 01-01-10-12
+    # return x, y, z
+    # software test run on 18/Jul/2023
+    #
     # rev: 01-01-01-06
     # date: 12/Mar/2023
     # description:
@@ -3692,9 +3693,9 @@ def rapid(name, df_main, counter):
     # software test run on 11/Aug/2022
 
     operation_debug = format_data_frame_variable(df_main, 'operation', counter)
-    text_debug = f'\n{operation_debug}\n'
-    text_debug = indent(text_debug, 8)
-    write_to_file(name_debug, text_debug)  # write to debug file
+#    text_debug = f'\n{operation_debug}\n'
+#    text_debug = indent(text_debug, 8)
+#    write_to_file(name_debug, text_debug)  # write to debug file
 
     x = format_data_frame_variable(df_main, 'x', counter)
     y = format_data_frame_variable(df_main, 'y', counter)
@@ -3710,36 +3711,37 @@ def rapid(name, df_main, counter):
         text = text + f' X{"%.4f" % x}'  # append x position
         text_debug = f'x: {x}, '
         text_debug = indent(text_debug, 8)
-        write_to_file(name_debug, text_debug)  # write to debug file
+#        write_to_file(name_debug, text_debug)  # write to debug file
     elif x == None: # check if x is 'None', if not skip.
         text_debug = f'x: {x}, '
         text_debug = indent(text_debug, 8)
-        write_to_file(name_debug, text_debug)  # write to debug file
+#        write_to_file(name_debug, text_debug)  # write to debug file
     else:
         abort('x', x, 'not float or None')
 
     if isinstance(y, float) == True:  # check if y is a number, if not skip.
         text = text + f' Y{"%.4f" % y}'  # append y position
         text_debug = f'y:{y}, '
-        write_to_file(name_debug, text_debug)  # write to debug file
+#        write_to_file(name_debug, text_debug)  # write to debug file
     elif y == None:  # check if y is 'None', if not skip.
         text_debug = f'y: {y}, '
-        write_to_file(name_debug, text_debug)  # write to debug file
+#        write_to_file(name_debug, text_debug)  # write to debug file
     else:
         abort('y', y, 'not float or None')
 
     if isinstance(z, float) == True:  # check if z is a number, if not skip.
         text = text + f' Z{"%.4f" % z}'  # append z position
         text_debug = f'z:{z}'
-        write_to_file(name_debug, text_debug)  # write to debug file
+#        write_to_file(name_debug, text_debug)  # write to debug file
     elif z == None: # check if z is 'None', if not skip.
         text_debug = f'z: {z}'
-        write_to_file(name_debug, text_debug)  # write to debug file
+#        write_to_file(name_debug, text_debug)  # write to debug file
     else:
         abort('z', z, 'not float or None')
 
     text = text + '         (Rapid)\n'
     write_to_file(name, text)       # write g-code
+    return (x, y, z)
 
 def last_row_detect(df_temp, sheet_temp, last_row_flag, last_row, counter, indent_spacing = 0):
     # ---Description---
@@ -3787,20 +3789,20 @@ def last_row_detect(df_temp, sheet_temp, last_row_flag, last_row, counter, inden
             text = f'''\n(early termination of row)\n(sheet: {sheet_temp})\n(row #: {"%.0f" % row})\n'''  # to G-code text file
             text_debug = 'early termination of row'
             text_debug = indent(text_debug, indent_spacing)
-            write_to_file(name_debug, text_debug)                                                # write to debug file
+#            write_to_file(name_debug, text_debug)                                                # write to debug file
         else:
             print(f'''last row processed\nnormal termination of program\nsheet: {sheet_temp}\n''')    # normal expected program termination
             text = f'''\n(last row processed)\n(normal termination of program)\n(sheet: {sheet_temp})\n'''  # to G-code text file
             text_debug = 'last row processed. normal termination of program.'
             text_debug = indent(text_debug, indent_spacing)
-            write_to_file(name_debug, text_debug)                                                # write to debug file
+#            write_to_file(name_debug, text_debug)                                                # write to debug file
         break_flag = True       # set break flag
     if counter == last_row and break_flag == False:
         print(f'''last row detected and processed\nlast_row_flag not detected!\nunexpected termination of program\nsheet: {sheet_temp}\n''')  # unexpected program termination. last_row_flag not detected
         text = f'''\n(last row detected and processed)\n(last_row_flag not detected!)\n(unexpected termination of program)\n(sheet: {sheet_temp})\n'''  # to G-code text file
         text_debug = 'last row detected and processed. last_row_flag not detected!'
         text_debug = indent(text_debug, indent_spacing)
-        write_to_file(name_debug, text_debug)                                                # write to debug file
+#        write_to_file(name_debug, text_debug)                                                # write to debug file
 
         break_flag = True       # set break flag
     return (break_flag, text)
@@ -3904,6 +3906,10 @@ def shift_data_frame(df_main, counter, shift_x, shift_y):
     # shift_x = amount to shift x by.
     # shift_y = amount to shift y by.
     # ---Change History---
+    # rev: 01-01-10-12
+    # removed debug text.
+    # software test run on 18/Jul/2023
+    #
     # rev: 01-01-01-07
     # initial release
     # software test run on 11/Aug/2022
@@ -3924,11 +3930,11 @@ def shift_data_frame(df_main, counter, shift_x, shift_y):
     else:
         abort('shift_y', temp_y, 'not float or None')
 
-    text_debug = f'\n{operation}\n' \
-                 f'x: {temp_x}, y: {temp_y}\n' \
-                 f'shift_x: {shift_x}, shift_y: {shift_y}'
-    text_debug = indent(text_debug, 8)
-    write_to_file(name_debug, text_debug)  # write to debug file
+#    text_debug = f'\n{operation}\n' \
+#                 f'x: {temp_x}, y: {temp_y}\n' \
+#                 f'shift_x: {shift_x}, shift_y: {shift_y}'
+#    text_debug = indent(text_debug, 8)
+#    write_to_file(name_debug, text_debug)  # write to debug file
 
     return (shift_x, shift_y)
 
@@ -3957,12 +3963,10 @@ def repeat_data_frame(df_main, counter):
     counter = repeat_row - 1  # set counter to run row on next loop.
     repeat_flag = True  # set repeat_flag
 
-
-
-    text_debug = f'\n{operation}\n' \
-                     f'repeat row: {repeat_row}'
-    text_debug = indent(text_debug, 8)
-    write_to_file(name_debug, text_debug)  # write to debug file
+#    text_debug = f'\n{operation}\n' \
+#                     f'repeat row: {repeat_row}'
+#    text_debug = indent(text_debug, 8)
+#    write_to_file(name_debug, text_debug)  # write to debug file
 
     return (stored_counter, counter, repeat_flag)
 
@@ -4032,14 +4036,58 @@ shift_y = 0  # initialize shift y
 repeat_flag = False  # initialize repeat_flag
 repeat_done_flag = False  # initialize repeat_done_flag
 stored_counter = int(0)  # initialize stored_counter
+last_row_flag = False   # initialize last_row_flag
+row_df = debug_single_row_df(df_main)  # initialize single row data frame.
 
 text_debug = f'\ntab: {sheet}\n' \
              f'total rows: {rows}\n\n'
 df_temp = df_main[df_main.columns.drop(['notes'])]      # create main df. exclude notes column
 df_temp = df_temp.to_markdown(index=False, tablefmt='pipe', colalign=['center']*len(df_temp.columns))   # tabulate main df
-text_debug = text_debug + str(df_temp)
+text_debug = text_debug + str(df_temp) + '\n\n'
 text_debug = indent(text_debug, 0)
 write_to_file(name_debug, text_debug)    # write to debug file
+
+def debug_df_row(df_temp, counter):
+    # ---Description---
+    # populate single, current data frame row.
+    # df_temp = debug_df_row(df_temp, counter)
+
+    # ---Variable List---
+    # df_temp = data frame
+    # counter = row counter
+
+    # ---Return Variable List---
+    # df_temp = tabulated row
+
+    df_temp.iloc[[0],:] = '--raw--'  # initialize cells by writing '--raw--' into all cells
+    df_temp.at[0, '#'] = counter  # write counter to # column
+    df_temp.at[0, 'last_row_flag'] = last_row_flag_debug
+    df_temp.at[0, 'operation'] = operation
+    df_temp.at[0, 'sheet_name'] = sheet_debug
+    df_temp.at[0, 'comments'] = df_main.at[counter, 'comments']
+
+    df_temp.at[0, 'adjusted_x'] = '--raw--'     # initialize cells by writing '--raw--'
+    df_temp.at[0, 'adjusted_y'] = '--raw--'     # initialize cells by writing '--raw--'
+    df_temp.at[0, 'shift_x'] = shift_x
+    df_temp.at[0, 'shift_y'] = shift_y
+    df_temp.at[0, 'repeat_flag'] = repeat_flag
+
+    return (df_temp)  # return values
+
+def debug_print_row(df_temp):
+    # ---Description---
+    # Tabulates single, current row to text format.
+    # text_debug_temp = debug_print_row(df_temp)
+
+    # ---Variable List---
+    # df_temp = data frame
+
+    # ---Return Variable List---
+    # text_debug_temp = tabulated row
+
+    df_temp = df_temp.to_markdown(index=False, tablefmt='pipe', colalign=['center'] * len(df_temp.columns))  # tabulate df in txt format
+    text_debug_temp = str(df_temp)  # convert to text str
+    return (text_debug_temp)  # return values
 
 # import content of excel file.
 while counter<=last_row:
@@ -4050,9 +4098,14 @@ while counter<=last_row:
 
     last_row_flag_debug = format_data_frame_variable(df_main, 'last_row_flag', counter)       # import last_row flag from excel file for debug file.
     sheet_debug = format_data_frame_variable(df_main, 'sheet_name', counter)       # import sheet_name from excel file for debug file.
-    text_debug = f'\nrow #: {counter}, last_row flag: {last_row_flag_debug}, operation: {operation}, sheet: {sheet_debug}\n'
-    text_debug = indent(text_debug,4)
-    write_to_file(name_debug, text_debug)  # write to debug file
+#    text_debug = f'\nrow #: {counter}, last_row flag: {last_row_flag_debug}, operation: {operation}, sheet: {sheet_debug}\n'
+
+#    text_debug = text_debug + debug_print_row(row_df, counter)  # populate debug row.
+#    text_debug = text_debug + '\n\n'
+    row_df = debug_df_row(row_df, counter)  # populate debug row.
+
+#    text_debug = indent(text_debug,4)
+#    write_to_file(name_debug, text_debug)  # write to debug file
 
     if operation == 'line' or operation == 'trochoidal':
         operation_valid_flag = True  # set flag
@@ -4065,37 +4118,68 @@ while counter<=last_row:
         if isinstance(return_safe_z, bool) == False:  # check if return_safe_z is a boolean, if not issue error.
             abort('return_safe_z', return_safe_z)  # abort. write error message.
 
+        row_df.at[0, 'start_safe_z'] = start_safe_z
+        row_df.at[0, 'return_safe_z'] = return_safe_z
+        text_debug = debug_print_row(row_df)  # populate debug row.
+        text_debug = text_debug + '\n'
+        text_debug = indent(text_debug, 0)
+        write_to_file(name_debug, text_debug)  # write to debug file
+
         first_x_adjusted, first_y_adjusted, end_x, end_y, cutter_x, cutter_y, text = toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, operation, dia, debug = False)
         write_to_file(name, text)
 
     elif operation == 'drill':
         operation_valid_flag = True  # set flag
         sheet = format_data_frame_variable(df_main, 'sheet_name', counter)
+        text_debug = debug_print_row(row_df)  # populate debug row.
+        text_debug = text_debug + '\n'
+        text_debug = indent(text_debug, 0)
+        write_to_file(name_debug, text_debug)  # write to debug file
         peck_drill_data_frame(name, excel_file, sheet)
 
     elif operation == 'surface':
         operation_valid_flag = True  # set flag
         sheet = format_data_frame_variable(df_main, 'sheet_name', counter)
+        text_debug = debug_print_row(row_df)  # populate debug row.
+        text_debug = text_debug + '\n'
+        text_debug = indent(text_debug, 0)
+        write_to_file(name_debug, text_debug)  # write to debug file
         surface_data_frame(name, excel_file, sheet)
 
     elif operation == 'spiral_drill':
         operation_valid_flag = True  # set flag
         sheet = format_data_frame_variable(df_main, 'sheet_name', counter)
+        text_debug = debug_print_row(row_df)  # populate debug row.
+        text_debug = text_debug + '\n'
+        text_debug = indent(text_debug, 0)
+        write_to_file(name_debug, text_debug)  # write to debug file
         spiral_drill_data_frame(name, excel_file, sheet)
 
     elif operation == 'spiral_surface':
         operation_valid_flag = True  # set flag
         sheet = format_data_frame_variable(df_main, 'sheet_name', counter)
+        text_debug = debug_print_row(row_df)  # populate debug row.
+        text_debug = text_debug + '\n'
+        text_debug = indent(text_debug, 0)
+        write_to_file(name_debug, text_debug)  # write to debug file
         spiral_surface_data_frame(name, excel_file, sheet)
 
     elif operation == 'corner_slice':
         operation_valid_flag = True  # set flag
         sheet = format_data_frame_variable(df_main, 'sheet_name', counter)
+        text_debug = debug_print_row(row_df)  # populate debug row.
+        text_debug = text_debug + '\n'
+        text_debug = indent(text_debug, 0)
+        write_to_file(name_debug, text_debug)  # write to debug file
         corner_slice_data_frame(name, excel_file, sheet)
 
     elif operation == 'spiral_boss':
         operation_valid_flag = True  # set flag
         sheet = format_data_frame_variable(df_main, 'sheet_name', counter)
+        text_debug = debug_print_row(row_df)  # populate debug row.
+        text_debug = text_debug + '\n'
+        text_debug = indent(text_debug, 0)
+        write_to_file(name_debug, text_debug)  # write to debug file
         spiral_boss_data_frame(name, excel_file, sheet)
 
     elif operation == 'clear_z':
@@ -4103,31 +4187,70 @@ while counter<=last_row:
         text = f'G0 Z{clear_z}          (Clear Z)\n'
         write_to_file(name, text)
 
-        text_debug = f'\n{operation}\n' \
-                     f'z: {clear_z}'
-        text_debug = indent(text_debug, 8)
+#        text_debug = f'\n{operation}\n' \
+#                     f'z: {clear_z}\n'
+#        text_debug = indent(text_debug, 8)
+#        write_to_file(name_debug, text_debug)  # write to debug file
+
+        row_df.at[0, 'clear_z'] = clear_z
+        text_debug = debug_print_row(row_df)  # populate debug row.
+        text_debug = text_debug + '\n'
+        text_debug = indent(text_debug, 0)
         write_to_file(name_debug, text_debug)  # write to debug file
 
     elif operation == 'rapid':
         operation_valid_flag = True  # set flag
-        rapid(name, df_main, counter)
+        x, y, z = rapid(name, df_main, counter)
+
+        row_df.at[0, 'x'] = df_main.at[counter, 'x']   # update x
+        row_df.at[0, 'y'] = df_main.at[counter, 'y']   # update y
+        row_df.at[0, 'z'] = df_main.at[counter, 'z']   # update z
+        row_df.at[0, 'adjusted_x'] = x  # update adjusted_x
+        row_df.at[0, 'adjusted_y'] = y  # update adjusted_y
+        text_debug = debug_print_row(row_df)  # populate debug row.
+        text_debug = text_debug + '\n'
+        text_debug = indent(text_debug, 0)
+        write_to_file(name_debug, text_debug)  # write to debug file
 
     elif operation == 'shift':
         operation_valid_flag = True  # set flag
         shift_x, shift_y = shift_data_frame(df_main, counter, shift_x, shift_y)
 
+        row_df.at[0, 'x'] = df_main.at[counter, 'x']   # update x
+        row_df.at[0, 'y'] = df_main.at[counter, 'y']   # update y
+        row_df.at[0, 'shift_x'] = shift_x   # update shift_x
+        row_df.at[0, 'shift_y'] = shift_y   # update shift_y
+        text_debug = debug_print_row(row_df)  # populate debug row.
+        text_debug = text_debug + '\n'
+        text_debug = indent(text_debug, 0)
+        write_to_file(name_debug, text_debug)  # write to debug file
+
     elif operation == 'clear_shift':
         shift_x = 0    # clear shift x value.
         shift_y = 0    # clear shift y value.
         operation_valid_flag = True  # set flag
-        text_debug = f'\n{operation}\n' \
-                     f'shift_x: {shift_x}, shift_y: {shift_y}'
-        text_debug = indent(text_debug, 8)
+#        text_debug = f'\n{operation}\n' \
+#                     f'shift_x: {shift_x}, shift_y: {shift_y}\n'
+#        text_debug = indent(text_debug, 8)
+#        write_to_file(name_debug, text_debug)  # write to debug file
+
+        row_df.at[0, 'shift_x'] = shift_x   # update shift_x
+        row_df.at[0, 'shift_y'] = shift_y   # update shift_y
+        text_debug = debug_print_row(row_df)  # populate debug row.
+        text_debug = text_debug + '\n'
+        text_debug = indent(text_debug, 0)
         write_to_file(name_debug, text_debug)  # write to debug file
 
     elif operation == 'repeat':
         operation_valid_flag = True  # set flag
         stored_counter, counter, repeat_flag = repeat_data_frame(df_main, counter)
+
+        row_df.at[0, 'repeat_flag'] = repeat_flag   # update repeat flag
+        row_df.at[0, 'repeat_row'] = counter+1  # update row to repeat
+        text_debug = debug_print_row(row_df)  # populate debug row.
+        text_debug = text_debug + '\n'
+        text_debug = indent(text_debug, 0)
+        write_to_file(name_debug, text_debug)  # write to debug file
 
     if operation_valid_flag == False:  # check for invalid operation.
         abort('operation', operation)   # abort. write error message.
@@ -4142,7 +4265,7 @@ while counter<=last_row:
         if last_row_flag == True:
             break_flag = True      # set break_flag
 
-    if break_flag == True:                                                  # break if last row
+    if break_flag == True:       # break if last row
         write_to_file(name, text)
         break
 
