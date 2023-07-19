@@ -2298,12 +2298,6 @@ def debug_print_table(df_temp, operation_temp, sheet_temp, rows_temp):
     # initial release
     # software test run on 18/Jul/2023
 
-#    text_debug_temp = '\n===========================\n'
-#    text_debug_temp = text_debug_temp + 'operation:' + operation_temp + '\n'
-#    text_debug_temp = text_debug_temp + 'tab:' + sheet_temp + '\n'
-#    text_debug_temp = text_debug_temp + '===========================\n\n'
-#    text_debug_temp = text_debug_temp + 'total rows: ' + str(rows_temp) + '\n\n'
-
     text_debug_temp = f'\n===========================\n'\
                       f'operation: {operation_temp}\n'\
                       f'tab: {sheet_temp} \n'\
@@ -2796,6 +2790,10 @@ def parameters_data_frame(excel_file, sheet):
     # dia = adjusted cutter tolerance
 
     # ---Change History---
+    # rev: 01-01-10-12
+    # added header borders
+    # software test run on 19/Jul/2023
+    #
     # rev: 01-01-01-05
     # Added int modifier for rev number.
     # Added written by and written on to parameters function.
@@ -2863,10 +2861,12 @@ def parameters_data_frame(excel_file, sheet):
     written_by = format_data_frame_variable(df, 'value', 'written by')  # author name
     written_on = format_data_frame_variable(df, 'value', 'written on')  # date
 
-    text_debug = f'python script: {os.path.basename(__file__)}\n' \
+    text_debug = f'==========================================================================================\n' \
+                 f'python script: {os.path.basename(__file__)}\n' \
                  f'file: {parameter_file_name}\n' \
                  f'rev: {int(parameter_file_rev)}\n' \
-                 f'template: {template_file_name}\n\n'
+                 f'template: {template_file_name}\n'\
+                 f'==========================================================================================\n\n'
     write_to_file(name_debug, text_debug)  # write to debug file
 
     info = \
@@ -3938,12 +3938,6 @@ def shift_data_frame(df_main, counter, shift_x, shift_y):
     else:
         abort('shift_y', temp_y, 'not float or None')
 
-#    text_debug = f'\n{operation}\n' \
-#                 f'x: {temp_x}, y: {temp_y}\n' \
-#                 f'shift_x: {shift_x}, shift_y: {shift_y}'
-#    text_debug = indent(text_debug, 8)
-#    write_to_file(name_debug, text_debug)  # write to debug file
-
     return (shift_x, shift_y)
 
 def repeat_data_frame(df_main, counter):
@@ -3962,6 +3956,10 @@ def repeat_data_frame(df_main, counter):
     # repeat_flag = repeat_flag
 
     # ---Change History---
+    # rev: 01-01-10-12
+    # removed debug text.
+    # software test run on 18/Jul/2023
+    #
     # rev: 01-01-01-07
     # initial release
     # software test run on 11/Aug/2022
@@ -3970,11 +3968,6 @@ def repeat_data_frame(df_main, counter):
     stored_counter = counter + 1  # store original counter for next row.
     counter = repeat_row - 1  # set counter to run row on next loop.
     repeat_flag = True  # set repeat_flag
-
-#    text_debug = f'\n{operation}\n' \
-#                     f'repeat row: {repeat_row}'
-#    text_debug = indent(text_debug, 8)
-#    write_to_file(name_debug, text_debug)  # write to debug file
 
     return (stored_counter, counter, repeat_flag)
 
@@ -4108,14 +4101,7 @@ while counter<=last_row:
 
     last_row_flag_debug = format_data_frame_variable(df_main, 'last_row_flag', counter)       # import last_row flag from excel file for debug file.
     sheet_debug = format_data_frame_variable(df_main, 'sheet_name', counter)       # import sheet_name from excel file for debug file.
-#    text_debug = f'\nrow #: {counter}, last_row flag: {last_row_flag_debug}, operation: {operation}, sheet: {sheet_debug}\n'
-
-#    text_debug = text_debug + debug_print_row(row_df, counter)  # populate debug row.
-#    text_debug = text_debug + '\n\n'
     row_df = debug_df_row(row_df, counter)  # populate debug row.
-
-#    text_debug = indent(text_debug,4)
-#    write_to_file(name_debug, text_debug)  # write to debug file
 
     if operation == 'line' or operation == 'trochoidal':
         operation_valid_flag = True  # set flag
@@ -4197,11 +4183,6 @@ while counter<=last_row:
         text = f'G0 Z{clear_z}          (Clear Z)\n'
         write_to_file(name, text)
 
-#        text_debug = f'\n{operation}\n' \
-#                     f'z: {clear_z}\n'
-#        text_debug = indent(text_debug, 8)
-#        write_to_file(name_debug, text_debug)  # write to debug file
-
         row_df.at[0, 'clear_z'] = clear_z
         text_debug = debug_print_row(row_df)  # populate debug row.
         text_debug = text_debug + '\n'
@@ -4239,10 +4220,6 @@ while counter<=last_row:
         shift_x = 0    # clear shift x value.
         shift_y = 0    # clear shift y value.
         operation_valid_flag = True  # set flag
-#        text_debug = f'\n{operation}\n' \
-#                     f'shift_x: {shift_x}, shift_y: {shift_y}\n'
-#        text_debug = indent(text_debug, 8)
-#        write_to_file(name_debug, text_debug)  # write to debug file
 
         row_df.at[0, 'shift_x'] = shift_x   # update shift_x
         row_df.at[0, 'shift_y'] = shift_y   # update shift_y
@@ -4286,5 +4263,5 @@ while counter<=last_row:
 # ===========================================================================
 
 write_to_file(name, end_block)      # write G-code end block
-text_debug = '\n\nwrite g-code end_block\n'
+text_debug = '\nwrite g-code end_block\n'
 write_to_file(name_debug, text_debug)    # write to debug file
