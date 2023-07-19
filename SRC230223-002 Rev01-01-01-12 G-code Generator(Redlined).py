@@ -2298,9 +2298,17 @@ def debug_print_table(df_temp, operation_temp, sheet_temp, rows_temp):
     # initial release
     # software test run on 18/Jul/2023
 
-    text_debug_temp = '\noperation:' + operation_temp + '\n'
-    text_debug_temp = text_debug_temp + 'tab:' + sheet_temp + '\n'
-    text_debug_temp = text_debug_temp + 'total rows: ' + str(rows_temp) + '\n\n'
+#    text_debug_temp = '\n===========================\n'
+#    text_debug_temp = text_debug_temp + 'operation:' + operation_temp + '\n'
+#    text_debug_temp = text_debug_temp + 'tab:' + sheet_temp + '\n'
+#    text_debug_temp = text_debug_temp + '===========================\n\n'
+#    text_debug_temp = text_debug_temp + 'total rows: ' + str(rows_temp) + '\n\n'
+
+    text_debug_temp = f'\n===========================\n'\
+                      f'operation: {operation_temp}\n'\
+                      f'tab: {sheet_temp} \n'\
+                      f'===========================\n\n'
+
     df_temp = df_temp[df_temp.columns.drop(['notes'])]  # remove notes column
     df_temp = df_temp.to_markdown(index=False, tablefmt='pipe', colalign=['center'] * len(df_temp.columns))  # tabulate dataframe
     text_debug_temp = text_debug_temp + str(df_temp)
@@ -4039,8 +4047,10 @@ stored_counter = int(0)  # initialize stored_counter
 last_row_flag = False   # initialize last_row_flag
 row_df = debug_single_row_df(df_main)  # initialize single row data frame.
 
-text_debug = f'\ntab: {sheet}\n' \
-             f'total rows: {rows}\n\n'
+text_debug = f'\n===========================\n'\
+             f'tab: {sheet}\n' \
+             f'total rows: {rows}\n'\
+             f'===========================\n\n'
 df_temp = df_main[df_main.columns.drop(['notes'])]      # create main df. exclude notes column
 df_temp = df_temp.to_markdown(index=False, tablefmt='pipe', colalign=['center']*len(df_temp.columns))   # tabulate main df
 text_debug = text_debug + str(df_temp) + '\n\n'
