@@ -4085,17 +4085,82 @@ def toolbox():
     print('copies index column to \'#\' column')
     print(str(df)+'\n')
 
-def absolute_cartesian_to_relative_polar(start_x, start_y, end_x, end_y):
-    # transforms absolute cartesian coordinates of 2 points to its relative polar coordinates.
+def absolute_cartesian_to_relative_polar(origin_x, origin_y, absolute_x, absolute_y):
+    # transforms absolute cartesian coordinates of a single point to its relative polar coordinates about an origin point.
     # angle will range from 0 deg to < 360 deg. No negative angle.
-    # input parameters: start_x, start_y, end_x, end_y
-    # angle, length, origin_x, origin_y = absolute_cartesian_to_relative_polar(start_x, start_y, end_x, end_y)
+    # input parameters: origin_x, origin_y, absolute_x, absolute_y
+    # angle, length, origin_x, origin_y = absolute_cartesian_to_relative_polar(origin_x, origin_y, absolute_x, absolute_y)
 
-    angle = absolute_angle(start_x, start_y, end_x, end_y)  # absolute angle of line
-    length = math.sqrt((end_x - start_x) ** 2 + (end_y - start_y) ** 2)     # length of line
-    origin_x = start_x
-    origin_y = start_y
+    angle = absolute_angle(origin_x, origin_y, absolute_x, absolute_y)  # absolute angle of line
+    length = math.sqrt((absolute_x - origin_x) ** 2 + (absolute_y - origin_y) ** 2)     # length of line
+    origin_x = origin_x
+    origin_y = origin_y
     return angle, length, origin_x, origin_y
+
+def shift_origin(new_origin_x,new_origin_y, x, y):
+    # transforms absolute cartesian coordinates of a single point to its new cartesian coordinates relative to a new origin point.
+    # input parameters: new_origin_x,new_origin_y, x, y
+    # shifted_x, shifted_y = shift_origin(new_origin_x,new_origin_y, x, y)
+
+    new_x = x - new_origin_x
+    new_y = y - new_origin_y
+    return new_x, new_y
+
+def cartesian_to_polar(x, y):
+    # transforms cartesian coordinates of a single point to its polar coordinates.
+    # in event an origin point. return angle = None, length = 0
+    # input parameters: x, y
+    # angle, length = cartesian_to_polar(x, y)
+
+    if x == 0 and y == 0:
+        hypo = 0
+        angle = None
+    else:
+        hypo = math.sqrt(x ** 2 + y ** 2)       # length of hypotenuse
+        angle = absolute_angle(0, 0, x, y)      # angle of line
+    return angle, hypo
+
+def polar_to_cartesian(angle, length):
+    # transforms polar coordinates of a single point to its cartesian coordinates.
+    # in event of an origin point, i.e. length = 0. return x = 0 y = 0
+    # input parameters: angle, length
+    # x, y = polar_to_cartesian(angle, length)
+
+    angle = format_angle(angle) # format angle
+
+    if length == 0:
+        x = 0   # origin point
+        y = 0   # origin point
+    else:
+        x = length * math.cos((angle)/180*math.pi)  # calculate x
+        y = length * math.sin((angle)/180*math.pi)  # calculate y
+    return x, y
+
+def format_angle(angle):
+    # formats angle to non negative angle in the range of: 0 >= angle < 360 degress.
+    # input parameters: angle
+    # angle = format_angle(angle)
+
+    angle = angle % 360     # format angle to remove excess revolutions.
+    if angle < 0 :
+        angle = angle + 360     # format negative angles to positive absolute angle.
+    return angle
+
+def rotate_axis(angle, x, y):
+    # transforms cartesian coordinates of a single point to its new cartesian coordinates relative to a new rotated axis.
+    # input parameters: angle, x, y
+    # new_x, new_y = rotate_axis(angle, x, y)
+
+    if x == 0 and y == 0:
+        new_x = 0   # origin point
+        new_y = 0   # origin point
+    else:
+        temp_angle, length = cartesian_to_polar(x, y)
+        temp_angle = temp_angle + angle
+        temp_angle = format_angle(temp_angle)   # format angle
+        new_x, new_y = polar_to_cartesian(temp_angle,length)
+
+    return new_x, new_y
 
 def arc_data(start_x, start_y, end_x, end_y, rad, cw, less_180):
     # calculate various arc parameters based on inputs.
@@ -4788,10 +4853,10 @@ while profile_counter <= end:
 
             intersect_x = (prior_segment_c - later_segment_c) / (later_segment_m - prior_segment_m)     # calculate x intercept
             intersect_y = (prior_segment_c * later_segment_m - later_segment_c * prior_segment_m) / (later_segment_m - prior_segment_m)   # calculate y intercept
-            df_profile.loc[profile_counter - 1, 'intersect_x'] = intersect_x    # write intersect x to prior segment
-            df_profile.loc[profile_counter - 1, 'intersect_y'] = intersect_y    # write intersect y to prior segment
-            df_profile.loc[profile_counter + 1, 'intersect_x'] = intersect_x    # write intersect x to later segment
-            df_profile.loc[profile_counter + 1, 'intersect_y'] = intersect_y    # write intersect y to later segment
+            df_profile.loc[profile_counter - 1, 'end_x_intersect'] = intersect_x    # write intersect x to prior segment
+            df_profile.loc[profile_counter - 1, 'end_y_intersect'] = intersect_y    # write intersect y to prior segment
+            df_profile.loc[profile_counter + 1, 'start_x_intersect'] = intersect_x    # write intersect x to later segment
+            df_profile.loc[profile_counter + 1, 'start_y_intersect'] = intersect_y    # write intersect y to later segment
 
         print('intersect_x: ' + str(intersect_x))
         print('intersect_y: ' + str(intersect_y))
