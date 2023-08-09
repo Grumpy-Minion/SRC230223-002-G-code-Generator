@@ -4127,13 +4127,15 @@ def polar_to_cartesian(angle, length):
     # x, y = polar_to_cartesian(angle, length)
 
     angle = format_angle(angle) # format angle
-
+    print('temp_angle_04: ' + str(angle)) #ok
     if length == 0:
         x = 0   # origin point
         y = 0   # origin point
     else:
         x = length * math.cos((angle)/180*math.pi)  # calculate x
         y = length * math.sin((angle)/180*math.pi)  # calculate y
+        print('x_05: ' + str(x))        #ok
+        print('y_05: ' + str(y))        #ok
     return x, y
 
 def format_angle(angle):
@@ -4156,10 +4158,13 @@ def rotate_axis(angle, x, y):
         new_y = 0   # origin point
     else:
         temp_angle, length = cartesian_to_polar(x, y)
-        temp_angle = temp_angle + angle
+        print('temp_angle_01: ' + str(temp_angle))
+        print('length_01: ' + str(length))      #ok
+        temp_angle = temp_angle - angle
+        print('temp_angle_02: ' + str(temp_angle))      #ok
         temp_angle = format_angle(temp_angle)   # format angle
+        print('temp_angle_03: ' + str(temp_angle))      #ok
         new_x, new_y = polar_to_cartesian(temp_angle,length)
-
     return new_x, new_y
 
 def arc_data(start_x, start_y, end_x, end_y, rad, cw, less_180):
@@ -4837,8 +4842,8 @@ while profile_counter <= end:
             prior_segment_y1 = df_profile.loc[profile_counter - 1, 'start_y_adjusted']      # read start_y_adjusted on prior segment
             prior_segment_x2 = df_profile.loc[profile_counter - 1, 'end_x_adjusted']        # read end_x_adjusted on prior segment
             prior_segment_y2 = df_profile.loc[profile_counter - 1, 'end_y_adjusted']        # read end_y_adjusted on prior segment
-            prior_segment_m = (prior_segment_y2 - prior_segment_y1) / (prior_segment_x2 - prior_segment_x1)   # calculate gradient of prior segment
-            prior_segment_c = prior_segment_y2 - prior_segment_x2 * prior_segment_m     # calculate y intercept of prior segment
+#            prior_segment_m = (prior_segment_y2 - prior_segment_y1) / (prior_segment_x2 - prior_segment_x1)   # calculate gradient of prior segment
+#            prior_segment_c = prior_segment_y2 - prior_segment_x2 * prior_segment_m     # calculate y intercept of prior segment
 
         if later_segment_type == 'linear':
 
@@ -4846,13 +4851,51 @@ while profile_counter <= end:
             later_segment_y1 = df_profile.loc[profile_counter + 1, 'start_y_adjusted']       # read start_y_adjusted on later segment
             later_segment_x2 = df_profile.loc[profile_counter + 1, 'end_x_adjusted']       # read end_x_adjusted on later segment
             later_segment_y2 = df_profile.loc[profile_counter + 1, 'end_y_adjusted']       # read end_y_adjusted on later segment
-            later_segment_m = (later_segment_y2 - later_segment_y1) / (later_segment_x2 - later_segment_x1)   # calculate gradient of later segment
-            later_segment_c = later_segment_y2 - later_segment_x2 * later_segment_m     # calculate y intercept of later segment
+#            later_segment_m = (later_segment_y2 - later_segment_y1) / (later_segment_x2 - later_segment_x1)   # calculate gradient of later segment
+#            later_segment_c = later_segment_y2 - later_segment_x2 * later_segment_m     # calculate y intercept of later segment
 
         if prior_segment_type == 'linear' and later_segment_type == 'linear' :
 
-            intersect_x = (prior_segment_c - later_segment_c) / (later_segment_m - prior_segment_m)     # calculate x intercept
-            intersect_y = (prior_segment_c * later_segment_m - later_segment_c * prior_segment_m) / (later_segment_m - prior_segment_m)   # calculate y intercept
+            parallel_flag = False   # initialize flag
+            origin_x = prior_segment_x1     # use prior segment start point as the origin.
+            origin_y = prior_segment_y1     # use prior segment start point as the origin.
+            axis_angle = absolute_angle(prior_segment_x1, prior_segment_y1, prior_segment_x2, prior_segment_y2)      # use angle of prior segment as the angle of the rotated axis.
+            print('axis_angle: ' + str(axis_angle))     # ok
+            temp_x1, temp_y1  = shift_origin(origin_x, origin_y, later_segment_x1, later_segment_y1)        # apply shift in origin
+            print('temp_x1: ' + str(temp_x1))     # ok
+            print('temp_y1: ' + str(temp_y1))     # ok
+            rel_x1, rel_y1 = rotate_axis(axis_angle, temp_x1, temp_y1)                                    # apply axis rotation
+            print('rel_x1: ' + str(rel_x1))     # ok
+            print('rel_y1: ' + str(rel_y1))     # ok
+            temp_x2, temp_y2  = shift_origin(origin_x, origin_y, later_segment_x2, later_segment_y2)        # apply shift in origin
+            rel_x2, rel_y2 = rotate_axis(axis_angle, temp_x2, temp_y2)                                    # apply axis rotation
+            print('rel_x2: ' + str(rel_x2))     # ok
+            print('rel_y2: ' + str(rel_y2))     # ok
+
+            rel_angle = absolute_angle(rel_x1, rel_y1, rel_x2, rel_y2)     # find angle of later segment relative to prior segment.
+            print('rel_angle: ' + str(rel_angle))   # ok
+            if round(rel_angle,1) == 0:         # later segment is parallel/ 0 deg relative to the prior segment in the same direction.
+                parallel_flag = True        # set parallel flag
+            elif round(rel_angle,1) == 180:         # later segment is parallel/ 180 deg relative to the prior segment in the opposing direction.
+                parallel_flag = True        # set parallel flag
+            elif round(rel_angle,1) == 90 or round(rel_angle,1) == 270:
+                rel_intersect_x = temp_x1      # later segment is normal/90 deg relative to the prior segment.
+            else:
+#                rel_hypo = math.sqrt(rel_x1**2 + rel_y1**2)      # calculate hypotenuse of intersect point and first point of later segment relative to prior segment.
+#                print('rel_hypo: ' + str(rel_hypo))
+#                rel_intersect_x = rel_hypo * math.cos(rel_angle/180*math.pi)        # calculate the root or x-axis intersect on the relative axis.
+#            rel_m = (rel_y2 - rel_y1) / (rel_x2 - rel_x1)   # calculate gradient of relative segment
+#            rel_c = rel_y2 - rel_x2 * rel_m     # calculate y intercept of relative segment
+                rel_m = math.tan(rel_angle/180*math.pi)   # calculate gradient of relative segment for y=mx+c
+                rel_c = rel_y2 - rel_x2 * rel_m     # calculate y intercept of relative segment for y=mx+c
+                rel_intersect_x = -rel_c/rel_m      # calculate x intercept. x = -c/m
+                print('rel_intersect_x: ' + str(rel_intersect_x))
+            temp_x1, temp_y1 = rotate_axis(-axis_angle, rel_intersect_x, 0)          # undo axis rotation
+            intersect_x, intersect_y = shift_origin(-origin_x, -origin_y, temp_x1, temp_y1)          # undo origin shift
+
+
+#            intersect_x = (prior_segment_c - later_segment_c) / (later_segment_m - prior_segment_m)     # calculate x intercept
+#            intersect_y = (prior_segment_c * later_segment_m - later_segment_c * prior_segment_m) / (later_segment_m - prior_segment_m)   # calculate y intercept
             df_profile.loc[profile_counter - 1, 'end_x_intersect'] = intersect_x    # write intersect x to prior segment
             df_profile.loc[profile_counter - 1, 'end_y_intersect'] = intersect_y    # write intersect y to prior segment
             df_profile.loc[profile_counter + 1, 'start_x_intersect'] = intersect_x    # write intersect x to later segment
