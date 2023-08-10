@@ -4141,7 +4141,7 @@ def format_angle(angle):
     # input parameters: angle
     # angle = format_angle(angle)
 
-    angle = angle % 360     # format angle to remove excess revolutions.
+    angle = angle % 360     # format angle to remove excess revolutions. remainder of angle divided by 360deg
     if angle < 0 :
         angle = angle + 360     # format negative angles to positive absolute angle.
     return angle
@@ -4180,6 +4180,7 @@ def arc_data(start_x, start_y, end_x, end_y, rad, cw, less_180):
     # start_angle = absolute start angle of arc
     # end_angle = absolute end angle of arc
     # arc_length = length of arc
+    # arc_angle = angle of arc
 
     vec_x = end_x - start_x                         # x vector length of slot
     vec_y = end_y - start_y                         # y vector length of slot
@@ -4235,14 +4236,30 @@ def arc_data(start_x, start_y, end_x, end_y, rad, cw, less_180):
     arc_angle = abs(arc_angle)      # absolute arc angle
     arc_length = arc_angle/360 * 2*math.pi * rad    # calculate arc_length
 
-#    center_x = round(center_x, 4)  # round to 4 decimal places
-#    center_y = round(center_y, 4)  # round to 4 decimal places
-#    start_angle = round(start_angle, 2)  # round to 2 decimal places
-#    end_angle = round(end_angle, 2)  # round to 2 decimal places
-#    arc_length = round(arc_length, 4)  # round to 4 decimal places
-#    arc_angle = round(arc_angle, 2)  # round to 2 decimal places
-
     return center_x, center_y, start_angle, end_angle, arc_length, arc_angle
+
+def line_data(start_x, start_y, end_x, end_y):
+    # calculate various line parameters based on inputs.
+    # angle, length, vector_x, vector_y = line_data(start_x, start_y, end_x, end_y)
+
+    # ---Variable List---
+    # start_x = x start of line
+    # start_y = y start of line
+    # end_x = x end of line
+    # end_y = y end of line
+
+    # ---Return Variable List---
+    # angle = absolute angle of line
+    # length = length of line
+    # vector_x = x vector of line
+    # vector_y = y vector of line
+
+    vector_x = end_x - start_x                         # x vector length of slot
+    vector_y = end_y - start_y                         # y vector length of slot
+    length = math.sqrt(vector_x ** 2 + vector_y ** 2)     # direct length of start to end point.
+    angle = absolute_angle(start_x, start_y, end_x, end_y, debug=False)        # calculate absolute angle of the vector from the start point to end point. Used to determine center of arc
+
+    return angle, length, vector_x, vector_y
 
 def temp_text_df_debug(df_profile) :
 
@@ -4795,6 +4812,8 @@ end = rows - 1  # initialize end counter
 #-----------------------------------------------------------------------
 while profile_counter <= end:
 
+    intersect_x = None      # intialize
+    intersect_y = None      # intialize
     last_row_flag = df_profile.loc[profile_counter, 'last_row_flag']  # get last_row_flag from df_profile dataframe
     inversion_flag = df_profile.loc[profile_counter, 'inversion_flag']  # get inversion_flag from df_profile dataframe
 
@@ -4805,57 +4824,133 @@ while profile_counter <= end:
         prior_segment_type = df_profile.loc[profile_counter - 1, 'segment']  # get prior segment type from df_profile dataframe
         later_segment_type = df_profile.loc[profile_counter + 1, 'segment']  # get segment type from df_profile dataframe
 
-        if prior_segment_type == 'linear' :
+        prior_segment_x1 = df_profile.loc[profile_counter - 1, 'start_x_adjusted']      # read start_x_adjusted on prior segment
+        prior_segment_y1 = df_profile.loc[profile_counter - 1, 'start_y_adjusted']      # read start_y_adjusted on prior segment
+        prior_segment_x2 = df_profile.loc[profile_counter - 1, 'end_x_adjusted']        # read end_x_adjusted on prior segment
+        prior_segment_y2 = df_profile.loc[profile_counter - 1, 'end_y_adjusted']        # read end_y_adjusted on prior segment
+        if prior_segment_type == 'arc' :
+            prior_segment_r = df_profile.loc[profile_counter - 1, 'rad_adjusted']       # read rad_adjusted on prior segment
+            prior_segment_arc_center_x = df_profile.loc[profile_counter - 1, 'arc_center_x']      # read arc_center_x on prior segment
+            prior_segment_arc_center_y = df_profile.loc[profile_counter - 1, 'arc_center_y']  # read arc_center_y on prior segment
 
-            prior_segment_x1 = df_profile.loc[profile_counter - 1, 'start_x_adjusted']      # read start_x_adjusted on prior segment
-            prior_segment_y1 = df_profile.loc[profile_counter - 1, 'start_y_adjusted']      # read start_y_adjusted on prior segment
-            prior_segment_x2 = df_profile.loc[profile_counter - 1, 'end_x_adjusted']        # read end_x_adjusted on prior segment
-            prior_segment_y2 = df_profile.loc[profile_counter - 1, 'end_y_adjusted']        # read end_y_adjusted on prior segment
-#            prior_segment_m = (prior_segment_y2 - prior_segment_y1) / (prior_segment_x2 - prior_segment_x1)   # calculate gradient of prior segment
+        #            prior_segment_m = (prior_segment_y2 - prior_segment_y1) / (prior_segment_x2 - prior_segment_x1)   # calculate gradient of prior segment
 #            prior_segment_c = prior_segment_y2 - prior_segment_x2 * prior_segment_m     # calculate y intercept of prior segment
 
-        if later_segment_type == 'linear':
-
-            later_segment_x1 = df_profile.loc[profile_counter + 1, 'start_x_adjusted']       # read start_x_adjusted on later segment
-            later_segment_y1 = df_profile.loc[profile_counter + 1, 'start_y_adjusted']       # read start_y_adjusted on later segment
-            later_segment_x2 = df_profile.loc[profile_counter + 1, 'end_x_adjusted']       # read end_x_adjusted on later segment
-            later_segment_y2 = df_profile.loc[profile_counter + 1, 'end_y_adjusted']       # read end_y_adjusted on later segment
+        later_segment_x1 = df_profile.loc[profile_counter + 1, 'start_x_adjusted']       # read start_x_adjusted on later segment
+        later_segment_y1 = df_profile.loc[profile_counter + 1, 'start_y_adjusted']       # read start_y_adjusted on later segment
+        later_segment_x2 = df_profile.loc[profile_counter + 1, 'end_x_adjusted']       # read end_x_adjusted on later segment
+        later_segment_y2 = df_profile.loc[profile_counter + 1, 'end_y_adjusted']       # read end_y_adjusted on later segment
+        if later_segment_type == 'arc':
+            later_segment_r = df_profile.loc[profile_counter + 1, 'rad_adjusted']  # read rad_adjusted on later segment
+            later_segment_arc_center_x = df_profile.loc[profile_counter + 1, 'arc_center_x']      # read arc_center_x on later segment
+            later_segment_arc_center_y = df_profile.loc[profile_counter + 1, 'arc_center_y']  # read arc_center_y on later segment
 #            later_segment_m = (later_segment_y2 - later_segment_y1) / (later_segment_x2 - later_segment_x1)   # calculate gradient of later segment
 #            later_segment_c = later_segment_y2 - later_segment_x2 * later_segment_m     # calculate y intercept of later segment
 
+        # -------------------------------
+        # line - line intersect
+        # -------------------------------
         if prior_segment_type == 'linear' and later_segment_type == 'linear' :
 
             parallel_flag = False   # initialize flag
             origin_x = prior_segment_x1     # use prior segment start point as the origin.
             origin_y = prior_segment_y1     # use prior segment start point as the origin.
-            axis_angle = absolute_angle(prior_segment_x1, prior_segment_y1, prior_segment_x2, prior_segment_y2)      # use angle of prior segment as the angle of the rotated axis.
+            axis_angle = absolute_angle(prior_segment_x1, prior_segment_y1, prior_segment_x2, prior_segment_y2)      # find absolute angle of prior segment. Use segment as reference axis.
             temp_x1, temp_y1  = shift_origin(origin_x, origin_y, later_segment_x1, later_segment_y1)        # apply shift in origin
             rel_x1, rel_y1 = rotate_axis(axis_angle, temp_x1, temp_y1)                                    # apply axis rotation
             temp_x2, temp_y2  = shift_origin(origin_x, origin_y, later_segment_x2, later_segment_y2)        # apply shift in origin
             rel_x2, rel_y2 = rotate_axis(axis_angle, temp_x2, temp_y2)                                    # apply axis rotation
 
-            rel_angle = absolute_angle(rel_x1, rel_y1, rel_x2, rel_y2)     # find angle of later segment relative to prior segment.
+            rel_angle = absolute_angle(rel_x1, rel_y1, rel_x2, rel_y2)     # find angle of later segment relative to prior segment (reference axis).
+
+            # identify possible arc-arc cases
             if round(rel_angle,1) == 0:         # later segment is parallel/ 0 deg relative to the prior segment in the same direction.
+                inversion_type = 'line-line similar parallel'
                 parallel_flag = True        # set parallel flag
+                if round(rel_y1, 4) == 0:       # both segments are colinear
+                    inversion_type = 'line-line similar colinear'
             elif round(rel_angle,1) == 180:         # later segment is parallel/ 180 deg relative to the prior segment in the opposing direction.
+                inversion_type = 'line-line opposing parallel'
                 parallel_flag = True        # set parallel flag
+                if round(rel_y1, 4) == 0:       # both segments are colinear
+                    inversion_type = 'line-line similar colinear'
             elif round(rel_angle,1) == 90 or round(rel_angle,1) == 270:
                 rel_intersect_x = temp_x1      # later segment is normal/90 deg relative to the prior segment.
+                inversion_type = 'line-line orthogonal intersection'
             else:
                 rel_m = math.tan(rel_angle/180*math.pi)   # calculate gradient of relative segment for y=mx+c
                 rel_c = rel_y2 - rel_x2 * rel_m     # calculate y intercept of relative segment for y=mx+c
                 rel_intersect_x = -rel_c/rel_m      # calculate x intercept. x = -c/m
+                inversion_type = 'line-line intersecting'
+
+            print('line-line ' + 'inversion_type: ' + str(inversion_type))  # debug
+            df_profile.loc[profile_counter, 'inversion_type'] = inversion_type    # write inversion_type to data frame
 
             temp_x1, temp_y1 = rotate_axis(-axis_angle, rel_intersect_x, 0)          # undo axis rotation
             intersect_x, intersect_y = shift_origin(-origin_x, -origin_y, temp_x1, temp_y1)          # undo origin shift
 
-            df_profile.loc[profile_counter - 1, 'end_x_intersect'] = intersect_x    # write intersect x to prior segment
-            df_profile.loc[profile_counter - 1, 'end_y_intersect'] = intersect_y    # write intersect y to prior segment
-            df_profile.loc[profile_counter + 1, 'start_x_intersect'] = intersect_x    # write intersect x to later segment
-            df_profile.loc[profile_counter + 1, 'start_y_intersect'] = intersect_y    # write intersect y to later segment
+        # -------------------------------
+        # arc - arc intersect
+        # -------------------------------
+        elif prior_segment_type == 'arc' and later_segment_type == 'arc' :
 
-        print('intersect_x: ' + str(intersect_x))
-        print('intersect_y: ' + str(intersect_y))
+            discard, length, discard, discard = line_data(prior_segment_arc_center_x, prior_segment_arc_center_y, later_segment_arc_center_x, later_segment_arc_center_y)
+            print('arc-arc ' + 'length-01: ' + str(length))  # debug
+            print('arc-arc ' + 'prior_segment_r-01: ' + str(prior_segment_r))  # debug
+            print('arc-arc ' + 'later_segment_r-01: ' + str(later_segment_r))  # debug
+
+            # identify possible arc-arc cases
+            inversion_type = None   # initialize
+            if round(length,4) == round((prior_segment_r + later_segment_r),4):         # arc circles are external tangents.
+                inversion_type = 'arc-arc external tangents'
+            elif round(length,4) == round(abs(prior_segment_r - later_segment_r),4):    # arc circles are internal tangents.
+                inversion_type = 'arc-arc internal tangents'
+            elif round(length,4) > round((prior_segment_r + later_segment_r),4):        # arc circles are external non-intersecting.
+                inversion_type = 'arc-arc external non-intersecting'
+            elif round(length,4) < round(abs(prior_segment_r - later_segment_r),4):     # arc circles are internal non-intersecting.
+                inversion_type = 'arc-arc internal non-intersecting'
+            elif round(length,4) == 0:                                                  # arc circles are concentric
+                inversion_type = 'arc-arc concentric'
+            elif round(length,4) < round((prior_segment_r + later_segment_r),4):        # arc circles are intersecting at 2 distinct points
+                inversion_type = 'arc-arc distinct intersection'
+
+            print('arc-arc ' + 'inversion_type-01: ' + str(inversion_type))  # debug
+            df_profile.loc[profile_counter, 'inversion_type'] = inversion_type    # write inversion_type to data frame
+
+            # assuming that arcs have distinct intersection
+            axis_angle, length_b, discard, discard = line_data(prior_segment_arc_center_x, prior_segment_arc_center_y, later_segment_arc_center_x, prior_segment_arc_center_y)
+            length_c = prior_segment_r
+            length_a = later_segment_r
+            print('arc-arc ' + 'prior_segment_arc_center_x-01: ' + str(prior_segment_arc_center_x))  # ok
+            print('arc-arc ' + 'prior_segment_arc_center_y-01: ' + str(prior_segment_arc_center_y))  # ok
+            print('arc-arc ' + 'later_segment_arc_center_x-01: ' + str(later_segment_arc_center_x))  # ok
+            print('arc-arc ' + 'later_segment_arc_center_y-01: ' + str(later_segment_arc_center_y))  # ok
+
+            print('arc-arc ' + 'length_a-01: ' + str(length_a))  # ok
+            print('arc-arc ' + 'length_b-01: ' + str(length_b))  # ok
+            print('arc-arc ' + 'length_c-01: ' + str(length_c))  # ok
+            print('arc-arc ' + 'axis_angle-01: ' + str(axis_angle))  # ok
+            # Cosine Rule
+            # a^2 = b^2 + c^2 − 2bc cos A
+            # A = cos^-1 [(b^2 + c^2 + a^2)/(2bc)]
+            # Use cosine rule to calculate angle A given lengths a, b, c
+            # Calculate d to find the intersect points
+            # refer to "PRT230721-001 Rev01 Use Cases"
+            angle_a = math.degrees(math.acos((length_b**2 + length_c**2 - length_a**2)/(2*length_b*length_c)))  # calculating angle at corner a using cosine rule
+            rel_y = prior_segment_r * (math.sin((angle_a/180)*math.pi)) # calculating the y/perpendicular distance of an intersect point from reference axis or prior arc center to later arc center
+            rel_x = prior_segment_r * (math.cos((angle_a/180)*math.pi)) # calculating the x/parallel distance of an intersect point from reference axis or prior arc center to later arc center
+            print('arc-arc ' + 'rel_y-01: ' + str(rel_y))  # ok
+            print('arc-arc ' + 'angle_a-01: ' + str(angle_a))  # ok
+            temp_x1, temp_y1 = rotate_axis(-axis_angle, rel_x, rel_y)          # undo axis rotation
+            intersect_x, intersect_y = shift_origin(-prior_segment_arc_center_x, -prior_segment_arc_center_y, temp_x1, temp_y1)          # undo origin shift
+
+
+        print('\n' + 'intersect_x: ' + str(intersect_x))  # ok
+        print('intersect_y: ' + str(intersect_y))  # ok
+        df_profile.loc[profile_counter - 1, 'end_x_intersect'] = intersect_x  # write intersect x to prior segment
+        df_profile.loc[profile_counter - 1, 'end_y_intersect'] = intersect_y  # write intersect y to prior segment
+        df_profile.loc[profile_counter + 1, 'start_x_intersect'] = intersect_x  # write intersect x to later segment
+        df_profile.loc[profile_counter + 1, 'start_y_intersect'] = intersect_y  # write intersect y to later segment
 
     if last_row_flag == True or profile_counter == end:  # break while loop if last_row_flag detected or if last row is read.
         break  # check last_row_flag
