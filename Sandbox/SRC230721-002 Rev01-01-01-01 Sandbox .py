@@ -4918,7 +4918,7 @@ while profile_counter <= end:
             df_profile.loc[profile_counter, 'inversion_type'] = inversion_type    # write inversion_type to data frame
 
             # assuming that arcs have distinct intersection
-            axis_angle, length_b, discard, discard = line_data(prior_segment_arc_center_x, prior_segment_arc_center_y, later_segment_arc_center_x, prior_segment_arc_center_y)
+            axis_angle, length_b, discard, discard = line_data(prior_segment_arc_center_x, prior_segment_arc_center_y, later_segment_arc_center_x, prior_segment_arc_center_y)  # get parameters using arc to arc center line for reference axis
             length_c = prior_segment_r
             length_a = later_segment_r
             print('arc-arc ' + 'prior_segment_arc_center_x-01: ' + str(prior_segment_arc_center_x))  # ok
@@ -4941,6 +4941,18 @@ while profile_counter <= end:
             rel_x = prior_segment_r * (math.cos((angle_a/180)*math.pi)) # calculating the x/parallel distance of an intersect point from reference axis or prior arc center to later arc center
             print('arc-arc ' + 'rel_y-01: ' + str(rel_y))  # ok
             print('arc-arc ' + 'angle_a-01: ' + str(angle_a))  # ok
+
+            # determine which side the intersect point lies on relative to the reference axis
+            shifted_x, shifted_y = shift_origin(prior_segment_arc_center_x, prior_segment_arc_center_y, prior_segment_x2, prior_segment_y2)     # shift origin to prior_segment_arc_center
+            rel_prior_segment_x2, rel_prior_segment_y2 = rotate_axis(axis_angle, shifted_x, shifted_y)      # rotate axis
+
+            if rel_prior_segment_y2 >0 :    # on left/positive side of reference axis
+                rel_y = rel_y
+            elif rel_prior_segment_y2 <0 :    # on right/negative side of reference axis
+                rel_y = -rel_y
+
+            print('arc-arc ' + 'rel_y-02: ' + str(rel_y))  # ok
+
             temp_x1, temp_y1 = rotate_axis(-axis_angle, rel_x, rel_y)          # undo axis rotation
             intersect_x, intersect_y = shift_origin(-prior_segment_arc_center_x, -prior_segment_arc_center_y, temp_x1, temp_y1)          # undo origin shift
 
