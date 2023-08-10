@@ -4114,7 +4114,8 @@ def cartesian_to_polar(x, y):
 
     if x == 0 and y == 0:
         hypo = 0
-        angle = None
+        angle = 0
+#        angle = None
     else:
         hypo = math.sqrt(x ** 2 + y ** 2)       # length of hypotenuse
         angle = absolute_angle(0, 0, x, y)      # angle of line
@@ -4127,15 +4128,12 @@ def polar_to_cartesian(angle, length):
     # x, y = polar_to_cartesian(angle, length)
 
     angle = format_angle(angle) # format angle
-    print('temp_angle_04: ' + str(angle)) #ok
     if length == 0:
         x = 0   # origin point
         y = 0   # origin point
     else:
         x = length * math.cos((angle)/180*math.pi)  # calculate x
         y = length * math.sin((angle)/180*math.pi)  # calculate y
-        print('x_05: ' + str(x))        #ok
-        print('y_05: ' + str(y))        #ok
     return x, y
 
 def format_angle(angle):
@@ -4158,12 +4156,8 @@ def rotate_axis(angle, x, y):
         new_y = 0   # origin point
     else:
         temp_angle, length = cartesian_to_polar(x, y)
-        print('temp_angle_01: ' + str(temp_angle))
-        print('length_01: ' + str(length))      #ok
         temp_angle = temp_angle - angle
-        print('temp_angle_02: ' + str(temp_angle))      #ok
         temp_angle = format_angle(temp_angle)   # format angle
-        print('temp_angle_03: ' + str(temp_angle))      #ok
         new_x, new_y = polar_to_cartesian(temp_angle,length)
     return new_x, new_y
 
@@ -4616,7 +4610,9 @@ start_block, end_block, name, name_debug, clear_z, start_z, cut_f, finish_f, z_f
 offset = df_line_static.loc['offset','static_value']       # get offset from line data frame. for constant offset only.
 mode = df_line_static.loc['mode','static_value']       # get mode from line data frame.
 
+#-----------------------------------------------------------------------
 # calculate adjusted parameters sans transition arcs
+#-----------------------------------------------------------------------
 while profile_counter <= end:
 
     last_row_flag = df_profile.loc[profile_counter, 'last_row_flag']  # get last_row_flag from df_profile dataframe
@@ -4641,23 +4637,13 @@ while profile_counter <= end:
         df_profile.loc[profile_counter, 'end_x_adjusted'] = end_x_adjusted  # write end_x_adjusted
         df_profile.loc[profile_counter, 'end_y_adjusted'] = end_y_adjusted  # write end_y_adjusted
 
-#        df_profile.loc[profile_counter, 'start_x_adjusted'] = round(start_x_adjusted, 4)  # write start_x_adjusted
-#        df_profile.loc[profile_counter, 'start_y_adjusted'] = round(start_y_adjusted, 4)  # write start_y_adjusted
-#        df_profile.loc[profile_counter, 'end_x_adjusted'] = round(end_x_adjusted, 4)  # write end_x_adjusted
-#        df_profile.loc[profile_counter, 'end_y_adjusted'] = round(end_y_adjusted, 4)  # write end_y_adjusted
-
         angle, length, origin_x, origin_y = absolute_cartesian_to_relative_polar(start_x_adjusted, start_y_adjusted, end_x_adjusted, end_y_adjusted)
         df_profile.loc[profile_counter, 'vector_angle_start_adjusted'] = angle  # write vector_angle_start to df_profile dataframe (round to 2 decimal places)
         df_profile.loc[profile_counter, 'vector_angle_end_adjusted'] = angle     # write vector_angle_end to df_profile dataframe (round to 2 decimal places)
         df_profile.loc[profile_counter, 'length_adjusted'] = length             # write length to df_profile dataframe (round to 4 decimal places)
 
-#        df_profile.loc[profile_counter, 'vector_angle_start_adjusted'] = round(angle, 2)  # write vector_angle_start to df_profile dataframe (round to 2 decimal places)
-#        df_profile.loc[profile_counter, 'vector_angle_end_adjusted'] = round(angle, 2)     # write vector_angle_end to df_profile dataframe (round to 2 decimal places)
-#        df_profile.loc[profile_counter, 'length_adjusted'] = round(length, 4)             # write length to df_profile dataframe (round to 4 decimal places)
-
         angle, length, origin_x, origin_y = absolute_cartesian_to_relative_polar(start_x_adjusted, start_y_adjusted, end_x_adjusted, end_y_adjusted)
         df_profile.loc[profile_counter, 'direction_adjusted'] = angle   # write direction of start to end point irregardless of line or arc (round to 2 decimal places)
-#        df_profile.loc[profile_counter, 'direction_adjusted'] = round(angle, 2)   # write direction of start to end point irregardless of line or arc (round to 2 decimal places)
 
     if segment == 'arc' and transition_arc_flag != True :
         start_x_adjusted, start_y_adjusted, end_x_adjusted, end_y_adjusted, rad_adjusted = arc_offset_adjustment(dia, offset, start_x, start_y, end_x, end_y, rad, cw, less_180, mode)
@@ -4673,13 +4659,6 @@ while profile_counter <= end:
         print('end_y_adjusted: ' + str(end_y_adjusted))
         print('rad_adjusted: ' + str(rad_adjusted))
 
-
-#        df_profile.loc[profile_counter, 'start_x_adjusted'] = round(start_x_adjusted, 4)  # write start_x_adjusted
-#        df_profile.loc[profile_counter, 'start_y_adjusted'] = round(start_y_adjusted, 4)  # write start_y_adjusted
-#        df_profile.loc[profile_counter, 'end_x_adjusted'] = round(end_x_adjusted, 4)  # write end_x_adjusted
-#        df_profile.loc[profile_counter, 'end_y_adjusted'] = round(end_y_adjusted, 4)  # write end_y_adjusted
-#        df_profile.loc[profile_counter, 'rad_adjusted'] = round(rad_adjusted, 4)  # write rad_adjusted
-
         if round(rad_adjusted,5) == 0 :    # detect if concave arc has offset into a point.
             arc_point_flag = True
             df_profile.loc[profile_counter, 'arc_point_flag'] = arc_point_flag    # write arc_point_flag to df_profile dataframe
@@ -4692,13 +4671,8 @@ while profile_counter <= end:
         df_profile.loc[profile_counter, 'vector_angle_end_adjusted'] = end_angle         # write vector_angle_end to df_profile dataframe (round to 2 decimal places)
         df_profile.loc[profile_counter, 'length_adjusted'] = arc_length                  # write length to df_profile dataframe (round to 4 decimal places)
 
-#        df_profile.loc[profile_counter, 'vector_angle_start_adjusted'] = round(start_angle, 2)     # write vector_angle_start to df_profile dataframe (round to 2 decimal places)
-#        df_profile.loc[profile_counter, 'vector_angle_end_adjusted'] = round(end_angle, 2)         # write vector_angle_end to df_profile dataframe (round to 2 decimal places)
-#        df_profile.loc[profile_counter, 'length_adjusted'] = round(arc_length, 4)                  # write length to df_profile dataframe (round to 4 decimal places)
-
         angle, length, origin_x, origin_y = absolute_cartesian_to_relative_polar(start_x_adjusted, start_y_adjusted, end_x_adjusted, end_y_adjusted)
         df_profile.loc[profile_counter, 'direction_adjusted'] = angle   # write direction of start to end point irregardless of line or arc (round to 2 decimal places)
-#        df_profile.loc[profile_counter, 'direction_adjusted'] = round(angle, 2)   # write direction of start to end point irregardless of line or arc (round to 2 decimal places)
 
     if last_row_flag == True or profile_counter == end:       # break while loop if last_row_flag detected or if last row is read.
         break  # check last_row_flag
@@ -4709,7 +4683,9 @@ profile_counter = 0  # initialize counter for profile df
 rows = len(df_profile)  # number of rows in df_line
 end = rows - 1  # initialize end counter
 
+#-----------------------------------------------------------------------
 # calculate adjusted parameters for transition arcs
+#-----------------------------------------------------------------------
 while profile_counter <= end:
 
     last_row_flag = df_profile.loc[profile_counter, 'last_row_flag']  # get last_row_flag from df_profile dataframe
@@ -4723,38 +4699,26 @@ while profile_counter <= end:
 
         df_profile.loc[profile_counter, 'offset_start'] = offset  # write offset_start for transition arc
         df_profile.loc[profile_counter, 'offset_end'] = offset  # write offset_end for transition arc
-#        df_profile.loc[profile_counter, 'offset_start'] = round(offset, 4)  # write offset_start for transition arc
-#        df_profile.loc[profile_counter, 'offset_end'] = round(offset, 4)  # write offset_end for transition arc
 
         start_x_adjusted = df_profile.loc[(profile_counter-1), 'end_x_adjusted']    # read end point of prior segment as start point of transition arc segment
         start_y_adjusted = df_profile.loc[(profile_counter-1), 'end_y_adjusted']    # read end point of prior segment as start point of transition arc segment
         end_x_adjusted = df_profile.loc[(profile_counter+1), 'start_x_adjusted']    # read start point of next segment as end point of transition arc segment
         end_y_adjusted = df_profile.loc[(profile_counter+1), 'start_y_adjusted']    # read start point of next segment as end point of transition arc segment
-        rad_adjusted = offset + dia/2       # caluculate rad of adjusted transition arc
+        rad_adjusted = offset + dia/2       # calculate rad of adjusted transition arc
 
         df_profile.loc[profile_counter, 'start_x_adjusted'] = start_x_adjusted  # write start_x_adjusted for transition arc
         df_profile.loc[profile_counter, 'start_y_adjusted'] = start_y_adjusted  # write start_y_adjusted for transition arc
         df_profile.loc[profile_counter, 'end_x_adjusted'] = end_x_adjusted  # write end_x_adjusted for transition arc
         df_profile.loc[profile_counter, 'end_y_adjusted'] = end_y_adjusted  # write end_y_adjusted for transition arc
         df_profile.loc[profile_counter, 'rad_adjusted'] = rad_adjusted  # write rad_adjusted
-#        df_profile.loc[profile_counter, 'start_x_adjusted'] = round(start_x_adjusted, 4)  # write start_x_adjusted for transition arc
-#        df_profile.loc[profile_counter, 'start_y_adjusted'] = round(start_y_adjusted, 4)  # write start_y_adjusted for transition arc
-#        df_profile.loc[profile_counter, 'end_x_adjusted'] = round(end_x_adjusted, 4)  # write end_x_adjusted for transition arc
-#        df_profile.loc[profile_counter, 'end_y_adjusted'] = round(end_y_adjusted, 4)  # write end_y_adjusted for transition arc
-#        df_profile.loc[profile_counter, 'rad_adjusted'] = round(rad_adjusted, 4)  # write rad_adjusted
 
         center_x, center_y, start_angle, end_angle, arc_length, arc_angle = arc_data(start_x_adjusted, start_y_adjusted, end_x_adjusted, end_y_adjusted, rad_adjusted, cw, less_180)
         df_profile.loc[profile_counter, 'vector_angle_start_adjusted'] = start_angle    # write vector_angle_start to df_profile dataframe (round to 2 decimal places)
         df_profile.loc[profile_counter, 'vector_angle_end_adjusted'] = end_angle        # write vector_angle_end to df_profile dataframe (round to 2 decimal places)
         df_profile.loc[profile_counter, 'length_adjusted'] = arc_length                 # write length to df_profile dataframe (round to 4 decimal places)
-#        df_profile.loc[profile_counter, 'vector_angle_start_adjusted'] = round(start_angle, 2)     # write vector_angle_start to df_profile dataframe (round to 2 decimal places)
-#        df_profile.loc[profile_counter, 'vector_angle_end_adjusted'] = round(end_angle, 2)         # write vector_angle_end to df_profile dataframe (round to 2 decimal places)
-#        df_profile.loc[profile_counter, 'length_adjusted'] = round(arc_length, 4)                  # write length to df_profile dataframe (round to 4 decimal places)
 
         angle, length, origin_x, origin_y = absolute_cartesian_to_relative_polar(start_x_adjusted, start_y_adjusted, end_x_adjusted, end_y_adjusted)
         df_profile.loc[profile_counter, 'direction_adjusted'] = angle   # write direction of start to end point irregardless of line or arc (round to 2 decimal places)
-#        df_profile.loc[profile_counter, 'direction_adjusted'] = round(angle, 2)   # write direction of start to end point irregardless of line or arc (round to 2 decimal places)
-
 
     if last_row_flag == True or profile_counter == end:  # break while loop if last_row_flag detected or if last row is read.
         break  # check last_row_flag
@@ -4765,7 +4729,9 @@ profile_counter = 0  # initialize counter for profile df
 rows = len(df_profile)  # number of rows in df_line
 end = rows - 1  # initialize end counter
 
+#-----------------------------------------------------------------------
 # calculate vector_angle_pre_adjusted
+#-----------------------------------------------------------------------
 while profile_counter <= end:
 
     temp_loop_debug('calculate vector_angle_pre_adjusted')      # debugging statement
@@ -4778,7 +4744,6 @@ while profile_counter <= end:
 
     vector_angle_pre_adjusted = df_profile.loc[profile_counter-1, 'vector_angle_end_adjusted']
     df_profile.loc[profile_counter, 'vector_angle_pre_adjusted'] = vector_angle_pre_adjusted  # write vector_angle_pre_adjusted
-#    df_profile.loc[profile_counter, 'vector_angle_pre_adjusted'] = round(vector_angle_pre_adjusted, 4)  # write vector_angle_pre_adjusted
 
     if last_row_flag == True or profile_counter == end:  # break while loop if last_row_flag detected or if last row is read.
         break  # check last_row_flag
@@ -4789,7 +4754,9 @@ profile_counter = 0  # initialize counter for profile df
 rows = len(df_profile)  # number of rows in df_line
 end = rows - 1  # initialize end counter
 
+#-----------------------------------------------------------------------
 # determine segment inversion
+#-----------------------------------------------------------------------
 while profile_counter <= end:
 
     last_row_flag = df_profile.loc[profile_counter, 'last_row_flag']  # get last_row_flag from df_profile dataframe
@@ -4823,7 +4790,9 @@ profile_counter = 0  # initialize counter for profile df
 rows = len(df_profile)  # number of rows in df_line
 end = rows - 1  # initialize end counter
 
+#-----------------------------------------------------------------------
 # determine intersection point
+#-----------------------------------------------------------------------
 while profile_counter <= end:
 
     last_row_flag = df_profile.loc[profile_counter, 'last_row_flag']  # get last_row_flag from df_profile dataframe
@@ -4860,20 +4829,12 @@ while profile_counter <= end:
             origin_x = prior_segment_x1     # use prior segment start point as the origin.
             origin_y = prior_segment_y1     # use prior segment start point as the origin.
             axis_angle = absolute_angle(prior_segment_x1, prior_segment_y1, prior_segment_x2, prior_segment_y2)      # use angle of prior segment as the angle of the rotated axis.
-            print('axis_angle: ' + str(axis_angle))     # ok
             temp_x1, temp_y1  = shift_origin(origin_x, origin_y, later_segment_x1, later_segment_y1)        # apply shift in origin
-            print('temp_x1: ' + str(temp_x1))     # ok
-            print('temp_y1: ' + str(temp_y1))     # ok
             rel_x1, rel_y1 = rotate_axis(axis_angle, temp_x1, temp_y1)                                    # apply axis rotation
-            print('rel_x1: ' + str(rel_x1))     # ok
-            print('rel_y1: ' + str(rel_y1))     # ok
             temp_x2, temp_y2  = shift_origin(origin_x, origin_y, later_segment_x2, later_segment_y2)        # apply shift in origin
             rel_x2, rel_y2 = rotate_axis(axis_angle, temp_x2, temp_y2)                                    # apply axis rotation
-            print('rel_x2: ' + str(rel_x2))     # ok
-            print('rel_y2: ' + str(rel_y2))     # ok
 
             rel_angle = absolute_angle(rel_x1, rel_y1, rel_x2, rel_y2)     # find angle of later segment relative to prior segment.
-            print('rel_angle: ' + str(rel_angle))   # ok
             if round(rel_angle,1) == 0:         # later segment is parallel/ 0 deg relative to the prior segment in the same direction.
                 parallel_flag = True        # set parallel flag
             elif round(rel_angle,1) == 180:         # later segment is parallel/ 180 deg relative to the prior segment in the opposing direction.
@@ -4881,21 +4842,13 @@ while profile_counter <= end:
             elif round(rel_angle,1) == 90 or round(rel_angle,1) == 270:
                 rel_intersect_x = temp_x1      # later segment is normal/90 deg relative to the prior segment.
             else:
-#                rel_hypo = math.sqrt(rel_x1**2 + rel_y1**2)      # calculate hypotenuse of intersect point and first point of later segment relative to prior segment.
-#                print('rel_hypo: ' + str(rel_hypo))
-#                rel_intersect_x = rel_hypo * math.cos(rel_angle/180*math.pi)        # calculate the root or x-axis intersect on the relative axis.
-#            rel_m = (rel_y2 - rel_y1) / (rel_x2 - rel_x1)   # calculate gradient of relative segment
-#            rel_c = rel_y2 - rel_x2 * rel_m     # calculate y intercept of relative segment
                 rel_m = math.tan(rel_angle/180*math.pi)   # calculate gradient of relative segment for y=mx+c
                 rel_c = rel_y2 - rel_x2 * rel_m     # calculate y intercept of relative segment for y=mx+c
                 rel_intersect_x = -rel_c/rel_m      # calculate x intercept. x = -c/m
-                print('rel_intersect_x: ' + str(rel_intersect_x))
+
             temp_x1, temp_y1 = rotate_axis(-axis_angle, rel_intersect_x, 0)          # undo axis rotation
             intersect_x, intersect_y = shift_origin(-origin_x, -origin_y, temp_x1, temp_y1)          # undo origin shift
 
-
-#            intersect_x = (prior_segment_c - later_segment_c) / (later_segment_m - prior_segment_m)     # calculate x intercept
-#            intersect_y = (prior_segment_c * later_segment_m - later_segment_c * prior_segment_m) / (later_segment_m - prior_segment_m)   # calculate y intercept
             df_profile.loc[profile_counter - 1, 'end_x_intersect'] = intersect_x    # write intersect x to prior segment
             df_profile.loc[profile_counter - 1, 'end_y_intersect'] = intersect_y    # write intersect y to prior segment
             df_profile.loc[profile_counter + 1, 'start_x_intersect'] = intersect_x    # write intersect x to later segment
