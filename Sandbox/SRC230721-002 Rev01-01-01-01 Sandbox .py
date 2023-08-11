@@ -5028,14 +5028,15 @@ while profile_counter <= end:
 
             # Use Pythagoras rule to calculate the intersect point.
             # refer to "PRT230721-001 Rev01 Use Cases"
-            rel_intersect_x = rel_arc_x - math.sqrt(later_segment_r**2 - rel_arc_y**2)
+            half_cord = math.sqrt(later_segment_r ** 2 - rel_arc_y ** 2)
+            rel_intersect_x = rel_arc_x - half_cord
             print('\n' + 'rel_intersect_x: ' + str(rel_intersect_x))  # ok
 
             # determine which intersect point to use. near point or far point along the reference axis/line segment from relative origin/line start point
             if length < rel_arc_x:  # near point
                 rel_intersect_x = rel_intersect_x
             elif length > rel_arc_x:  # far point
-                rel_intersect_x = -rel_intersect_x
+                rel_intersect_x = rel_intersect_x + half_cord * 2
 
             print('\n' + 'rel_intersect_x-adj: ' + str(rel_intersect_x))  # ok
 
