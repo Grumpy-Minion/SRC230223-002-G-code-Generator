@@ -4925,7 +4925,7 @@ while profile_counter <= end:
             df_profile.loc[profile_counter, 'inversion_type'] = inversion_type    # write inversion_type to data frame
 
             # assuming that arcs have distinct intersection
-            axis_angle, length_b, discard, discard = line_data(prior_segment_arc_center_x, prior_segment_arc_center_y, later_segment_arc_center_x, prior_segment_arc_center_y)  # get parameters using arc to arc center line for reference axis
+            axis_angle, length_b, discard, discard = line_data(prior_segment_arc_center_x, prior_segment_arc_center_y, later_segment_arc_center_x, later_segment_arc_center_y)  # get parameters using arc to arc center line for reference axis
             length_c = prior_segment_r
             length_a = later_segment_r
             print('arc-arc ' + 'prior_segment_arc_center_x-01: ' + str(prior_segment_arc_center_x))  # ok
