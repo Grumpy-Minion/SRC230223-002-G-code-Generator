@@ -4814,6 +4814,11 @@ while profile_counter <= end:
 
     intersect_x = None      # intialize
     intersect_y = None      # intialize
+    inversion_type = None       # initialize
+    segment_swap_flag = False   # initialize
+    rel_intersect_x = None   # initialize
+    rel_intersect_y = None   # initialize
+
     last_row_flag = df_profile.loc[profile_counter, 'last_row_flag']  # get last_row_flag from df_profile dataframe
     inversion_flag = df_profile.loc[profile_counter, 'inversion_flag']  # get inversion_flag from df_profile dataframe
 
@@ -4900,7 +4905,6 @@ while profile_counter <= end:
             print('arc-arc ' + 'later_segment_r-01: ' + str(later_segment_r))  # debug
 
             # identify possible arc-arc cases
-            inversion_type = None   # initialize
             if round(length,4) == round((prior_segment_r + later_segment_r),4):         # arc circles are external tangents.
                 inversion_type = 'arc-arc external tangents'
             elif round(length,4) == round(abs(prior_segment_r - later_segment_r),4):    # arc circles are internal tangents.
@@ -4956,9 +4960,86 @@ while profile_counter <= end:
             temp_x1, temp_y1 = rotate_axis(-axis_angle, rel_x, rel_y)          # undo axis rotation
             intersect_x, intersect_y = shift_origin(-prior_segment_arc_center_x, -prior_segment_arc_center_y, temp_x1, temp_y1)          # undo origin shift
 
+        # -------------------------------
+        # line - arc intersect
+        # -------------------------------
+        elif (prior_segment_type == 'line' and later_segment_type == 'arc') or (prior_segment_type == 'arc' and later_segment_type == 'line'):
 
-        print('\n' + 'intersect_x: ' + str(intersect_x))  # ok
-        print('intersect_y: ' + str(intersect_y))  # ok
+            if prior_segment_type == 'arc' and later_segment_type == 'line':        # reverse relationship from arc-line to line-arc to normalize processing
+
+                segment_swap_flag = True        # set segment_swap_flag
+                temp_px1 = prior_segment_x1     # assign temp variable
+                temp_py1 = prior_segment_y1     # assign temp variable
+                temp_px2 = prior_segment_x2     # assign temp variable
+                temp_py2 = prior_segment_y2     # assign temp variable
+
+                temp_lx1 = later_segment_x1      # assign temp variable
+                temp_ly1 = later_segment_y1     # assign temp variable
+                temp_lx2 = later_segment_x2     # assign temp variable
+                temp_ly2 = later_segment_y2     # assign temp variable
+
+                temp_pr = prior_segment_r     # assign temp variable
+                temp_pacx = prior_segment_arc_center_x     # assign temp variable
+                temp_pacy = prior_segment_arc_center_y     # assign temp variable
+
+#                temp_lr = later_segment_r     # assign temp variable
+#                temp_lacx = lacx = later_segment_arc_center_x     # assign temp variable
+#                temp_lacy = later_segment_arc_center_y     # assign temp variable
+
+                prior_segment_x1 = temp_lx1     # exchange prior and later variables
+                prior_segment_y1 = temp_ly1     # exchange prior and later variables
+                prior_segment_x2 = temp_lx2     # exchange prior and later variables
+                prior_segment_y2 = temp_ly2     # exchange prior and later variables
+
+                later_segment_x1 = temp_px1     # exchange prior and later variables
+                later_segment_y1 = temp_py1     # exchange prior and later variables
+                later_segment_x2 = temp_px2     # exchange prior and later variables
+                later_segment_y2 = temp_py2     # exchange prior and later variables
+
+                later_segment_r = temp_pr     # exchange prior and later variables
+                later_segment_arc_center_x = temp_pacx     # exchange prior and later variables
+                later_segment_arc_center_y = temp_pacy     # exchange prior and later variables
+
+            axis_angle, length, discard, discard = line_data(prior_segment_x1, prior_segment_y1,prior_segment_x2, prior_segment_y2)    # get parameters using prior line segment for reference axis
+            temp_x, temp_y = shift_origin(prior_segment_x1, prior_segment_y1,later_segment_arc_center_x,later_segment_arc_center_y)     # apply origin shift to prior_segment_x1, prior_segment_y1 as origin
+            rel_arc_x, rel_arc_y = rotate_axis(axis_angle, temp_x, temp_y)      # apply axis rotation. rel_arc_y is the perpendicular distance between the line and center of arc.
+
+            print('\n' + 'rel_arc_y: ' + str(rel_arc_y))  #
+
+            if round(abs(rel_arc_y), 4) == round(later_segment_r, 4):   # detect tangential intersect
+                inversion_type = 'line-arc tangential'
+                if segment_swap_flag == True :
+                    inversion_type = 'arc-line tangential'
+            if round(abs(rel_arc_y), 4) > round(later_segment_r, 4):   # detect non-contact intersect
+                inversion_type = 'line-arc non-contact'
+                if segment_swap_flag == True :
+                    inversion_type = 'arc-line non-contact'
+            if round(abs(rel_arc_y), 4) < round(later_segment_r, 4):   # detect seperate and distinct intersect
+                inversion_type = 'line-arc distinct intersect'
+                if segment_swap_flag == True :
+                    inversion_type = 'arc-line distinct intersect'
+
+            df_profile.loc[profile_counter, 'inversion_type'] = inversion_type    # write inversion_type to data frame
+            print('\n' + 'inversion_type: ' + str(inversion_type))  #
+
+            # Use Pythagoras rule to calculate the intersect point.
+            # refer to "PRT230721-001 Rev01 Use Cases"
+            rel_intersect_x = rel_arc_x - math.sqrt(later_segment_r**2 - rel_arc_x**2)
+            print('\n' + 'rel_intersect_x: ' + str(rel_intersect_x))  #
+
+            # determine which intersect point to use. near point or far point along the reference axis/line segment from relative origin/line start point
+            if length < rel_x:  # near point
+                rel_intersect_x = rel_intersect_x
+            elif length > rel_x:  # far point
+                rel_intersect_x = -rel_intersect_x
+
+            print('\n' + 'rel_intersect_x-adj: ' + str(rel_intersect_x))  #
+
+            temp_x1, temp_y1 = rotate_axis(-axis_angle, rel_intersect_x, 0)  # undo axis rotation
+            intersect_x, intersect_y = shift_origin(-prior_segment_x1, -prior_segment_y1, temp_x1, temp_y1)  # undo origin shift
+
+        print('\n' + 'intersect_x: ' + str(intersect_x))  #
+        print('intersect_y: ' + str(intersect_y))  #
         df_profile.loc[profile_counter - 1, 'end_x_intersect'] = intersect_x  # write intersect x to prior segment
         df_profile.loc[profile_counter - 1, 'end_y_intersect'] = intersect_y  # write intersect y to prior segment
         df_profile.loc[profile_counter + 1, 'start_x_intersect'] = intersect_x  # write intersect x to later segment
