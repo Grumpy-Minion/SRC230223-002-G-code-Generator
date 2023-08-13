@@ -4320,6 +4320,24 @@ print('\n')
 
 rows = len(df_line)     # print number of rows in df_line
 
+#----------------------------------
+# look for online cut
+#----------------------------------
+mode = df_line_static.loc['mode','static_value']    #read mode from static_df
+on_line_flag = False    # initialize
+if mode == 3:       # look for online cut
+
+#    print ('==========================')
+#    print ('online cut exiting program')
+#    print ('==========================\n')
+#    temp_text_df_debug(df_profile)
+#    exit()
+
+    on_line_flag = True    # set on_line_flag
+    print ('==========================')
+    print ('on_line_flag: ' + str(on_line_flag))
+    print ('==========================\n')
+
 def extract_row(counter, df, debug=False):
     # ---Description---
     # Extract and format variables of a single row from the data frame to the explicit variable type.
@@ -4453,18 +4471,6 @@ while profile_counter <= end:
 
     profile_counter = profile_counter + 1     # increment profile counter.
 
-mode = df_line_static.loc['mode','static_value']    #read mode from static_df
-
-#----------------------------------
-# look for online cut
-#----------------------------------
-if mode == 3:       # look for online cut
-    print ('==========================')
-    print ('online cut exiting program')
-    print ('==========================\n')
-    temp_text_df_debug(df_profile)
-    exit()
-
 #-----------------------------------------------------------------------
 # scan for apex and undersized arc
 #-----------------------------------------------------------------------
@@ -4479,7 +4485,7 @@ start_inverted_apex_flag = False
 undersized_internal_arc_flag = False
 abort_flag = False
 
-while profile_counter <= end:
+while profile_counter <= end and on_line_flag == False:
 
     start_concave_apex_flag = False       # reset flag
     start_convex_apex_flag = False        # reset flag
@@ -4565,7 +4571,7 @@ profile_counter = 0     # initialize counter for profile df
 rows = len(df_profile)     # number of rows in df_line
 end = rows - 1    # initialize end counter
 
-while profile_counter <= end:
+while profile_counter <= end and on_line_flag == False:
 
     temp_loop_debug('insert row at convex apex points')    # debug only
 
@@ -4597,7 +4603,7 @@ while profile_counter <= end:
     profile_counter = profile_counter + 1  # increment profile counter.
 
 #-----------------------------------------------------------------------
-# calculate adjusted parameters
+# calculate adjusted parameters sans transition arcs
 #-----------------------------------------------------------------------
 profile_counter = 0     # initialize counter for profile df
 rows = len(df_profile)     # number of rows in df_line
@@ -4606,10 +4612,7 @@ start_block, end_block, name, name_debug, clear_z, start_z, cut_f, finish_f, z_f
 offset = df_line_static.loc['offset','static_value']       # get offset from line data frame. for constant offset only.
 mode = df_line_static.loc['mode','static_value']       # get mode from line data frame.
 
-#-----------------------------------------------------------------------
-# calculate adjusted parameters sans transition arcs
-#-----------------------------------------------------------------------
-while profile_counter <= end:
+while profile_counter <= end and on_line_flag == False:
 
     last_row_flag = df_profile.loc[profile_counter, 'last_row_flag']  # get last_row_flag from df_profile dataframe
     segment = df_profile.loc[profile_counter, 'segment']  # get segment type. linear or arc
@@ -4675,14 +4678,14 @@ while profile_counter <= end:
 
     profile_counter = profile_counter + 1  # increment profile counter.
 
+#-----------------------------------------------------------------------
+# calculate adjusted parameters for transition arcs
+#-----------------------------------------------------------------------
 profile_counter = 0  # initialize counter for profile df
 rows = len(df_profile)  # number of rows in df_line
 end = rows - 1  # initialize end counter
 
-#-----------------------------------------------------------------------
-# calculate adjusted parameters for transition arcs
-#-----------------------------------------------------------------------
-while profile_counter <= end:
+while profile_counter <= end and on_line_flag == False:
 
     last_row_flag = df_profile.loc[profile_counter, 'last_row_flag']  # get last_row_flag from df_profile dataframe
     transition_arc_flag = df_profile.loc[profile_counter, 'transition_arc_flag']  # get transition_arc_flag
@@ -4721,14 +4724,15 @@ while profile_counter <= end:
 
     profile_counter = profile_counter + 1  # increment profile counter.
 
+#-----------------------------------------------------------------------
+# calculate vector_angle_pre_adjusted
+#-----------------------------------------------------------------------
+
 profile_counter = 0  # initialize counter for profile df
 rows = len(df_profile)  # number of rows in df_line
 end = rows - 1  # initialize end counter
 
-#-----------------------------------------------------------------------
-# calculate vector_angle_pre_adjusted
-#-----------------------------------------------------------------------
-while profile_counter <= end:
+while profile_counter <= end and on_line_flag == False:
 
     temp_loop_debug('calculate vector_angle_pre_adjusted')      # debugging statement
 
@@ -4746,14 +4750,15 @@ while profile_counter <= end:
 
     profile_counter = profile_counter + 1  # increment profile counter.
 
+#-----------------------------------------------------------------------
+# determine segment inversion
+#-----------------------------------------------------------------------
+
 profile_counter = 0  # initialize counter for profile df
 rows = len(df_profile)  # number of rows in df_line
 end = rows - 1  # initialize end counter
 
-#-----------------------------------------------------------------------
-# determine segment inversion
-#-----------------------------------------------------------------------
-while profile_counter <= end:
+while profile_counter <= end and on_line_flag == False:
 
     last_row_flag = df_profile.loc[profile_counter, 'last_row_flag']  # get last_row_flag from df_profile dataframe
     transition_arc_flag = df_profile.loc[profile_counter, 'transition_arc_flag']  # get transition_arc_flag from df_profile dataframe
@@ -4782,14 +4787,15 @@ while profile_counter <= end:
 
     profile_counter = profile_counter + 1  # increment profile counter.
 
+#-----------------------------------------------------------------------
+# determine intersection point
+#-----------------------------------------------------------------------
+
 profile_counter = 0  # initialize counter for profile df
 rows = len(df_profile)  # number of rows in df_line
 end = rows - 1  # initialize end counter
 
-#-----------------------------------------------------------------------
-# determine intersection point
-#-----------------------------------------------------------------------
-while profile_counter <= end:
+while profile_counter <= end and on_line_flag == False:
 
     intersect_x = None      # intialize
     intersect_y = None      # intialize
@@ -5034,13 +5040,14 @@ while profile_counter <= end:
 
     profile_counter = profile_counter + 1  # increment profile counter.
 
+#-----------------------------------------------------------------------
+# populate output columns
+#-----------------------------------------------------------------------
+
 profile_counter = 0  # initialize counter for profile df
 rows = len(df_profile)  # number of rows in df_line
 end = rows - 1  # initialize end counter
 
-#-----------------------------------------------------------------------
-# populate output columns
-#-----------------------------------------------------------------------
 while profile_counter <= end:
 
     last_row_flag = df_profile.loc[profile_counter, 'last_row_flag']  # get last_row_flag from df_profile dataframe
@@ -5051,17 +5058,28 @@ while profile_counter <= end:
         profile_counter = profile_counter + 1  # increment profile counter.
         continue                # skip while loop iteration
 
-    ouput_start_x = df_profile.loc[profile_counter, 'TBD']  # get TBD from df_profile dataframe
-    ouput_start_y = df_profile.loc[profile_counter, 'TBD']  # get TBD from df_profile dataframe
-    ouput_end_x = df_profile.loc[profile_counter, 'TBD']  # get TBD from df_profile dataframe
-    ouput_end_y = df_profile.loc[profile_counter, 'TBD']  # get TBD from df_profile dataframe
-    ouput_segment = df_profile.loc[profile_counter, 'TBD']  # get TBD from df_profile dataframe
-    ouput_rad = df_profile.loc[profile_counter, 'TBD']  # get TBD from df_profile dataframe
-    ouput_cw = df_profile.loc[profile_counter, 'TBD']  # get TBD from df_profile dataframe
-    ouput_less_180 = df_profile.loc[profile_counter, 'TBD']  # get TBD from df_profile dataframe
+    if on_line_flag == True:
+
+        ouput_start_x = df_profile.loc[profile_counter, 'start_x']  # get start_x from df_profile dataframe
+        ouput_start_y = df_profile.loc[profile_counter, 'start_y']  # get start_y from df_profile dataframe
+        ouput_end_x = df_profile.loc[profile_counter, 'end_x']  # get end_x from df_profile dataframe
+        ouput_end_y = df_profile.loc[profile_counter, 'end_y']  # get end_y from df_profile dataframe
+        ouput_segment = df_profile.loc[profile_counter, 'segment']  # get segment from df_profile dataframe
+        ouput_rad = df_profile.loc[profile_counter, 'rad']  # get rad from df_profile dataframe
+        ouput_cw = df_profile.loc[profile_counter, 'cw']  # get cw from df_profile dataframe
+        ouput_less_180 = df_profile.loc[profile_counter, 'less_180']  # get less_180 from df_profile dataframe
 
     if last_row_flag == True or profile_counter == end:  # break while loop if last_row_flag detected or if last row is read.
         break  # check last_row_flag
+
+    df_profile.loc[profile_counter, 'ouput_start_x'] = ouput_start_x    # write start_x from df_profile dataframe
+    df_profile.loc[profile_counter, 'ouput_start_y'] = ouput_start_y    # write ouput_start_y from df_profile dataframe
+    df_profile.loc[profile_counter, 'ouput_end_x'] = ouput_end_x        # write ouput_end_x from df_profile dataframe
+    df_profile.loc[profile_counter, 'ouput_end_y'] = ouput_end_y        # write ouput_end_y from df_profile dataframe
+    df_profile.loc[profile_counter, 'ouput_segment'] = ouput_segment    # write ouput_segment from df_profile datafram
+    df_profile.loc[profile_counter, 'ouput_rad'] = ouput_rad            # write ouput_rad from df_profile dataframe
+    df_profile.loc[profile_counter, 'ouput_cw'] = ouput_cw              # write ouput_cw from df_profile dataframe
+    df_profile.loc[profile_counter, 'ouput_less_180'] = ouput_less_180       # write ouput_less_180 from df_profile dataframe
 
     profile_counter = profile_counter + 1  # increment profile counter.
 
