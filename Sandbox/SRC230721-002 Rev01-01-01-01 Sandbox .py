@@ -4439,25 +4439,7 @@ while profile_counter <= end:
         df_profile.loc[profile_counter, 'vector_angle_end'] = end_angle         # write vector_angle_end to df_profile dataframe (round to 2 decimal places)
         df_profile.loc[profile_counter, 'length'] = arc_length                  # write length to df_profile dataframe (round to 4 decimal places)
 
-#    if segment == 'linear':
-#        angle, length, origin_x, origin_y = absolute_cartesian_to_relative_polar(start_x, start_y, end_x, end_y)
-#        df_profile.loc[profile_counter, 'vector_angle_start'] = round(angle, 1)  # write vector_angle_start to df_profile dataframe (round to 2 decimal places)
-#        df_profile.loc[profile_counter, 'vector_angle_end'] = round(angle, 1)     # write vector_angle_end to df_profile dataframe (round to 2 decimal places)
-#        df_profile.loc[profile_counter, 'length'] = round(length, 4)             # write length to df_profile dataframe (round to 4 decimal places)
-#    elif segment == 'arc':
-#        center_x, center_y, start_angle, end_angle, arc_length, arc_angle = arc_data(start_x, start_y, end_x, end_y, rad, cw, less_180)
-#        df_profile.loc[profile_counter, 'arc_center_x'] = round(center_x, 4)              # write arc_center_x to df_profile dataframe (round to 4 decimal places)
-#        df_profile.loc[profile_counter, 'arc_center_y'] = round(center_y, 4)              # write arc_center_y to df_profile dataframe (round to 4 decimal places)
-#        df_profile.loc[profile_counter, 'vector_angle_start'] = round(start_angle, 1)     # write vector_angle_start to df_profile dataframe (round to 2 decimal places)
-#        df_profile.loc[profile_counter, 'vector_angle_end'] = round(end_angle, 1)         # write vector_angle_end to df_profile dataframe (round to 2 decimal places)
-#        df_profile.loc[profile_counter, 'length'] = round(arc_length, 4)                  # write length to df_profile dataframe (round to 4 decimal places)
-
-#    print(last_row_flag)
-    #print(f'line counter: ' + str(line_counter))
-#    print(f'profile_counter: ' + str(profile_counter) + '\n')
-
     angle, length, origin_x, origin_y = absolute_cartesian_to_relative_polar(start_x, start_y, end_x, end_y)
-#    df_profile.loc[profile_counter, 'direction'] = round(angle, 1)   # write direction of start to end point irregardless of line or arc (round to 2 decimal places)
     df_profile.loc[profile_counter, 'direction'] = angle   # write direction of start to end point irregardless of line or arc (round to 2 decimal places)
 
     if profile_counter == 0:       # if line_counter = 0 skip while loop iteration
@@ -4465,7 +4447,6 @@ while profile_counter <= end:
         continue                # skip while loop iteration
     else:
         df_profile.loc[profile_counter, 'vector_angle_pre'] = df_profile.loc[profile_counter-1, 'vector_angle_end']   # write vector_angle_pre to df_profile dataframe (round to 2 decimal places)
-#        df_profile.loc[profile_counter, 'vector_angle_pre'] = round(df_profile.loc[profile_counter-1, 'vector_angle_end'], 1)    # write vector_angle_pre to df_profile dataframe (round to 2 decimal places)
 
     if last_row_flag == True or profile_counter == end:       # break while loop if last_row_flag detected or if last row is read.
         break                           # check last_row_flag
@@ -4497,8 +4478,6 @@ start_convex_apex_flag = False
 start_inverted_apex_flag = False
 undersized_internal_arc_flag = False
 abort_flag = False
-
-#temp_text_df_debug(df_profile) # debug only
 
 while profile_counter <= end:
 
@@ -5049,6 +5028,37 @@ while profile_counter <= end:
         df_profile.loc[profile_counter - 1, 'end_y_intersect'] = intersect_y  # write intersect y to prior segment
         df_profile.loc[profile_counter + 1, 'start_x_intersect'] = intersect_x  # write intersect x to later segment
         df_profile.loc[profile_counter + 1, 'start_y_intersect'] = intersect_y  # write intersect y to later segment
+
+    if last_row_flag == True or profile_counter == end:  # break while loop if last_row_flag detected or if last row is read.
+        break  # check last_row_flag
+
+    profile_counter = profile_counter + 1  # increment profile counter.
+
+profile_counter = 0  # initialize counter for profile df
+rows = len(df_profile)  # number of rows in df_line
+end = rows - 1  # initialize end counter
+
+#-----------------------------------------------------------------------
+# populate output columns
+#-----------------------------------------------------------------------
+while profile_counter <= end:
+
+    last_row_flag = df_profile.loc[profile_counter, 'last_row_flag']  # get last_row_flag from df_profile dataframe
+    skip_flag = df_profile.loc[profile_counter, 'skip_flag']  # get skip_flag from df_profile dataframe
+    temp_loop_debug('populate output columns')      # debugging statement
+
+    if skip_flag == True:       # if line_counter = 0 skip while loop iteration
+        profile_counter = profile_counter + 1  # increment profile counter.
+        continue                # skip while loop iteration
+
+    ouput_start_x = df_profile.loc[profile_counter, 'TBD']  # get TBD from df_profile dataframe
+    ouput_start_y = df_profile.loc[profile_counter, 'TBD']  # get TBD from df_profile dataframe
+    ouput_end_x = df_profile.loc[profile_counter, 'TBD']  # get TBD from df_profile dataframe
+    ouput_end_y = df_profile.loc[profile_counter, 'TBD']  # get TBD from df_profile dataframe
+    ouput_segment = df_profile.loc[profile_counter, 'TBD']  # get TBD from df_profile dataframe
+    ouput_rad = df_profile.loc[profile_counter, 'TBD']  # get TBD from df_profile dataframe
+    ouput_cw = df_profile.loc[profile_counter, 'TBD']  # get TBD from df_profile dataframe
+    ouput_less_180 = df_profile.loc[profile_counter, 'TBD']  # get TBD from df_profile dataframe
 
     if last_row_flag == True or profile_counter == end:  # break while loop if last_row_flag detected or if last row is read.
         break  # check last_row_flag
