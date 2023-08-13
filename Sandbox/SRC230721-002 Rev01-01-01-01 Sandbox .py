@@ -356,11 +356,13 @@ def linear_offset_adjustment(dia, offset, start_x, start_y, end_x, end_y, mode =
 
     angle_temp = absolute_angle(start_x, start_y, end_x, end_y)
     start_x_adjusted, start_y_adjusted = relative_coordinate(start_x_temp, start_y_temp, angle_temp, x1_temp, y_temp, debug=False)
-    start_x_adjusted = round(start_x_adjusted, 5)    # round to 5 decimal places.
-    start_y_adjusted = round(start_y_adjusted, 5)     # round to 5 decimal places.
+#    removed rounding
+#    start_x_adjusted = round(start_x_adjusted, 5)    # round to 5 decimal places.
+#    start_y_adjusted = round(start_y_adjusted, 5)     # round to 5 decimal places.
     end_x_adjusted, end_y_adjusted = relative_coordinate(start_x_temp, start_y_temp, angle_temp, x2_temp, y_temp, debug=False)
-    end_x_adjusted = round(end_x_adjusted, 5)     # round to 5 decimal places.
-    end_y_adjusted = round(end_y_adjusted, 5)     # round to 5 decimal places.
+#    removed rounding
+#    end_x_adjusted = round(end_x_adjusted, 5)     # round to 5 decimal places.
+#    end_y_adjusted = round(end_y_adjusted, 5)     # round to 5 decimal places.
 
     return(start_x_adjusted, start_y_adjusted, end_x_adjusted, end_y_adjusted)
 
@@ -416,11 +418,12 @@ def arc_offset_adjustment(dia, offset, start_x, start_y, end_x, end_y, rad, cw, 
         end_x_adjusted = end_x
         end_y_adjusted = end_y
         rad_adjusted = rad
-        start_x_adjusted = round(start_x_adjusted, 5)  # round to 5 decimal places.
-        start_y_adjusted = round(start_y_adjusted, 5)  # round to 5 decimal places.
-        end_x_adjusted = round(end_x_adjusted, 5)  # round to 5 decimal places.
-        end_y_adjusted = round(end_y_adjusted, 5)  # round to 5 decimal places.
-        rad_adjusted = round(rad_adjusted, 5)  # round to 5 decimal places.
+#         removed rounding
+#        start_x_adjusted = round(start_x_adjusted, 5)  # round to 5 decimal places.
+#        start_y_adjusted = round(start_y_adjusted, 5)  # round to 5 decimal places.
+#        end_x_adjusted = round(end_x_adjusted, 5)  # round to 5 decimal places.
+#        end_y_adjusted = round(end_y_adjusted, 5)  # round to 5 decimal places.
+#        rad_adjusted = round(rad_adjusted, 5)  # round to 5 decimal places.
         return (start_x_adjusted, start_y_adjusted, end_x_adjusted, end_y_adjusted, rad_adjusted)
 
     # check if cutter radius + offset is larger than arc radius for internal/pocket cut.
@@ -472,15 +475,18 @@ def arc_offset_adjustment(dia, offset, start_x, start_y, end_x, end_y, rad, cw, 
             rad_adjusted = rad + (dia/2 + offset)   # calculate adjusted radius for external/boss cut
         elif mode == 2:
             rad_adjusted = rad - (dia/2 + offset)    # calculate adjusted radius for internal/pocket cut
-    rad_adjusted = round(rad_adjusted, 5)  # round to 5 decimal places.
+#            removed rounding
+#    rad_adjusted = round(rad_adjusted, 5)  # round to 5 decimal places.
 
     start_x_adjusted, start_y_adjusted = relative_polar(x_center, y_center, start_angle, rad_adjusted, 0, debug=False)        # calculate adjusted start point
-    start_x_adjusted = round(start_x_adjusted, 5)    # round to 5 decimal places.
-    start_y_adjusted = round(start_y_adjusted, 5)     # round to 5 decimal places.
+#    removed rounding
+#    start_x_adjusted = round(start_x_adjusted, 5)    # round to 5 decimal places.
+#    start_y_adjusted = round(start_y_adjusted, 5)     # round to 5 decimal places.
 
     end_x_adjusted, end_y_adjusted = relative_polar(x_center, y_center, start_angle, rad_adjusted, angle_arc, debug=False)    # calculate adjusted end point
-    end_x_adjusted = round(end_x_adjusted, 5)     # round to 5 decimal places.
-    end_y_adjusted = round(end_y_adjusted, 5)     # round to 5 decimal places.
+#    removed rounding
+#    end_x_adjusted = round(end_x_adjusted, 5)     # round to 5 decimal places.
+#    end_y_adjusted = round(end_y_adjusted, 5)     # round to 5 decimal places.
 
     return(start_x_adjusted, start_y_adjusted, end_x_adjusted, end_y_adjusted, rad_adjusted)
 
@@ -4527,15 +4533,13 @@ while profile_counter <= end and on_line_flag == False:
 
         vector_angle_pre = df_profile.loc[profile_counter, 'vector_angle_pre']  # get vector_angle_pre from df_profile dataframe
         vector_angle_start = df_profile.loc[profile_counter, 'vector_angle_start']  # get vector_angle_start from df_profile dataframe
-#        vector_angle_pre = round(vector_angle_pre,1)        # round to 1 decimal place to prevent false apex trigger.
-#        vector_angle_start = round(vector_angle_start,1)        # round to 1 decimal place to prevent false apex trigger.
-
-        vector = vector_angle_start-vector_angle_pre    # calculate change in vector between current segment and segment before
+        vector = vector_angle_start - vector_angle_pre    # calculate change in vector between current segment and segment before
         vector = round(vector,1)        # round to 1 decimal place to prevent false apex trigger.
+
         if vector < 0:  # calculate absolute angle
             vector = vector + 360
 
-        if vector == 0 or vector == 360:     # segment transition is tangent
+        if vector == 0 or vector == 360:     # segment transition is tangent and in same direction
             start_concave_apex_flag = False
             start_convex_apex_flag = False
             start_inverted_apex_flag = False
@@ -4607,6 +4611,7 @@ while profile_counter <= end and on_line_flag == False:
     if start_convex_apex_flag == True:
 
         temp_counter = (profile_counter-1)+0.1
+        print('temp_counter: ' + str(temp_counter))
         df_profile.loc[temp_counter, :] = '---'  # create new row, index: profile_counter+0.1 with cells containing text: '---'. to be later reindexed to be inserted before apex row.
         df_profile.loc[temp_counter, 'last_row_flag'] = False  # clear last_row_flag
         df_profile.loc[temp_counter, 'transition_arc_flag'] = True  # set transition_arc_flag
@@ -4802,14 +4807,19 @@ while profile_counter <= end and on_line_flag == False:
         direction_difference = direction_adjusted - direction  # calculate direction difference
         direction_difference = round(direction_difference,1)  # round to 1 decimal place to prevent false inversion trigger
 
-        if direction_difference != 0:
+        print('direction_difference: ' + str(direction_difference))
+
+        if direction_difference == 0 or direction_difference == 360 :   # no inversion found. start and end points of segment are in the same direction before and after adjustment.
+            df_profile.loc[profile_counter, 'inversion_flag'] = False   # clear inversion flag
+        else:                                                           # inversion found. start and end points of segment are not in the same direction before and after adjustment.
             df_profile.loc[profile_counter, 'skip_flag'] = True  # set skip_flag
             df_profile.loc[profile_counter, 'inversion_flag'] = True  # determine segment inversion if any change in start-end direction is found. does not have to be 180deg apart.
             df_profile.loc[profile_counter - 1, 'intersect_end_flag'] = True   # set prior segment intersect end flag
             df_profile.loc[profile_counter + 1, 'intersect_start_flag'] = True  # set subsequent segment intersect start flag
             add_comment(profile_counter,'segment inversion. ')      # update comments
-        elif direction_difference == 0:
-            df_profile.loc[profile_counter, 'inversion_flag'] = False  # determine segment inversion if any change in start-end direction is found. does not have to be 180deg apart.
+
+        inversion_flag = df_profile.loc[profile_counter, 'inversion_flag']
+        print('inversion_flag: ' + str(inversion_flag))
 
     if last_row_flag == True or profile_counter == end:  # break while loop if last_row_flag detected or if last row is read.
         break  # check last_row_flag
@@ -5131,18 +5141,18 @@ while profile_counter <= end:
             ouput_less_180 = df_profile.loc[profile_counter, 'less_180']  # get less_180 from df_profile dataframe
 
 
-    df_profile.loc[profile_counter, 'ouput_start_x'] = round(ouput_start_x, 4)    # write start_x from df_profile dataframe
-    df_profile.loc[profile_counter, 'ouput_start_y'] = round(ouput_start_y, 4)    # write ouput_start_y from df_profile dataframe
-    df_profile.loc[profile_counter, 'ouput_end_x'] = round(ouput_end_x, 4)        # write ouput_end_x from df_profile dataframe
-    df_profile.loc[profile_counter, 'ouput_end_y'] = round(ouput_end_y , 4)       # write ouput_end_y from df_profile dataframe
+    df_profile.loc[profile_counter, 'ouput_start_x'] = round(ouput_start_x, 6)    # write start_x from df_profile dataframe
+    df_profile.loc[profile_counter, 'ouput_start_y'] = round(ouput_start_y, 6)    # write ouput_start_y from df_profile dataframe
+    df_profile.loc[profile_counter, 'ouput_end_x'] = round(ouput_end_x, 6)        # write ouput_end_x from df_profile dataframe
+    df_profile.loc[profile_counter, 'ouput_end_y'] = round(ouput_end_y , 6)       # write ouput_end_y from df_profile dataframe
     df_profile.loc[profile_counter, 'ouput_segment'] = ouput_segment    # write ouput_segment from df_profile datafram
 
     if ouput_segment == 'arc':
-        df_profile.loc[profile_counter, 'ouput_rad'] = round(ouput_rad, 4)            # write ouput_rad from df_profile dataframe
+        df_profile.loc[profile_counter, 'ouput_rad'] = round(ouput_rad, 6)            # write ouput_rad from df_profile dataframe
         df_profile.loc[profile_counter, 'ouput_cw'] = ouput_cw              # write ouput_cw from df_profile dataframe
         df_profile.loc[profile_counter, 'ouput_less_180'] = ouput_less_180      # write ouput_less_180 from df_profile dataframe
 
-    output_comments = df_profile.loc[profile_counter, 'comments']  # get comments from df_profile dataframe
+    output_comments = df_profile.loc[profile_counter, 'comments']       # get comments from df_profile dataframe
     df_profile.loc[profile_counter, 'output_comments'] = output_comments       # write output_comments from df_profile dataframe
 
     if last_row_flag == True or profile_counter == end:  # break while loop if last_row_flag detected or if last row is read.
