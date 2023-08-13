@@ -4069,6 +4069,10 @@ def toolbox():
     print('remove all rows except for the first row.')
     print(str(df)+'\n')
 
+    df = df.loc[:, :'B']  # removes all columns up to 'B' columns
+    print('removes all columns up to \'B\' columns')
+    print(str(df)+'\n')
+
     df = pd.DataFrame(np.nan, index=[0, 1, 2, 3, 4], columns=['A', 'B', 'C', 'D'])  # creates empty data frame with indexed rows and labeled columns.
     df.loc[0:4,'A'] = ['Q','W','E','R','T']  # write 'Q','W','E','R','T' to column 'A'.
     print('write \'Q\',\'W\',\'E\',\'R\',\'T\' to column \'A\'')
@@ -4265,11 +4269,14 @@ def temp_text_df_debug(df_profile) :
 
 #    print(str(df_profile))
     df_temp = df_profile.to_markdown(index=False, tablefmt='pipe', colalign=['center'] * len(df_profile.columns))     # format df into table
-    text_debug = '\n' + str(df_temp)       # convert to text
-    text_debug = indent(text_debug,0)       # indent to margin
-    write_to_file(name_debug, text_debug)  # write to debug file
     print('\n')
     print(str(df_temp))
+
+    df_temp = df_profile.loc[:, :'output_comments']  # removes all columns up to 'output_comments' columns
+    df_temp = df_temp.to_markdown(index=False, tablefmt='pipe',colalign=['center'] * len(df_temp.columns))  # format df into table
+    text_debug = '\n' + str(df_temp)  # convert to text
+    text_debug = indent(text_debug, 0)  # indent to margin
+    write_to_file(name_debug, text_debug)  # write to debug file
 
 def temp_loop_debug(title):
 
@@ -4287,6 +4294,24 @@ def temp_loop_debug_01(title):
     print('profile_counter: ' + str(profile_counter))
     print('end: ' + str(end))
     print('last_row_flag: ' + str(last_row_flag))
+
+def add_comment(row, text):
+    # add comment to comment column
+    # add_comment(row, text)
+
+    # ---Variable List---
+    # row = row in the data frame to add commnet
+    # text  = text to add to comment
+
+    # ---Return Variable List---
+    # N/A
+
+    comment = df_profile.loc[row , 'comments']  # read comments from data frame
+    if comment ==  '---' :
+        comment = str(text)     # remove initial '---' format and replace with text
+    else:
+        comment = comment + str(text)
+    df_profile.loc[row, 'comments'] = comment
 
 #===========================================================================
 #toolbox()
@@ -4580,13 +4605,14 @@ while profile_counter <= end and on_line_flag == False:
 
 #    print('start_convex_apex_flag: ' + str(start_convex_apex_flag))
     if start_convex_apex_flag == True:
-#        print('start_convex_apex_flag: ' + str(start_convex_apex_flag))
+
         temp_counter = (profile_counter-1)+0.1
         df_profile.loc[temp_counter, :] = '---'  # create new row, index: profile_counter+0.1 with cells containing text: '---'. to be later reindexed to be inserted before apex row.
         df_profile.loc[temp_counter, 'last_row_flag'] = False  # clear last_row_flag
         df_profile.loc[temp_counter, 'transition_arc_flag'] = True  # set transition_arc_flag
         df_profile.loc[temp_counter, 'segment'] = 'arc'  # set segment type to arc
-        #df_profile.loc[temp_counter, 'rad'] = 0  # set rad to 0. point arc.
+        add_comment(temp_counter,'transition arc. ')    # add comment to comments column
+
         if mode == 2:
             df_profile.loc[temp_counter, 'cw'] = True  # set cw to True. cutter travel on left hand side of profile will always make a cw arc.
         elif mode == 1:
@@ -4597,7 +4623,7 @@ while profile_counter <= end and on_line_flag == False:
 
     if last_row_flag == True or profile_counter == end:       # break while loop if last_row_flag detected or if last row is read.
         df_profile = df_profile.sort_index().reset_index(drop=True)  # sort rows according to index values and reset to running integers.
-        df_profile.loc[:, '#'] = df_profile.index   # cpoy index column to # column
+        df_profile.loc[:, '#'] = df_profile.index   # copy index column to # column
         break  # check last_row_flag
 
     profile_counter = profile_counter + 1  # increment profile counter.
@@ -4608,7 +4634,7 @@ while profile_counter <= end and on_line_flag == False:
 profile_counter = 0     # initialize counter for profile df
 rows = len(df_profile)     # number of rows in df_line
 end = rows - 1    # initialize end counter
-start_block, end_block, name, name_debug, clear_z, start_z, cut_f, finish_f, z_f, dia = parameters_data_frame(excel_file, 'parameters')    # import parameters
+start_block, end_block, name, name_debug, clear_z, start_z, cut_f, finish_f, z_f, dia = parameters_data_frame(excel_file, 'parameters')    # import parameters. !!!clear print statements!!!
 offset = df_line_static.loc['offset','static_value']       # get offset from line data frame. for constant offset only.
 mode = df_line_static.loc['mode','static_value']       # get mode from line data frame.
 
@@ -4661,7 +4687,9 @@ while profile_counter <= end and on_line_flag == False:
         if round(rad_adjusted,5) == 0 :    # detect if concave arc has offset into a point.
             arc_point_flag = True
             df_profile.loc[profile_counter, 'arc_point_flag'] = arc_point_flag    # write arc_point_flag to df_profile dataframe
-            df_profile.loc[profile_counter, 'skip_flag'] = True  # set skip_flag
+            df_profile.loc[profile_counter, 'skip_flag'] = True     # set skip_flag
+            comment_temp = 'concave offset point'      # comment
+            add_comment(profile_counter, comment_temp)      # update comments
             profile_counter = profile_counter + 1  # increment profile counter.
             continue        # skip loop iteration.
 
@@ -4779,6 +4807,7 @@ while profile_counter <= end and on_line_flag == False:
             df_profile.loc[profile_counter, 'inversion_flag'] = True  # determine segment inversion if any change in start-end direction is found. does not have to be 180deg apart.
             df_profile.loc[profile_counter - 1, 'intersect_end_flag'] = True   # set prior segment intersect end flag
             df_profile.loc[profile_counter + 1, 'intersect_start_flag'] = True  # set subsequent segment intersect start flag
+            add_comment(profile_counter,'segment inversion. ')      # update comments
         elif direction_difference == 0:
             df_profile.loc[profile_counter, 'inversion_flag'] = False  # determine segment inversion if any change in start-end direction is found. does not have to be 180deg apart.
 
@@ -4927,7 +4956,7 @@ while profile_counter <= end and on_line_flag == False:
             # A = cos^-1 [(b^2 + c^2 + a^2)/(2bc)]
             # Use cosine rule to calculate angle A given lengths a, b, c
             # Calculate d to find the intersect points
-            # refer to "PRT230721-001 Rev01 Use Cases"
+            # refer to "PRT230721-001 Use Cases"
             angle_a = math.degrees(math.acos((length_b**2 + length_c**2 - length_a**2)/(2*length_b*length_c)))  # calculating angle at corner a using cosine rule
             rel_y = prior_segment_r * (math.sin((angle_a/180)*math.pi)) # calculating the y/perpendicular distance of an intersect point from reference axis or prior arc center to later arc center
             rel_x = prior_segment_r * (math.cos((angle_a/180)*math.pi)) # calculating the x/parallel distance of an intersect point from reference axis or prior arc center to later arc center
@@ -5003,7 +5032,7 @@ while profile_counter <= end and on_line_flag == False:
                 inversion_type = 'line-arc non-contact'
                 if segment_swap_flag == True :
                     inversion_type = 'arc-line non-contact'
-            if round(abs(rel_arc_y), 4) < round(later_segment_r, 4):   # detect seperate and distinct intersect
+            if round(abs(rel_arc_y), 4) < round(later_segment_r, 4):   # detect separate and distinct intersect
                 inversion_type = 'line-arc distinct intersect'
                 if segment_swap_flag == True :
                     inversion_type = 'arc-line distinct intersect'
@@ -5054,7 +5083,9 @@ while profile_counter <= end:
     skip_flag = df_profile.loc[profile_counter, 'skip_flag']  # get skip_flag from df_profile dataframe
     temp_loop_debug('populate output columns')      # debugging statement
 
-    if skip_flag == True:       # if line_counter = 0 skip while loop iteration
+    if skip_flag == True:       # if skip_flag = True skip while loop iteration
+        output_comments = df_profile.loc[profile_counter, 'comments']  # get comments from df_profile dataframe
+        df_profile.loc[profile_counter, 'output_comments'] = output_comments  # write output_comments from df_profile dataframe
         profile_counter = profile_counter + 1  # increment profile counter.
         continue                # skip while loop iteration
 
@@ -5069,17 +5100,53 @@ while profile_counter <= end:
         ouput_cw = df_profile.loc[profile_counter, 'cw']  # get cw from df_profile dataframe
         ouput_less_180 = df_profile.loc[profile_counter, 'less_180']  # get less_180 from df_profile dataframe
 
+    if on_line_flag == False:
+
+        inversion_type = df_profile.loc[profile_counter, 'inversion_type']  # get inversion_type from df_profile dataframe
+        print('inversion_type: ' + str(inversion_type))
+        intersect_start_flag = df_profile.loc[profile_counter, 'intersect_start_flag']  # get intersect_start_flag from df_profile dataframe
+        intersect_end_flag = df_profile.loc[profile_counter, 'intersect_end_flag']  # get intersect_end_flag from df_profile dataframe
+
+        if intersect_start_flag == True:
+            add_comment(profile_counter, 'start intersect. ')
+            ouput_start_x = df_profile.loc[profile_counter, 'start_x_intersect']  # get start_x_intersect from df_profile dataframe
+            ouput_start_y = df_profile.loc[profile_counter, 'start_y_intersect']  # get start_y_intersect from df_profile dataframe
+        else:
+            ouput_start_x = df_profile.loc[profile_counter, 'start_x_adjusted']  # get start_x from df_profile dataframe
+            ouput_start_y = df_profile.loc[profile_counter, 'start_y_adjusted']  # get start_y from df_profile dataframe
+
+        if intersect_end_flag == True:
+            add_comment(profile_counter, 'end intersect. ')
+            ouput_end_x = df_profile.loc[profile_counter, 'end_x_intersect']  # get end_x_intersect from df_profile dataframe
+            ouput_end_y = df_profile.loc[profile_counter, 'end_y_intersect']  # get end_y_intersect from df_profile dataframe
+        else:
+            ouput_end_x = df_profile.loc[profile_counter, 'end_x_adjusted']  # get end_x from df_profile dataframe
+            ouput_end_y = df_profile.loc[profile_counter, 'end_y_adjusted']  # get end_y from df_profile dataframe
+
+        ouput_segment = df_profile.loc[profile_counter, 'segment']  # get segment from df_profile dataframe
+
+        if ouput_segment == 'arc':
+            ouput_rad = df_profile.loc[profile_counter, 'rad_adjusted']  # get rad from df_profile dataframe
+            ouput_cw = df_profile.loc[profile_counter, 'cw']  # get cw from df_profile dataframe
+            ouput_less_180 = df_profile.loc[profile_counter, 'less_180']  # get less_180 from df_profile dataframe
+
+
+    df_profile.loc[profile_counter, 'ouput_start_x'] = round(ouput_start_x, 4)    # write start_x from df_profile dataframe
+    df_profile.loc[profile_counter, 'ouput_start_y'] = round(ouput_start_y, 4)    # write ouput_start_y from df_profile dataframe
+    df_profile.loc[profile_counter, 'ouput_end_x'] = round(ouput_end_x, 4)        # write ouput_end_x from df_profile dataframe
+    df_profile.loc[profile_counter, 'ouput_end_y'] = round(ouput_end_y , 4)       # write ouput_end_y from df_profile dataframe
+    df_profile.loc[profile_counter, 'ouput_segment'] = ouput_segment    # write ouput_segment from df_profile datafram
+
+    if ouput_segment == 'arc':
+        df_profile.loc[profile_counter, 'ouput_rad'] = round(ouput_rad, 4)            # write ouput_rad from df_profile dataframe
+        df_profile.loc[profile_counter, 'ouput_cw'] = ouput_cw              # write ouput_cw from df_profile dataframe
+        df_profile.loc[profile_counter, 'ouput_less_180'] = ouput_less_180      # write ouput_less_180 from df_profile dataframe
+
+    output_comments = df_profile.loc[profile_counter, 'comments']  # get comments from df_profile dataframe
+    df_profile.loc[profile_counter, 'output_comments'] = output_comments       # write output_comments from df_profile dataframe
+
     if last_row_flag == True or profile_counter == end:  # break while loop if last_row_flag detected or if last row is read.
         break  # check last_row_flag
-
-    df_profile.loc[profile_counter, 'ouput_start_x'] = ouput_start_x    # write start_x from df_profile dataframe
-    df_profile.loc[profile_counter, 'ouput_start_y'] = ouput_start_y    # write ouput_start_y from df_profile dataframe
-    df_profile.loc[profile_counter, 'ouput_end_x'] = ouput_end_x        # write ouput_end_x from df_profile dataframe
-    df_profile.loc[profile_counter, 'ouput_end_y'] = ouput_end_y        # write ouput_end_y from df_profile dataframe
-    df_profile.loc[profile_counter, 'ouput_segment'] = ouput_segment    # write ouput_segment from df_profile datafram
-    df_profile.loc[profile_counter, 'ouput_rad'] = ouput_rad            # write ouput_rad from df_profile dataframe
-    df_profile.loc[profile_counter, 'ouput_cw'] = ouput_cw              # write ouput_cw from df_profile dataframe
-    df_profile.loc[profile_counter, 'ouput_less_180'] = ouput_less_180       # write ouput_less_180 from df_profile dataframe
 
     profile_counter = profile_counter + 1  # increment profile counter.
 
