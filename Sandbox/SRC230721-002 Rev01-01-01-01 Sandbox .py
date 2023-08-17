@@ -223,22 +223,22 @@ def absolute_angle(start_x, start_y, end_x, end_y, debug = False):
     vec_x = end_x - start_x
     vec_y = end_y - start_y
     length = math.sqrt(vec_x ** 2 + vec_y ** 2)
-#    angle = math.degrees(math.asin(abs(vec_y)/length))
-    angle = math.asin(abs(vec_y)/length)  # in radians
+    angle = math.degrees(math.asin(abs(vec_y)/length))
+#    angle = math.asin(abs(vec_y)/length)  # in radians
     if vec_x >= 0 and vec_y >= 0:   # angle in the 1st quadrant. from 0deg to 90deg.
         angle = angle
         q=1
     elif vec_x < 0 and vec_y >= 0:   # angle in the 2nd quadrant. from 90deg to 180deg.
-#        angle = 180 - angle
-        angle = math.pi - angle     # in radians
+        angle = 180 - angle
+#        angle = math.pi - angle     # in radians
         q=2
     elif vec_x <= 0 and vec_y < 0:  # angle in the 3rd quadrant. from 180deg to 270deg.
-#        angle = 180 + angle
-        angle = math.pi + angle     # in radians
+        angle = 180 + angle
+#        angle = math.pi + angle     # in radians
         q=3
     elif vec_x > 0 and vec_y < 0:  # angle in the 4th quadrant. from 270deg to 360deg.
-#        angle = 360 - angle
-        angle = 2*math.pi - angle     # in radians
+        angle = 360 - angle
+#        angle = 2*math.pi - angle     # in radians
         q=4
     if debug == True:
         print(f"Q {q}")
@@ -253,11 +253,11 @@ def relative_coordinate(datum_x, datum_y, datum_angle, x, y, debug = False):
 
     length = math.sqrt(x ** 2 + y ** 2)     # length of position relative to datum.
     angle = absolute_angle(0, 0, x, y, debug)    # angle of position vector relative to datum x axis.
-#    absolute_x = length * math.cos((datum_angle + angle)/180*math.pi) + datum_x
-#    absolute_y = length * math.sin((datum_angle + angle)/180*math.pi) + datum_y
+    absolute_x = length * math.cos((datum_angle + angle)/180*math.pi) + datum_x
+    absolute_y = length * math.sin((datum_angle + angle)/180*math.pi) + datum_y
 
-    absolute_x = length * math.cos(datum_angle + angle) + datum_x     # in radians
-    absolute_y = length * math.sin(datum_angle + angle) + datum_y     # in radians
+#    absolute_x = length * math.cos(datum_angle + angle) + datum_x     # in radians
+#    absolute_y = length * math.sin(datum_angle + angle) + datum_y     # in radians
 
     if debug == True:
         print("")
@@ -280,10 +280,10 @@ def relative_polar(datum_x, datum_y, datum_angle, length, angle, debug = False):
     # absolute_x, absolute_y = relative_polar(datum_x, datum_y, datum_angle, length, angle, debug)
     # refer to "PRT20210423002 Polar Coordinates Calculator"
 
-#    absolute_x = length * math.cos((datum_angle + angle)/180*math.pi) + datum_x
-#    absolute_y = length * math.sin((datum_angle + angle)/180*math.pi) + datum_y
-    absolute_x = length * math.cos(datum_angle + angle) + datum_x     # in radians
-    absolute_y = length * math.sin(datum_angle + angle) + datum_y     # in radians
+    absolute_x = length * math.cos((datum_angle + angle)/180*math.pi) + datum_x
+    absolute_y = length * math.sin((datum_angle + angle)/180*math.pi) + datum_y
+#    absolute_x = length * math.cos(datum_angle + angle) + datum_x     # in radians
+#    absolute_y = length * math.sin(datum_angle + angle) + datum_y     # in radians
 
     if debug == True:
         print(f"datum_x = {datum_x}")
@@ -453,8 +453,8 @@ def arc_offset_adjustment(dia, offset, start_x, start_y, end_x, end_y, rad, cw, 
     x_temp = length/2                               # determine the projected (x) distance of the center of arc along the vector from the start to end point. Used later to determine center of arc.
     y_temp = math.sqrt(rad ** 2 - x_temp ** 2)      # Determine the perpendicular (y) distance of the center of arc to the vector from the start to end point. Used later to determine center of arc.
     angle_temp = absolute_angle(start_x, start_y, end_x, end_y, debug=False)        # calculate absolute angle of the vector from the start point to end point. Used to determine center of arc
-#    angle_arc = 2 * math.degrees(math.asin((length/2)/rad))                         # determine angle of arc.
-    angle_arc = 2 * math.asin((length/2)/rad)                         # determine angle of arc. in radians
+    angle_arc = 2 * math.degrees(math.asin((length/2)/rad))                         # determine angle of arc.
+#    angle_arc = 2 * math.asin((length/2)/rad)                         # determine angle of arc. in radians
 
     #if mn
     if cw == True:
@@ -4152,10 +4152,10 @@ def polar_to_cartesian(angle, length):
         x = 0   # origin point
         y = 0   # origin point
     else:
-#        x = length * math.cos((angle)/180*math.pi)  # calculate x
-#        y = length * math.sin((angle)/180*math.pi)  # calculate y
-        x = length * math.cos(angle)  # calculate x   # in radians
-        y = length * math.sin(angle)  # calculate y   # in radians
+        x = length * math.cos((angle)/180*math.pi)  # calculate x
+        y = length * math.sin((angle)/180*math.pi)  # calculate y
+#        x = length * math.cos(angle)  # calculate x   # in radians
+#        y = length * math.sin(angle)  # calculate y   # in radians
     return x, y
 
 def format_angle(angle):
@@ -4163,11 +4163,11 @@ def format_angle(angle):
     # input parameters: angle
     # angle = format_angle(angle)
 
-#    angle = angle % 360     # format angle to remove excess revolutions. remainder of angle divided by 360deg
-    angle = angle % (2*math.pi)     # format angle to remove excess revolutions. remainder of angle divided by 360deg. in radians.
+    angle = angle % 360     # format angle to remove excess revolutions. remainder of angle divided by 360deg
+#    angle = angle % (2*math.pi)     # format angle to remove excess revolutions. remainder of angle divided by 360deg. in radians.
     if angle < 0 :
-#        angle = angle + 360     # format negative angles to positive absolute angle.
-        angle = angle + 2*math.pi    # format negative angles to positive absolute angle. in radians.
+        angle = angle + 360     # format negative angles to positive absolute angle.
+#        angle = angle + 2*math.pi    # format negative angles to positive absolute angle. in radians.
     return angle
 
 def rotate_axis(angle, x, y):
@@ -4212,8 +4212,8 @@ def arc_data(start_x, start_y, end_x, end_y, rad, cw, less_180):
     x_temp = length/2                               # determine the projected (x) distance of the center of arc along the vector from the start to end point. Used later to determine center of arc.
     y_temp = math.sqrt(rad ** 2 - x_temp ** 2)      # Determine the perpendicular (y) distance of the center of arc to the vector from the start to end point. Used later to determine center of arc.
     angle_temp = absolute_angle(start_x, start_y, end_x, end_y, debug=False)        # calculate absolute angle of the vector from the start point to end point. Used to determine center of arc
-#    angle_arc = 2 * math.degrees(math.asin((length/2)/rad))                         # determine angle of arc.
-    angle_arc = 2 * math.asin((length/2)/rad)                         # determine angle of arc. in radians
+    angle_arc = 2 * math.degrees(math.asin((length/2)/rad))                         # determine angle of arc.
+#    angle_arc = 2 * math.asin((length/2)/rad)                         # determine angle of arc. in radians
 
     if cw == True:
         if less_180 == True:
@@ -4235,58 +4235,58 @@ def arc_data(start_x, start_y, end_x, end_y, rad, cw, less_180):
     start_angle_temp, length, origin_x, origin_y = absolute_cartesian_to_relative_polar(center_x, center_y, start_x, start_y)
     end_angle_temp, length, origin_x, origin_y = absolute_cartesian_to_relative_polar(center_x, center_y, end_x, end_y)
 
-#    if cw == True:
-#        start_angle = start_angle_temp - 90     # calculate angle of starting vector
-#        if start_angle < 0:
-#            start_angle = start_angle + 360     # if angle is negative. add 360deg
-#        end_angle = end_angle_temp - 90         # calculate angle of ending vector
-#        if end_angle < 0:
-#            end_angle = end_angle + 360     # if angle is negative. add 360deg
-#    elif cw == False:
-#        start_angle = start_angle_temp + 90   # calculate angle of starting vector
-#        if start_angle >= 360:
-#            start_angle = start_angle - 360     # if angle is over 360. subtract 360deg
-#        end_angle = end_angle_temp + 90         # calculate angle of ending vector
-#        if end_angle >= 360:
-#            end_angle = end_angle - 360     # if angle is over 360. subtract 360deg
+    if cw == True:
+        start_angle = start_angle_temp - 90     # calculate angle of starting vector
+        if start_angle < 0:
+            start_angle = start_angle + 360     # if angle is negative. add 360deg
+        end_angle = end_angle_temp - 90         # calculate angle of ending vector
+        if end_angle < 0:
+            end_angle = end_angle + 360     # if angle is negative. add 360deg
+    elif cw == False:
+        start_angle = start_angle_temp + 90   # calculate angle of starting vector
+        if start_angle >= 360:
+            start_angle = start_angle - 360     # if angle is over 360. subtract 360deg
+        end_angle = end_angle_temp + 90         # calculate angle of ending vector
+        if end_angle >= 360:
+            end_angle = end_angle - 360     # if angle is over 360. subtract 360deg
 
 #--------------------in radians-------------------
-    if cw == True:
-        start_angle = start_angle_temp - math.pi/2  # calculate angle of starting vector
-        if start_angle < 0:
-            start_angle = start_angle + math.pi*2  # if angle is negative. add 360deg
-        end_angle = end_angle_temp - math.pi/2  # calculate angle of ending vector
-        if end_angle < 0:
-            end_angle = end_angle + math.pi*2  # if angle is negative. add 360deg
-    elif cw == False:
-        start_angle = start_angle_temp + math.pi/2  # calculate angle of starting vector
-        if start_angle >= math.pi*2:
-            start_angle = start_angle - math.pi*2  # if angle is over 360. subtract 360deg
-        end_angle = end_angle_temp + math.pi/2  # calculate angle of ending vector
-        if end_angle >= math.pi*2:
-            end_angle = end_angle - math.pi*2  # if angle is over 360. subtract 360deg
+#    if cw == True:
+#        start_angle = start_angle_temp - math.pi/2  # calculate angle of starting vector
+#        if start_angle < 0:
+#            start_angle = start_angle + math.pi*2  # if angle is negative. add 360deg
+#        end_angle = end_angle_temp - math.pi/2  # calculate angle of ending vector
+#        if end_angle < 0:
+#            end_angle = end_angle + math.pi*2  # if angle is negative. add 360deg
+#    elif cw == False:
+#        start_angle = start_angle_temp + math.pi/2  # calculate angle of starting vector
+#        if start_angle >= math.pi*2:
+#            start_angle = start_angle - math.pi*2  # if angle is over 360. subtract 360deg
+#        end_angle = end_angle_temp + math.pi/2  # calculate angle of ending vector
+#        if end_angle >= math.pi*2:
+#            end_angle = end_angle - math.pi*2  # if angle is over 360. subtract 360deg
 # ---------------------------------------
 
-#    start_angle_temp = round(start_angle, 2)  # round to 2 decimal places
-#    if start_angle_temp == 360:  # if angle is 360. conventionalize to 0
-#        start_angle = 0
-#    end_angle_temp = round(end_angle, 2)  # round to 2 decimal places
-#    if end_angle_temp == 360:    # if angle is 360. conventionalize to 0
-#        end_angle = 0
+    start_angle_temp = round(start_angle, 2)  # round to 2 decimal places
+    if start_angle_temp == 360:  # if angle is 360. conventionalize to 0
+        start_angle = 0
+    end_angle_temp = round(end_angle, 2)  # round to 2 decimal places
+    if end_angle_temp == 360:    # if angle is 360. conventionalize to 0
+        end_angle = 0
 
     # --------------------in radians-------------------
-    start_angle_temp = round(start_angle, 4)  # round to 2 decimal places
-    if start_angle_temp == math.pi:  # if angle is 360. conventionalize to 0
-        start_angle = 0
-    end_angle_temp = round(end_angle, 4)  # round to 2 decimal places
-    if end_angle_temp == math.pi:    # if angle is 360. conventionalize to 0
-        end_angle = 0
+#    start_angle_temp = round(start_angle, 4)  # round to 2 decimal places
+#    if start_angle_temp == math.pi:  # if angle is 360. conventionalize to 0
+#        start_angle = 0
+#    end_angle_temp = round(end_angle, 4)  # round to 2 decimal places
+#    if end_angle_temp == math.pi:    # if angle is 360. conventionalize to 0
+#        end_angle = 0
     # ---------------------------------------
 
     arc_angle = absolute_angle(center_x, center_y, end_x, end_y) - absolute_angle(center_x, center_y, start_x, start_y)     # calculate arc angle
     arc_angle = abs(arc_angle)      # absolute arc angle
-#    arc_length = arc_angle/360 * 2*math.pi * rad    # calculate arc_length
-    arc_length = arc_angle * rad    # calculate arc_length
+    arc_length = arc_angle/360 * 2*math.pi * rad    # calculate arc_length
+#    arc_length = arc_angle * rad    # calculate arc_length
 
     return center_x, center_y, start_angle, end_angle, arc_length, arc_angle
 
@@ -4556,7 +4556,6 @@ start_convex_apex_flag = False
 start_inverted_apex_flag = False
 undersized_internal_arc_flag = False
 abort_flag = False
-
 while profile_counter <= end and on_line_flag == False:
 
     start_concave_apex_flag = False       # reset flag
@@ -4575,20 +4574,20 @@ while profile_counter <= end and on_line_flag == False:
         vector_angle_pre = df_profile.loc[profile_counter, 'vector_angle_pre']  # get vector_angle_pre from df_profile dataframe
         vector_angle_start = df_profile.loc[profile_counter, 'vector_angle_start']  # get vector_angle_start from df_profile dataframe
         vector = vector_angle_start - vector_angle_pre    # calculate change in vector between current segment and segment before
-#        vector = round(vector,1)        # round to 1 decimal place to prevent false apex trigger.
-        vector = round(vector,3)        # round to 3 decimal place to prevent false apex trigger. in radians
+        vector = round(vector,1)        # round to 1 decimal place to prevent false apex trigger.
+#        vector = round(vector,3)        # round to 3 decimal place to prevent false apex trigger. in radians
 
         if vector < 0:  # calculate absolute angle.
 #            vector = vector + 360
             vector = format_angle(vector)   # in radians
 
-#        if vector == 0 or vector == 360:     # segment transition is tangent and in same direction
-        if vector == 0 or vector == (2*math.pi):  # segment transition is tangent and in same direction. in radians
+        if vector == 0 or vector == 360:     # segment transition is tangent and in same direction
+#        if vector == 0 or vector == (2*math.pi):  # segment transition is tangent and in same direction. in radians
             start_concave_apex_flag = False
             start_convex_apex_flag = False
             start_inverted_apex_flag = False
-#        elif vector > 0 and vector < 180 :    # segment transition not tangent. deviates to the left.
-        elif vector > 0 and vector < math.pi:  # segment transition not tangent. deviates to the left. in radians
+        elif vector > 0 and vector < 180 :    # segment transition not tangent. deviates to the left.
+#        elif vector > 0 and vector < math.pi:  # segment transition not tangent. deviates to the left. in radians
             if mode == 1:
                 start_concave_apex_flag = False
                 start_convex_apex_flag = True
@@ -4597,8 +4596,8 @@ while profile_counter <= end and on_line_flag == False:
                 start_concave_apex_flag = True
                 start_convex_apex_flag = False
                 start_inverted_apex_flag = False
-#        elif vector > 180 and vector < 360 :    # segment transition not tangent. deviates to the right.
-        elif vector > math.pi and vector < (2*math.pi):  # segment transition not tangent. deviates to the right. in radians
+        elif vector > 180 and vector < 360 :    # segment transition not tangent. deviates to the right.
+#        elif vector > math.pi and vector < (2*math.pi):  # segment transition not tangent. deviates to the right. in radians
             if mode == 1:
                 start_concave_apex_flag = True
                 start_convex_apex_flag = False
@@ -4607,8 +4606,8 @@ while profile_counter <= end and on_line_flag == False:
                 start_concave_apex_flag = False
                 start_convex_apex_flag = True
                 start_inverted_apex_flag = False
-#        elif vector == 180:    # segment transition is tangent but inverted.
-        elif vector == math.pi:  # segment transition is tangent but inverted. in radians
+        elif vector == 180:    # segment transition is tangent but inverted.
+#        elif vector == math.pi:  # segment transition is tangent but inverted. in radians
             start_concave_apex_flag = False
             start_convex_apex_flag = True   # convex apex irregardless mode 1 or 2. i.e. left or right side of travel
             start_inverted_apex_flag = True
@@ -4646,7 +4645,6 @@ while profile_counter <= end and on_line_flag == False:
 profile_counter = 0     # initialize counter for profile df
 rows = len(df_profile)     # number of rows in df_line
 end = rows - 1    # initialize end counter
-
 while profile_counter <= end and on_line_flag == False:
 
     temp_loop_debug('insert row at convex apex points')    # debug only
@@ -4689,7 +4687,6 @@ end = rows - 1    # initialize end counter
 start_block, end_block, name, name_debug, clear_z, start_z, cut_f, finish_f, z_f, dia = parameters_data_frame(excel_file, 'parameters')    # import parameters. !!!clear print statements!!!
 offset = df_line_static.loc['offset','static_value']       # get offset from line data frame. for constant offset only.
 mode = df_line_static.loc['mode','static_value']       # get mode from line data frame.
-
 while profile_counter <= end and on_line_flag == False:
 
     last_row_flag = df_profile.loc[profile_counter, 'last_row_flag']  # get last_row_flag from df_profile dataframe
@@ -4768,7 +4765,6 @@ while profile_counter <= end and on_line_flag == False:
 profile_counter = 0  # initialize counter for profile df
 rows = len(df_profile)  # number of rows in df_line
 end = rows - 1  # initialize end counter
-
 while profile_counter <= end and on_line_flag == False:
 
     last_row_flag = df_profile.loc[profile_counter, 'last_row_flag']  # get last_row_flag from df_profile dataframe
@@ -4860,13 +4856,13 @@ while profile_counter <= end and on_line_flag == False:
         direction = df_profile.loc[profile_counter, 'direction']  # get segment direction
         direction_adjusted = df_profile.loc[profile_counter, 'direction_adjusted']  # get adjusted segment direction
         direction_difference = direction_adjusted - direction  # calculate direction difference
-#        direction_difference = round(direction_difference,1)  # round to 1 decimal place to prevent false inversion trigger
-        direction_difference = round(direction_difference,3)  # round to 3 decimal place to prevent false inversion trigger. in radians.
+        direction_difference = round(direction_difference,1)  # round to 1 decimal place to prevent false inversion trigger
+#        direction_difference = round(direction_difference,3)  # round to 3 decimal place to prevent false inversion trigger. in radians.
 
         print('direction_difference: ' + str(direction_difference))
 
-#        if direction_difference == 0 or direction_difference == 360 :   # no inversion found. start and end points of segment are in the same direction before and after adjustment.
-        if direction_difference == 0 or direction_difference == round(2*math.pi, 3):  # no inversion found. start and end points of segment are in the same direction before and after adjustment. in radians.
+        if direction_difference == 0 or direction_difference == 360 :   # no inversion found. start and end points of segment are in the same direction before and after adjustment.
+#        if direction_difference == 0 or direction_difference == round(2*math.pi, 3):  # no inversion found. start and end points of segment are in the same direction before and after adjustment. in radians.
             df_profile.loc[profile_counter, 'inversion_flag'] = False   # clear inversion flag
         else:                                                           # inversion found. start and end points of segment are not in the same direction before and after adjustment.
             df_profile.loc[profile_counter, 'skip_flag'] = True  # set skip_flag
@@ -4916,12 +4912,11 @@ while profile_counter <= end and on_line_flag == False:
         prior_segment_y1 = df_profile.loc[profile_counter - 1, 'start_y_adjusted']      # read start_y_adjusted on prior segment
         prior_segment_x2 = df_profile.loc[profile_counter - 1, 'end_x_adjusted']        # read end_x_adjusted on prior segment
         prior_segment_y2 = df_profile.loc[profile_counter - 1, 'end_y_adjusted']        # read end_y_adjusted on prior segment
-        if prior_segment_type == 'arc' :
+        if prior_segment_type == 'arc':
             prior_segment_r = df_profile.loc[profile_counter - 1, 'rad_adjusted']       # read rad_adjusted on prior segment
             prior_segment_arc_center_x = df_profile.loc[profile_counter - 1, 'arc_center_x']      # read arc_center_x on prior segment
             prior_segment_arc_center_y = df_profile.loc[profile_counter - 1, 'arc_center_y']  # read arc_center_y on prior segment
-
-        #            prior_segment_m = (prior_segment_y2 - prior_segment_y1) / (prior_segment_x2 - prior_segment_x1)   # calculate gradient of prior segment
+#            prior_segment_m = (prior_segment_y2 - prior_segment_y1) / (prior_segment_x2 - prior_segment_x1)   # calculate gradient of prior segment
 #            prior_segment_c = prior_segment_y2 - prior_segment_x2 * prior_segment_m     # calculate y intercept of prior segment
 
         later_segment_x1 = df_profile.loc[profile_counter + 1, 'start_x_adjusted']       # read start_x_adjusted on later segment
@@ -4955,25 +4950,25 @@ while profile_counter <= end and on_line_flag == False:
             rel_angle = absolute_angle(rel_x1, rel_y1, rel_x2, rel_y2)     # find angle of later segment relative to prior segment (reference axis).
 
             # identify possible line-line cases
-#            if round(rel_angle,1) == 0:         # later segment is parallel/ 0 deg relative to the prior segment in the same direction.
-            if round(rel_angle,3) == 0:  # later segment is parallel/ 0 deg relative to the prior segment in the same direction. in radians.
+            if round(rel_angle,1) == 0:         # later segment is parallel/ 0 deg relative to the prior segment in the same direction.
+#            if round(rel_angle,3) == 0:  # later segment is parallel/ 0 deg relative to the prior segment in the same direction. in radians.
                 inversion_type = 'line-line similar parallel'
                 parallel_flag = True        # set parallel flag
                 if round(rel_y1, 4) == 0:       # both segments are colinear
                     inversion_type = 'line-line similar colinear'
-#            elif round(rel_angle,1) == 180:         # later segment is parallel/ 180 deg relative to the prior segment in the opposing direction.
-            elif round(rel_angle,3) == round(math.pi,3):  # later segment is parallel/ 180 deg relative to the prior segment in the opposing direction. in radians.
+            elif round(rel_angle,1) == 180:         # later segment is parallel/ 180 deg relative to the prior segment in the opposing direction.
+#            elif round(rel_angle,3) == round(math.pi,3):  # later segment is parallel/ 180 deg relative to the prior segment in the opposing direction. in radians.
                 inversion_type = 'line-line opposing parallel'
                 parallel_flag = True        # set parallel flag
                 if round(rel_y1, 4) == 0:       # both segments are colinear
                     inversion_type = 'line-line similar colinear'
-#            elif round(rel_angle,1) == 90 or round(rel_angle,1) == 270:
-            elif round(rel_angle, 3) == round((0.5*math.pi),3) or round(rel_angle, 3) == round((1.5*math.pi),3):
+            elif round(rel_angle,1) == 90 or round(rel_angle,1) == 270:
+#            elif round(rel_angle, 3) == round((0.5*math.pi),3) or round(rel_angle, 3) == round((1.5*math.pi),3):
                 rel_intersect_x = temp_x1      # later segment is normal/90deg or 270deg relative to the prior segment.
                 inversion_type = 'line-line orthogonal intersection'
             else:
-#                rel_m = math.tan(rel_angle/180*math.pi)   # calculate gradient of relative segment for y=mx+c
-                rel_m = math.tan(rel_angle)  # calculate gradient of relative segment for y=mx+c in radians.
+                rel_m = math.tan(rel_angle/180*math.pi)   # calculate gradient of relative segment for y=mx+c
+#                rel_m = math.tan(rel_angle)  # calculate gradient of relative segment for y=mx+c in radians.
                 rel_c = rel_y2 - rel_x2 * rel_m     # calculate y intercept of relative segment for y=mx+c
                 rel_intersect_x = -rel_c/rel_m      # calculate x intercept. x = -c/m
                 inversion_type = 'line-line intersecting'
@@ -5030,12 +5025,12 @@ while profile_counter <= end and on_line_flag == False:
             # Use cosine rule to calculate angle A given lengths a, b, c
             # Calculate d to find the intersect points
             # refer to "PRT230721-001 Use Cases"
-#            angle_a = math.degrees(math.acos((length_b**2 + length_c**2 - length_a**2)/(2*length_b*length_c)))  # calculating angle at corner a using cosine rule
-#            rel_y = prior_segment_r * (math.sin((angle_a/180)*math.pi)) # calculating the y/perpendicular distance of an intersect point from reference axis or prior arc center to later arc center
-#            rel_x = prior_segment_r * (math.cos((angle_a/180)*math.pi)) # calculating the x/parallel distance of an intersect point from reference axis or prior arc center to later arc center
-            angle_a = math.acos((length_b**2 + length_c**2 - length_a**2)/(2*length_b*length_c))    # calculating angle at corner a using cosine rule in radians.
-            rel_y = prior_segment_r * math.sin(angle_a)     # calculating the y/perpendicular distance of an intersect point from reference axis or prior arc center to later arc center in radians.
-            rel_x = prior_segment_r * math.cos(angle_a)     # calculating the x/parallel distance of an intersect point from reference axis or prior arc center to later arc center in radians.
+            angle_a = math.degrees(math.acos((length_b**2 + length_c**2 - length_a**2)/(2*length_b*length_c)))  # calculating angle at corner a using cosine rule
+            rel_y = prior_segment_r * (math.sin((angle_a/180)*math.pi)) # calculating the y/perpendicular distance of an intersect point from reference axis or prior arc center to later arc center
+            rel_x = prior_segment_r * (math.cos((angle_a/180)*math.pi)) # calculating the x/parallel distance of an intersect point from reference axis or prior arc center to later arc center
+#            angle_a = math.acos((length_b**2 + length_c**2 - length_a**2)/(2*length_b*length_c))    # calculating angle at corner a using cosine rule in radians.
+#            rel_y = prior_segment_r * math.sin(angle_a)     # calculating the y/perpendicular distance of an intersect point from reference axis or prior arc center to later arc center in radians.
+#            rel_x = prior_segment_r * math.cos(angle_a)     # calculating the x/parallel distance of an intersect point from reference axis or prior arc center to later arc center in radians.
             print('arc-arc ' + 'rel_y-01: ' + str(rel_y))  # ok
             print('arc-arc ' + 'angle_a-01: ' + str(angle_a))  # ok
 
