@@ -8,6 +8,10 @@
 # Use "TMP20220414001 G-code Parameters" to input parameters
 #
 # ---Change History---
+# rev: 01-01-02-01
+# date: 18/Aug/2023
+# Major change.
+#
 # rev: 01-01-01-13
 # date: 21/Jul/2023
 # line and arc function. changed comments in end_z from relative units to absolute units.
@@ -213,11 +217,52 @@ from datetime import datetime
 import textwrap
 import numpy as np
 
+def format_angle(angle):
+    # ---Description---
+    # formats angle to non negative angle in the range of: 0 >= angle < 360 degrees.
+    # angle = format_angle(angle)
+
+    # ---Variable List---
+    # angle = angle to be formatted
+
+    # ---Return Variable List---
+    # angle = formatted angle
+
+    # ---Change History---
+    # rev: 01-01-02-01
+    # Initial release.
+    # software test run on 18/Aug/2023
+    # --------------------
+
+    angle = angle % 360     # format angle to remove excess revolutions. remainder of angle divided by 360deg. in degrees.
+#    angle = angle % (2*math.pi)     # format angle to remove excess revolutions. remainder of angle divided by 360deg. in radians.
+    if angle < 0 :
+        angle = angle + 360     # format negative angles to positive absolute angle. in degrees.
+#        angle = angle + 2*math.pi    # format negative angles to positive absolute angle. in radians.
+    return angle
+
 def absolute_angle(start_x, start_y, end_x, end_y, debug = False):
+    # ---Description---
     # calculate absolute angle of a vector with reference to the x axis.
     # input parameters: start_x, start_y, end_x, end_y, debug (optional)
     # returns the absolute angle.
     # angle = absolute_angle(start_x, start_y, end_x, end_y)
+
+    # ---Variable List---
+    # start_x = start point x coordinate
+    # start_y = start point y coordinate
+    # end_x = end point x coordinate
+    # end_y = end point y coordinate
+
+    # ---Return Variable List---
+    # angle = absolute angle of vector
+
+    # ---Change History---
+    # rev: 01-01-02-01
+    # Initial record.
+    # added change history
+    # software test run < 18/Aug/2023
+    # --------------------
 
     vec_x = end_x - start_x
     vec_y = end_y - start_y
@@ -241,10 +286,29 @@ def absolute_angle(start_x, start_y, end_x, end_y, debug = False):
     return angle
 
 def relative_coordinate(datum_x, datum_y, datum_angle, x, y, debug = False):
+    # ---Description---
     # transforms cartesian coordinates relative to a datum point to its absolute coordinates.
     # input parameters: datum_x, datum_y, datum_angle, x, y, debug(optional)
     # absolute_x, absolute_y = relative_coordinate(datum_x, datum_y, datum_angle, x, y, debug)
     # refer to "PRT20210423001 Relative Coordinates Calculator"
+
+    # ---Variable List---
+    # datum_x = datum x coordinate
+    # datum_y = datum y coordinate
+    # datum_angle = angle of relative axis relative to the absolute axis.
+    # x = relative x coordinate
+    # y = relative y coordinate
+
+    # ---Return Variable List---
+    # absolute_x = absolute x coordinate
+    # absolute_y = absolute y coordinate
+
+    # ---Change History---
+    # rev: 01-01-02-01
+    # Initial record.
+    # added change history
+    # software test run < 18/Aug/2023
+    # --------------------
 
     length = math.sqrt(x ** 2 + y ** 2)     # length of position relative to datum.
     angle = absolute_angle(0, 0, x, y, debug)    # angle of position vector relative to datum x axis.
@@ -267,10 +331,29 @@ def relative_coordinate(datum_x, datum_y, datum_angle, x, y, debug = False):
     return absolute_x, absolute_y
 
 def relative_polar(datum_x, datum_y, datum_angle, length, angle, debug = False):
+    # ---Description---
     # transforms polar coordinates relative to a datum point to its absolute cartesian coordinates.
     # input parameters: datum_x, datum_y, datum_angle, length, angle, debug(optional))
     # absolute_x, absolute_y = relative_polar(datum_x, datum_y, datum_angle, length, angle, debug)
     # refer to "PRT20210423002 Polar Coordinates Calculator"
+
+    # ---Variable List---
+    # datum_x = datum/absolute origin x coordinate
+    # datum_y = datum/absolute origin y coordinate
+    # datum_angle = angle of relative axis relative to the absolute axis.
+    # length = length of the polar coordinate
+    # angle =  angle of the polar coordinate
+
+    # ---Return Variable List---
+    # absolute_x = absolute x coordinate
+    # absolute_y = absolute y coordinate
+
+    # ---Change History---
+    # rev: 01-01-02-01
+    # Initial record.
+    # added change history
+    # software test run < 18/Aug/2023
+    # --------------------
 
     absolute_x = length * math.cos((datum_angle + angle)/180*math.pi) + datum_x
     absolute_y = length * math.sin((datum_angle + angle)/180*math.pi) + datum_y
@@ -287,7 +370,22 @@ def relative_polar(datum_x, datum_y, datum_angle, length, angle, debug = False):
     return absolute_x, absolute_y
 
 def write_to_file(name, text):
+    # ---Description---
     # open and write text to a text file.
+
+    # ---Variable List---
+    # name = name of txt file
+
+    # ---Return Variable List---
+    # text = text to write to file
+
+    # ---Change History---
+    # rev: 01-01-02-01
+    # Initial record.
+    # added change history
+    # software test run < 18/Aug/2023
+    # --------------------
+
     with open(f'{name}.txt', 'a') as file:  # create new date time stamped file and open for writing
         file.write(text)
     file.close()
