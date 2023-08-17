@@ -4315,7 +4315,6 @@ def line_data(start_x, start_y, end_x, end_y):
 
 def temp_text_df_debug(df_profile) :
 
-#    print(str(df_profile))
     df_temp = df_profile.to_markdown(index=False, tablefmt='pipe',floatfmt=".6f", colalign=['center'] * len(df_profile.columns))     # format df into table
     print('\n')
     print(str(df_temp))
@@ -4879,7 +4878,7 @@ while profile_counter <= end and on_line_flag == False:
         inversion_flag = df_profile.loc[profile_counter, 'inversion_flag']
         print('inversion_flag: ' + str(inversion_flag))
 
-    df_profile.loc[profile_counter, 'inversion_flag'] = False  # bypass inversion check. !!!!debug only!!!
+#    df_profile.loc[profile_counter, 'inversion_flag'] = False  # bypass inversion check. !!!!debug only!!!
 
     if last_row_flag == True or profile_counter == end:  # break while loop if last_row_flag detected or if last row is read.
         break  # check last_row_flag
@@ -4963,18 +4962,18 @@ while profile_counter <= end and on_line_flag == False:
                 if round(rel_y1, 4) == 0:       # both segments are colinear
                     inversion_type = 'line-line similar colinear'
 #            elif round(rel_angle,1) == 180:         # later segment is parallel/ 180 deg relative to the prior segment in the opposing direction.
-            elif round(rel_angle,3) == math.pi:  # later segment is parallel/ 180 deg relative to the prior segment in the opposing direction. in radians.
+            elif round(rel_angle,3) == round(math.pi,3):  # later segment is parallel/ 180 deg relative to the prior segment in the opposing direction. in radians.
                 inversion_type = 'line-line opposing parallel'
                 parallel_flag = True        # set parallel flag
                 if round(rel_y1, 4) == 0:       # both segments are colinear
                     inversion_type = 'line-line similar colinear'
 #            elif round(rel_angle,1) == 90 or round(rel_angle,1) == 270:
-            elif round(rel_angle, 3) == (0.5*math.pi) or round(rel_angle, 3) == (1.5*math.pi):
+            elif round(rel_angle, 3) == round((0.5*math.pi),3) or round(rel_angle, 3) == round((1.5*math.pi),3):
                 rel_intersect_x = temp_x1      # later segment is normal/90deg or 270deg relative to the prior segment.
                 inversion_type = 'line-line orthogonal intersection'
             else:
 #                rel_m = math.tan(rel_angle/180*math.pi)   # calculate gradient of relative segment for y=mx+c
-                rel_m = math.tan(rel_angle /math.pi)  # calculate gradient of relative segment for y=mx+c in radians.
+                rel_m = math.tan(rel_angle)  # calculate gradient of relative segment for y=mx+c in radians.
                 rel_c = rel_y2 - rel_x2 * rel_m     # calculate y intercept of relative segment for y=mx+c
                 rel_intersect_x = -rel_c/rel_m      # calculate x intercept. x = -c/m
                 inversion_type = 'line-line intersecting'
@@ -5081,21 +5080,31 @@ while profile_counter <= end and on_line_flag == False:
 #                temp_lacx = lacx = later_segment_arc_center_x     # assign temp variable
 #                temp_lacy = later_segment_arc_center_y     # assign temp variable
 
-                prior_segment_x1 = temp_lx1     # exchange prior and later variables
-                prior_segment_y1 = temp_ly1     # exchange prior and later variables
-                prior_segment_x2 = temp_lx2     # exchange prior and later variables
-                prior_segment_y2 = temp_ly2     # exchange prior and later variables
+#                prior_segment_x1 = temp_lx1     # exchange prior and later variables
+#                prior_segment_y1 = temp_ly1     # exchange prior and later variables
+#                prior_segment_x2 = temp_lx2     # exchange prior and later variables
+#                prior_segment_y2 = temp_ly2     # exchange prior and later variables
 
-                later_segment_x1 = temp_px1     # exchange prior and later variables
-                later_segment_y1 = temp_py1     # exchange prior and later variables
-                later_segment_x2 = temp_px2     # exchange prior and later variables
-                later_segment_y2 = temp_py2     # exchange prior and later variables
+#                later_segment_x1 = temp_px1     # exchange prior and later variables
+#                later_segment_y1 = temp_py1     # exchange prior and later variables
+#                later_segment_x2 = temp_px2     # exchange prior and later variables
+#                later_segment_y2 = temp_py2     # exchange prior and later variables
+
+                prior_segment_x1 = temp_lx2      # exchange prior and later variables
+                prior_segment_y1 = temp_ly2     # exchange prior and later variables
+                prior_segment_x2 = temp_lx1     # exchange prior and later variables
+                prior_segment_y2 = temp_ly1     # exchange prior and later variables
+
+                later_segment_x1 = temp_px2     # exchange prior and later variables
+                later_segment_y1 = temp_py2     # exchange prior and later variables
+                later_segment_x2 = temp_px1     # exchange prior and later variables
+                later_segment_y2 = temp_py1     # exchange prior and later variables
 
                 later_segment_r = temp_pr     # exchange prior and later variables
                 later_segment_arc_center_x = temp_pacx     # exchange prior and later variables
                 later_segment_arc_center_y = temp_pacy     # exchange prior and later variables
 
-            axis_angle, length, discard, discard = line_data(prior_segment_x1, prior_segment_y1,prior_segment_x2, prior_segment_y2)    # get parameters using prior line segment for reference axis
+            axis_angle, length, discard, discard = line_data(prior_segment_x1, prior_segment_y1,prior_segment_x2, prior_segment_y2)    # get parameters using prior line segment for reference axis. refer to "PRT230721-001 Use Cases"
             temp_x, temp_y = shift_origin(prior_segment_x1, prior_segment_y1, later_segment_arc_center_x, later_segment_arc_center_y)     # apply origin shift to prior_segment_x1, prior_segment_y1 as origin
             rel_arc_x, rel_arc_y = rotate_axis(axis_angle, temp_x, temp_y)      # apply axis rotation. rel_arc_y is the perpendicular distance between the line and center of arc.
 
@@ -5118,24 +5127,38 @@ while profile_counter <= end and on_line_flag == False:
             print('\n' + 'inversion_type: ' + str(inversion_type))  # ok
 
             # Use Pythagoras rule to calculate the intersect point.
-            # refer to "PRT230721-001 Rev01 Use Cases"
+            # refer to "PRT230721-001 Use Cases"
             half_cord = math.sqrt(later_segment_r ** 2 - rel_arc_y ** 2)
             rel_intersect_x = rel_arc_x - half_cord
             print('\n' + 'rel_intersect_x: ' + str(rel_intersect_x))  # ok
 
             # determine which intersect point to use. near point or far point along the reference axis/line segment from relative origin/line start point
+            # refer to "PRT230721-001 Use Cases"
             if length < rel_arc_x:  # near point
                 rel_intersect_x = rel_intersect_x
             elif length > rel_arc_x:  # far point
                 rel_intersect_x = rel_intersect_x + half_cord * 2
 
             print('\n' + 'rel_intersect_x-adj: ' + str(rel_intersect_x))  # ok
+            print('\n' + 'rel_intersect_x (near): ' + str(rel_intersect_x))  # ok
+            print('\n' + 'rel_intersect_x (far): ' + str(rel_intersect_x + half_cord * 2))  # ok
+            rel_intersect_x_far = rel_intersect_x + half_cord * 2
 
             temp_x1, temp_y1 = rotate_axis(-axis_angle, rel_intersect_x, 0)  # undo axis rotation
             intersect_x, intersect_y = shift_origin(-prior_segment_x1, -prior_segment_y1, temp_x1, temp_y1)  # undo origin shift
 
+            temp_x1_far, temp_y1_far = rotate_axis(-axis_angle, rel_intersect_x_far, 0)  # undo axis rotation
+            intersect_x_far, intersect_y_far = shift_origin(-prior_segment_x1, -prior_segment_y1, temp_x1_far,temp_y1_far)  # undo origin shift
+            print('\n' + 'intersect_x (far): ' + str(intersect_x_far))  # ok
+            print('intersect_y (far): ' + str(intersect_y_far))  # ok
+
         print('\n' + 'intersect_x: ' + str(intersect_x))  # ok
         print('intersect_y: ' + str(intersect_y))  # ok
+        print('\n' + 'intersect_x (near): ' + str(intersect_x))  # ok
+        print('intersect_y (near): ' + str(intersect_y))  # ok
+
+
+
         df_profile.loc[profile_counter - 1, 'end_x_intersect'] = intersect_x  # write intersect x to prior segment
         df_profile.loc[profile_counter - 1, 'end_y_intersect'] = intersect_y  # write intersect y to prior segment
         df_profile.loc[profile_counter + 1, 'start_x_intersect'] = intersect_x  # write intersect x to later segment
@@ -5168,14 +5191,14 @@ while profile_counter <= end:
 
     if on_line_flag == True:
 
-        ouput_start_x = df_profile.loc[profile_counter, 'start_x']  # get start_x from df_profile dataframe
-        ouput_start_y = df_profile.loc[profile_counter, 'start_y']  # get start_y from df_profile dataframe
-        ouput_end_x = df_profile.loc[profile_counter, 'end_x']  # get end_x from df_profile dataframe
-        ouput_end_y = df_profile.loc[profile_counter, 'end_y']  # get end_y from df_profile dataframe
-        ouput_segment = df_profile.loc[profile_counter, 'segment']  # get segment from df_profile dataframe
-        ouput_rad = df_profile.loc[profile_counter, 'rad']  # get rad from df_profile dataframe
-        ouput_cw = df_profile.loc[profile_counter, 'cw']  # get cw from df_profile dataframe
-        ouput_less_180 = df_profile.loc[profile_counter, 'less_180']  # get less_180 from df_profile dataframe
+        output_start_x = df_profile.loc[profile_counter, 'start_x']  # get start_x from df_profile dataframe
+        output_start_y = df_profile.loc[profile_counter, 'start_y']  # get start_y from df_profile dataframe
+        output_end_x = df_profile.loc[profile_counter, 'end_x']  # get end_x from df_profile dataframe
+        output_end_y = df_profile.loc[profile_counter, 'end_y']  # get end_y from df_profile dataframe
+        output_segment = df_profile.loc[profile_counter, 'segment']  # get segment from df_profile dataframe
+        output_rad = df_profile.loc[profile_counter, 'rad']  # get rad from df_profile dataframe
+        output_cw = df_profile.loc[profile_counter, 'cw']  # get cw from df_profile dataframe
+        output_less_180 = df_profile.loc[profile_counter, 'less_180']  # get less_180 from df_profile dataframe
 
     if on_line_flag == False:
 
@@ -5188,39 +5211,40 @@ while profile_counter <= end:
 
         if intersect_start_flag == True:
             add_comment(profile_counter, 'start intersect. ')
-            ouput_start_x = df_profile.loc[profile_counter, 'start_x_intersect']  # get start_x_intersect from df_profile dataframe
-            ouput_start_y = df_profile.loc[profile_counter, 'start_y_intersect']  # get start_y_intersect from df_profile dataframe
+            output_start_x = df_profile.loc[profile_counter, 'start_x_intersect']  # get start_x_intersect from df_profile dataframe
+            output_start_y = df_profile.loc[profile_counter, 'start_y_intersect']  # get start_y_intersect from df_profile dataframe
         else:
-            ouput_start_x = df_profile.loc[profile_counter, 'start_x_adjusted']  # get start_x from df_profile dataframe
-            ouput_start_y = df_profile.loc[profile_counter, 'start_y_adjusted']  # get start_y from df_profile dataframe
+            output_start_x = df_profile.loc[profile_counter, 'start_x_adjusted']  # get start_x from df_profile dataframe
+            output_start_y = df_profile.loc[profile_counter, 'start_y_adjusted']  # get start_y from df_profile dataframe
 
         if intersect_end_flag == True:
             add_comment(profile_counter, 'end intersect. ')
-            ouput_end_x = df_profile.loc[profile_counter, 'end_x_intersect']  # get end_x_intersect from df_profile dataframe
-            ouput_end_y = df_profile.loc[profile_counter, 'end_y_intersect']  # get end_y_intersect from df_profile dataframe
+            output_end_x = df_profile.loc[profile_counter, 'end_x_intersect']  # get end_x_intersect from df_profile dataframe
+            output_end_y = df_profile.loc[profile_counter, 'end_y_intersect']  # get end_y_intersect from df_profile dataframe
         else:
-            ouput_end_x = df_profile.loc[profile_counter, 'end_x_adjusted']  # get end_x from df_profile dataframe
-            ouput_end_y = df_profile.loc[profile_counter, 'end_y_adjusted']  # get end_y from df_profile dataframe
+            output_end_x = df_profile.loc[profile_counter, 'end_x_adjusted']  # get end_x from df_profile dataframe
+            output_end_y = df_profile.loc[profile_counter, 'end_y_adjusted']  # get end_y from df_profile dataframe
 
-        ouput_segment = df_profile.loc[profile_counter, 'segment']  # get segment from df_profile dataframe
+        output_segment = df_profile.loc[profile_counter, 'segment']  # get segment from df_profile dataframe
 
-        if ouput_segment == 'arc':
-            ouput_rad = df_profile.loc[profile_counter, 'rad_adjusted']  # get rad from df_profile dataframe
-            ouput_cw = df_profile.loc[profile_counter, 'cw']  # get cw from df_profile dataframe
-            ouput_less_180 = df_profile.loc[profile_counter, 'less_180']  # get less_180 from df_profile dataframe
+        if output_segment == 'arc':
+            output_rad = df_profile.loc[profile_counter, 'rad_adjusted']  # get rad from df_profile dataframe
+            output_cw = df_profile.loc[profile_counter, 'cw']  # get cw from df_profile dataframe
+            output_less_180 = df_profile.loc[profile_counter, 'less_180']  # get less_180 from df_profile dataframe
 
+#    temp_text_df_debug(df_profile)  # debug only!!!!!!!!
 
-#    df_profile.loc[profile_counter, 'ouput_start_x'] = round(ouput_start_x, 6)    # write start_x from df_profile dataframe
-    df_profile.loc[profile_counter, 'ouput_start_x'] = round(ouput_start_x, 5)    # write start_x from df_profile dataframe
-    df_profile.loc[profile_counter, 'ouput_start_y'] = round(ouput_start_y, 5)    # write ouput_start_y from df_profile dataframe
-    df_profile.loc[profile_counter, 'ouput_end_x'] = round(ouput_end_x, 5)        # write ouput_end_x from df_profile dataframe
-    df_profile.loc[profile_counter, 'ouput_end_y'] = round(ouput_end_y , 5)       # write ouput_end_y from df_profile dataframe
-    df_profile.loc[profile_counter, 'ouput_segment'] = ouput_segment    # write ouput_segment from df_profile datafram
+#    df_profile.loc[profile_counter, 'output_start_x'] = round(output_start_x, 6)    # write start_x from df_profile dataframe
+    df_profile.loc[profile_counter, 'output_start_x'] = round(output_start_x, 4)    # write start_x from df_profile dataframe
+    df_profile.loc[profile_counter, 'output_start_y'] = round(output_start_y, 4)    # write output_start_y from df_profile dataframe
+    df_profile.loc[profile_counter, 'output_end_x'] = round(output_end_x, 4)        # write output_end_x from df_profile dataframe
+    df_profile.loc[profile_counter, 'output_end_y'] = round(output_end_y , 4)       # write output_end_y from df_profile dataframe
+    df_profile.loc[profile_counter, 'output_segment'] = output_segment    # write output_segment from df_profile datafram
 
-    if ouput_segment == 'arc':
-        df_profile.loc[profile_counter, 'ouput_rad'] = round(ouput_rad, 5)            # write ouput_rad from df_profile dataframe
-        df_profile.loc[profile_counter, 'ouput_cw'] = ouput_cw              # write ouput_cw from df_profile dataframe
-        df_profile.loc[profile_counter, 'ouput_less_180'] = ouput_less_180      # write ouput_less_180 from df_profile dataframe
+    if output_segment == 'arc':
+        df_profile.loc[profile_counter, 'output_rad'] = round(output_rad, 4)            # write output_rad from df_profile dataframe
+        df_profile.loc[profile_counter, 'output_cw'] = output_cw              # write output_cw from df_profile dataframe
+        df_profile.loc[profile_counter, 'output_less_180'] = output_less_180      # write output_less_180 from df_profile dataframe
 
     output_comments = df_profile.loc[profile_counter, 'comments']       # get comments from df_profile dataframe
     df_profile.loc[profile_counter, 'output_comments'] = output_comments       # write output_comments from df_profile dataframe
@@ -5233,12 +5257,6 @@ while profile_counter <= end:
 #===========================================================================
 
 temp_text_df_debug(df_profile)
-temp = df_profile.loc[24, 'start_x_adjusted']
-print('row24 start_x_adjusted: ' + str(temp))
-temp = df_profile.loc[24, 'ouput_start_x']
-print(f'''row24 ouput_start_x: {"%.15f" % temp}''')
-temp = df_profile.loc[24, 'start_x_adjusted']
-print('row24 start_x_adjusted: ' + str(temp))
 
 exit()
 
