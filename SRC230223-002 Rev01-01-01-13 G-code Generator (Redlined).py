@@ -4016,49 +4016,6 @@ def repeat_check(repeat_flag, repeat_done_flag, stored_counter, counter):
 
     return (repeat_flag, repeat_done_flag, counter)
 
-def toolbox():
-    # ---------------------------------------
-    # Data frame tools
-    # ---------------------------------------
-    df = pd.DataFrame(np.nan, index=[0, 1, 2, 3, 4], columns=['A', 'B', 'C', 'D'])  # creates empty data frame with indexed rows and labeled columns.
-    print('create data frame')
-    print(str(df)+'\n')
-
-    df.loc[2.2,:] = '--raw--'  # create new row, index: 2.2 with cells containing text: '--raw--'.
-    print('create new row with index: 2.2 with all cells containing --raw--')
-    print(str(df)+'\n')
-
-    df = df.sort_index().reset_index(drop=True)  # sort rows according to index values and reset to running integers.
-    print('reset index')
-    print(str(df)+'\n')
-
-    df.loc[:,'E'] = '--raw--'  # create new column labeled "E" with cells containing text: '--raw--'.
-    print('create new column labeled "E" with cells containing text: --raw--')
-    print(str(df)+'\n')
-
-    df.loc[1, 'B'] = 'Hello'  # modifies cell in column labeled: 'B', row index: '1' to value: '**Hello**'.
-    print('modifies cell in column labeled: B, row index: 1 to value: Hello')
-    print(str(df)+'\n')
-
-    df.loc[4.5] = ['1', '2', '3', '4', '5']  # create new row, index: 4.5 with cells containing unique text. needs identical number of cells.
-    print('create new row, index: 4.5 with cells containing unique text. needs identical number of cells.')
-    print(str(df) + '\n')
-
-    df = df.sort_index().reset_index(drop=True)  # sort rows according to index values and reset to running integers.
-    print('reset index')
-    print(str(df)+'\n')
-
-    print('length: '+ str(len(df)) + '\n')        # print number of rows in df
-
-    df.loc[len(df),:] = ['--raw--']     # create new row at bottom of df with cells containing text: '--raw--'.
-    print('create new row at bottom of df with cells containing text: --raw--')
-    print(str(df)+'\n')
-
-    df.loc[(len(df)-1),'A'] = 'NEW ROW'   # modifies cell in bottom row, column labeled: 'A' to value: 'new row'
-    print('modifies cell in bottom row, column labeled: \'A\' to value: \'NEW ROW\'')
-    print(str(df)+'\n')
-
-
 # ---------Import Parameters------------
 
 excel_file = 'LOG20220414001 G-code Parameters.xlsx'       # !!!! identify name of excel file to import data from. !!!!
