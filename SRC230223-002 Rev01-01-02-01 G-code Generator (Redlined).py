@@ -217,6 +217,191 @@ from datetime import datetime
 import textwrap
 import numpy as np
 
+def toolbox_data_frame():
+    # ---------------------------------------
+    # Data frame tools
+    # ---------------------------------------
+    # creates empty data frame
+    df = pd.DataFrame(np.nan, index=[0, 1, 2, 3, 4], columns=['A', 'B', 'C', 'D'])  # creates empty data frame with indexed rows and labeled columns.
+    print('create data frame')
+    print(str(df)+'\n')
+
+    # create new row
+    df.loc[2.2,:] = '---'  # create new row, index: 2.2 with cells containing text: '---'.
+    print('create new row with index: 2.2 with all cells containing ---')
+    print(str(df)+'\n')
+
+    # reset index
+    df = df.sort_index().reset_index(drop=True)  # sort rows according to index values and reset to running integers.
+    print('reset index')
+    print(str(df)+'\n')
+
+    df.loc[:,'E'] = '---'  # create new column labeled "E" with cells containing text: '---'.
+    print('create new column labeled "E" with cells containing text: ---')
+    print(str(df)+'\n')
+
+    # write a value to a single cell.
+    df.loc[1, 'B'] = 'Hello'  # modifies cell in column labeled: 'B', row index: '1' to value: '**Hello**'.
+    print('modifies cell in column labeled: B, row index: 1 to value: Hello')
+    print(str(df)+'\n')
+
+    df.loc[4.5] = ['1', '2', '3', '4', '5']  # create new row, index: 4.5 with cells containing unique text. needs identical number of cells.
+    print('create new row, index: 4.5 with cells containing unique text. needs identical number of cells.')
+    print(str(df) + '\n')
+
+    df = df.sort_index().reset_index(drop=True)  # sort rows according to index values and reset to running integers.
+    print('reset index')
+    print(str(df)+'\n')
+
+    print('length: '+ str(len(df)) + '\n')        # print number of rows in df
+
+    df.loc[len(df),:] = ['---']     # create new row at bottom of df with cells containing text: '---'.
+    print('create new row at bottom of df with cells containing text: ---')
+    print(str(df)+'\n')
+
+    df.loc[(len(df)-1),'A'] = 'NEW ROW'   # modifies cell in bottom row, column labeled: 'A' to value: 'new row'
+    print('modifies cell in bottom row, column labeled: \'A\' to value: \'NEW ROW\'')
+    print(str(df)+'\n')
+
+    df = df.drop(df.index[1:])  # remove all rows except for the first row.
+    print('remove all rows except for the first row.')
+    print(str(df)+'\n')
+
+    df = df.loc[:, :'B']  # removes all columns up to 'B' columns
+    print('removes all columns up to \'B\' columns')
+    print(str(df)+'\n')
+
+    df = pd.DataFrame(np.nan, index=[0, 1, 2, 3, 4], columns=['A', 'B', 'C', 'D'])  # creates empty data frame with indexed rows and labeled columns.
+    df.loc[0:4,'A'] = ['Q','W','E','R','T']  # write 'Q','W','E','R','T' to column 'A'.
+    print('write \'Q\',\'W\',\'E\',\'R\',\'T\' to column \'A\'')
+    print(str(df)+'\n')
+
+    df.set_index('A', inplace=True)  # replace index default column with 'A' column
+    print('replace index default column with \'A\' column')
+    print(str(df)+'\n')
+
+    # copies index column to '#' column
+    df.loc[:,'#'] = '---'  # create new column labeled "#" with cells containing text: '---'.
+    df = df.sort_index().reset_index(drop=True)  # sort rows according to index values and reset to running integers.
+    df.loc[:, '#'] = df.index
+    print('copies index column to \'#\' column')
+    print(str(df)+'\n')
+
+def absolute_cartesian_to_relative_polar(origin_x, origin_y, absolute_x, absolute_y):
+    # ---Description---
+    # transforms absolute cartesian coordinates of a single point to its relative polar coordinates about an origin point.
+    # angle will range from 0 deg to < 360 deg. No negative angle.
+    # angle, length, origin_x, origin_y = absolute_cartesian_to_relative_polar(origin_x, origin_y, absolute_x, absolute_y)
+
+    # ---Variable List---
+    # origin_x = x origin of new relative polar coordinate axis
+    # origin_y = y origin of new relative polar coordinate axis
+    # absolute_x = x absolute cartesian coordinate
+    # absolute_y = y absolute cartesian coordinate
+
+    # ---Return Variable List---
+    # angle = angle on relative polar coordinate
+    # length = length on relative polar coordinate
+    # origin_x = x origin of new relative polar coordinate axis
+    # origin_y = y origin of new relative polar coordinate axis
+
+    # ---Change History---
+    # rev: 01-01-02-01
+    # Initial release.
+    # software test run on 18/Aug/2023
+    # --------------------
+
+    angle = absolute_angle(origin_x, origin_y, absolute_x, absolute_y)  # absolute angle of line
+    length = math.sqrt((absolute_x - origin_x) ** 2 + (absolute_y - origin_y) ** 2)     # length of line
+    origin_x = origin_x
+    origin_y = origin_y
+    return angle, length, origin_x, origin_y
+
+def shift_origin(new_origin_x,new_origin_y, x, y):
+    # ---Description---
+    # transforms absolute cartesian coordinates of a single point to its new cartesian coordinates relative to a new origin point.
+    # shifted_x, shifted_y = shift_origin(new_origin_x,new_origin_y, x, y)
+
+    # ---Variable List---
+    # new_origin_x = x origin of new relative cartesian coordinate
+    # new_origin_y = y origin of new relative cartesian coordinate
+    # x = x absolute cartesian coordinate
+    # y = y absolute cartesian coordinate
+
+    # ---Return Variable List---
+    # new_x = x origin of new relative cartesian coordinate
+    # new_y = y origin of new relative cartesian coordinate
+
+    # ---Change History---
+    # rev: 01-01-02-01
+    # Initial release.
+    # software test run on 18/Aug/2023
+    # --------------------
+
+    new_x = x - new_origin_x
+    new_y = y - new_origin_y
+    return new_x, new_y
+
+def cartesian_to_polar(x, y):
+    # ---Description---
+    # transforms cartesian coordinates of a single point to its polar coordinates.
+    # in event an origin point. return angle = 0, length = 0
+    # angle, length = cartesian_to_polar(x, y)
+
+    # ---Variable List---
+    # x = x absolute cartesian coordinate
+    # y = y absolute cartesian coordinate
+
+    # ---Return Variable List---
+    # angle = angle on polar coordinate
+    # hypo = length on polar coordinate
+
+    # ---Change History---
+    # rev: 01-01-02-01
+    # Initial release.
+    # software test run on 18/Aug/2023
+    # --------------------
+
+    if x == 0 and y == 0:
+        hypo = 0
+        angle = 0
+    else:
+        hypo = math.sqrt(x ** 2 + y ** 2)       # length of hypotenuse
+        angle = absolute_angle(0, 0, x, y)      # angle of line
+    return angle, hypo
+
+def polar_to_cartesian(angle, length):
+    # ---Description---
+    # transforms polar coordinates of a single point to its cartesian coordinates.
+    # in event of an origin point, i.e. length = 0. return x = 0 y = 0
+    # input parameters: angle, length
+    # x, y = polar_to_cartesian(angle, length)
+
+    # ---Variable List---
+    # angle = angle on polar coordinate
+    # length = length on polar coordinate
+
+    # ---Return Variable List---
+    # x = x cartesian coordinate
+    # y = y cartesian coordinate
+
+    # ---Change History---
+    # rev: 01-01-02-01
+    # Initial release.
+    # software test run on 18/Aug/2023
+    # --------------------
+
+    angle = format_angle(angle) # format angle
+    if length == 0:
+        x = 0   # origin point
+        y = 0   # origin point
+    else:
+        x = length * math.cos((angle)/180*math.pi)  # calculate x in degrees
+        y = length * math.sin((angle)/180*math.pi)  # calculate y in degrees
+#        x = length * math.cos(angle)  # calculate x   # in radians
+#        y = length * math.sin(angle)  # calculate y   # in radians
+    return x, y
+
 def format_angle(angle):
     # ---Description---
     # formats angle to non negative angle in the range of: 0 >= angle < 360 degrees.
@@ -240,6 +425,181 @@ def format_angle(angle):
         angle = angle + 360     # format negative angles to positive absolute angle. in degrees.
 #        angle = angle + 2*math.pi    # format negative angles to positive absolute angle. in radians.
     return angle
+
+def rotate_axis(angle, x, y):
+    # ---Description---
+    # transforms cartesian coordinates of a single point to its new cartesian coordinates relative to a new rotated axis.
+    # axis is rotated about the absolute origin.
+    # input parameters: angle, x, y
+    # new_x, new_y = rotate_axis(angle, x, y)
+
+    # ---Variable List---
+    # x = x absolute cartesian coordinate
+    # y = y absolute cartesian coordinate
+
+    # ---Return Variable List---
+    # new_x = x origin of new relative cartesian coordinate
+    # new_y = y origin of new relative cartesian coordinate
+
+    # ---Change History---
+    # rev: 01-01-02-01
+    # Initial release.
+    # software test run on 18/Aug/2023
+    # --------------------
+
+    if x == 0 and y == 0:
+        new_x = 0   # origin point
+        new_y = 0   # origin point
+    else:
+        temp_angle, length = cartesian_to_polar(x, y)
+        temp_angle = temp_angle - angle
+        temp_angle = format_angle(temp_angle)   # format angle
+        new_x, new_y = polar_to_cartesian(temp_angle,length)
+    return new_x, new_y
+
+def arc_data(start_x, start_y, end_x, end_y, rad, cw, less_180):
+    # ---Description---
+    # calculate various arc parameters based on inputs.
+    # center_x, center_y, start_angle, end_angle, arc_length, arc_angle = arc_data(start_x, start_y, end_x, end_y, rad, cw, less_180)
+
+    # ---Variable List---
+    # start_x = x start of arc
+    # start_y = y start of arc
+    # end_x = x end of arc
+    # end_y = y end of arc
+    # rad = radius of arc
+    # cw = Boolean. True = clockwise False = counter clockwise.
+    # less_180 = Boolean. True: < 180deg i.e. acute arc. False: > 180deg i.e. obtuse arc.
+
+    # ---Return Variable List---
+    # center_x = x coordinates of center of arc
+    # center_y = y coordinates of center of arc
+    # start_angle = absolute start angle of arc
+    # end_angle = absolute end angle of arc
+    # arc_length = length of arc
+    # arc_angle = angle of arc
+
+    # ---Change History---
+    # rev: 01-01-02-01
+    # Initial release.
+    # software test run on 18/Aug/2023
+    # --------------------
+
+    vec_x = end_x - start_x                         # x vector length of slot
+    vec_y = end_y - start_y                         # y vector length of slot
+    length = math.sqrt(vec_x ** 2 + vec_y ** 2)     # direct length of start to end point.
+    x_temp = length/2                               # determine the projected (x) distance of the center of arc along the vector from the start to end point. Used later to determine center of arc.
+    y_temp = math.sqrt(rad ** 2 - x_temp ** 2)      # Determine the perpendicular (y) distance of the center of arc to the vector from the start to end point. Used later to determine center of arc.
+    angle_temp = absolute_angle(start_x, start_y, end_x, end_y, debug=False)        # calculate absolute angle of the vector from the start point to end point. Used to determine center of arc
+    angle_arc = 2 * math.degrees(math.asin((length/2)/rad))                         # determine angle of arc in degrees.
+#    angle_arc = 2 * math.asin((length/2)/rad)                         # determine angle of arc. in radians
+
+    if cw == True:
+        if less_180 == True:
+            y_temp = -y_temp        # center is on right side of arc vector for acute clockwise arcs.
+            angle_arc = -angle_arc  # arc angle is moving in the negative direction from the start to end point.
+        elif less_180 == False:
+            y_temp = y_temp         # center is on left side of arc vector for obtuse clockwise arcs.
+            angle_arc = angle_arc   # arc angle is moving in the positive direction from the start to end point.
+    if cw == False:
+        if less_180 == True:
+            y_temp = y_temp         # center is on left side of arc vector for acute counter-clockwise arcs.
+            angle_arc = angle_arc   # arc angle is moving in the positive direction from the start to end point.
+        elif less_180 == False:
+            y_temp = -y_temp        # center is on right side of arc vector for acute clockwise arcs.
+            angle_arc = -angle_arc  # arc angle is moving in the negative direction from the start to end point.
+
+    center_x, center_y = relative_coordinate(start_x, start_y, angle_temp, x_temp, y_temp, debug = False) # calculate center of arc
+
+    start_angle_temp, length, origin_x, origin_y = absolute_cartesian_to_relative_polar(center_x, center_y, start_x, start_y)
+    end_angle_temp, length, origin_x, origin_y = absolute_cartesian_to_relative_polar(center_x, center_y, end_x, end_y)
+
+    if cw == True:
+        start_angle = start_angle_temp - 90     # calculate angle of starting vector
+        if start_angle < 0:
+            start_angle = start_angle + 360     # if angle is negative. add 360deg
+        end_angle = end_angle_temp - 90         # calculate angle of ending vector
+        if end_angle < 0:
+            end_angle = end_angle + 360     # if angle is negative. add 360deg
+    elif cw == False:
+        start_angle = start_angle_temp + 90   # calculate angle of starting vector
+        if start_angle >= 360:
+            start_angle = start_angle - 360     # if angle is over 360. subtract 360deg
+        end_angle = end_angle_temp + 90         # calculate angle of ending vector
+        if end_angle >= 360:
+            end_angle = end_angle - 360     # if angle is over 360. subtract 360deg
+
+#--------------------in radians-------------------
+#    if cw == True:
+#        start_angle = start_angle_temp - math.pi/2  # calculate angle of starting vector
+#        if start_angle < 0:
+#            start_angle = start_angle + math.pi*2  # if angle is negative. add 360deg
+#        end_angle = end_angle_temp - math.pi/2  # calculate angle of ending vector
+#        if end_angle < 0:
+#            end_angle = end_angle + math.pi*2  # if angle is negative. add 360deg
+#    elif cw == False:
+#        start_angle = start_angle_temp + math.pi/2  # calculate angle of starting vector
+#        if start_angle >= math.pi*2:
+#            start_angle = start_angle - math.pi*2  # if angle is over 360. subtract 360deg
+#        end_angle = end_angle_temp + math.pi/2  # calculate angle of ending vector
+#        if end_angle >= math.pi*2:
+#            end_angle = end_angle - math.pi*2  # if angle is over 360. subtract 360deg
+# ---------------------------------------
+
+    start_angle_temp = round(start_angle, 2)  # round to 2 decimal places
+    if start_angle_temp == 360:  # if angle is 360. conventionalize to 0
+        start_angle = 0
+    end_angle_temp = round(end_angle, 2)  # round to 2 decimal places
+    if end_angle_temp == 360:    # if angle is 360. conventionalize to 0
+        end_angle = 0
+
+    # --------------------in radians-------------------
+#    start_angle_temp = round(start_angle, 4)  # round to 2 decimal places
+#    if start_angle_temp == math.pi:  # if angle is 360. conventionalize to 0
+#        start_angle = 0
+#    end_angle_temp = round(end_angle, 4)  # round to 2 decimal places
+#    if end_angle_temp == math.pi:    # if angle is 360. conventionalize to 0
+#        end_angle = 0
+    # ---------------------------------------
+
+    arc_angle = absolute_angle(center_x, center_y, end_x, end_y) - absolute_angle(center_x, center_y, start_x, start_y)     # calculate arc angle
+    arc_angle = abs(arc_angle)      # absolute arc angle
+    arc_length = arc_angle/360 * 2*math.pi * rad    # calculate arc_length in degrees.
+#    arc_length = arc_angle * rad    # calculate arc_length in radians.
+
+    return center_x, center_y, start_angle, end_angle, arc_length, arc_angle
+
+def line_data(start_x, start_y, end_x, end_y):
+    # ---Description---
+    # calculate various line parameters based on inputs.
+    # angle, length, vector_x, vector_y = line_data(start_x, start_y, end_x, end_y)
+
+    # ---Variable List---
+    # start_x = x start of line
+    # start_y = y start of line
+    # end_x = x end of line
+    # end_y = y end of line
+
+    # ---Return Variable List---
+    # angle = absolute angle of line
+    # length = length of line
+    # vector_x = x vector of line
+    # vector_y = y vector of line
+
+    # ---Change History---
+    # rev: 01-01-02-01
+    # Initial release.
+    # software test run on 18/Aug/2023
+    # --------------------
+
+    vector_x = end_x - start_x                         # x vector length of slot
+    vector_y = end_y - start_y                         # y vector length of slot
+    length = math.sqrt(vector_x ** 2 + vector_y ** 2)     # direct length of start to end point.
+    angle = absolute_angle(start_x, start_y, end_x, end_y, debug=False)        # calculate absolute angle of the vector from the start point to end point. Used to determine center of arc
+
+    return angle, length, vector_x, vector_y
+
+#------------------------------------------------------------------
 
 def absolute_angle(start_x, start_y, end_x, end_y, debug = False):
     # ---Description---
