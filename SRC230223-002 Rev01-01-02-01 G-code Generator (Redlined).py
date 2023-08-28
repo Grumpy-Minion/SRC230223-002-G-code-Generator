@@ -3278,6 +3278,10 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
 
     # ---Change History---
     #
+    # rev: 01-01-02-01
+    # date: 18/Aug/2023
+    # major change. designed to be used with profile function.
+    #
     # rev: 01-01-10-12
     # updated debug text to print tabulated tables and rows.
     # software test run on 18/Jul/2023
@@ -4931,7 +4935,7 @@ def profile_generator(df_import, tro, dia):
     # ---Variable List---
     # df_import = line or trochoidal formatted dataframe
     # tro = trochoidal flag
-    # dia = tool diameter
+    # dia = effective tool diameter
 
     # ---Return Variable List---
     # df_profile = data frame of adjusted toolpath
@@ -4978,12 +4982,11 @@ def profile_generator(df_import, tro, dia):
         last_row_flag = format_data_frame_variable(df, 'last_row_flag', counter, debug)  # import last_row_flag value.
         x = format_data_frame_variable(df, 'x', counter, debug)  # import x value.
         y = format_data_frame_variable(df, 'y', counter, debug)  # import y value.
-        #z = format_data_frame_variable(df, 'z', counter, debug)  # import z value.
-        #    x, y = shift(x, y, shift_x, shift_y)  # add shift to x, y value.
+        x, y = shift(x, y, shift_x, shift_y)  # add shift to x, y value.
 
         if tro == False:
             z = format_data_frame_variable(df, 'z', counter, debug)  # import z value if line toolpath.
-        elif tro == True:
+        else:
             z = None  # null z value if trochoidal toolpath.
 
         segment = format_data_frame_variable(df, 'segment', counter, debug)  # import segment value.
@@ -5042,7 +5045,8 @@ def profile_generator(df_import, tro, dia):
     df_profile = pd.read_excel(excel_file, 'profile-00', na_filter=False)  # import profile tab from excel file into dataframe.
     df_profile = df_profile.loc[:, :'comments']  # create dataframe up to 'comments' columns
     df_profile = df_profile.drop(df_profile.index[1:])  # remove all rows except for the first row. = df_temp.drop(df_temp.index[1:])  # remove all rows except for the first row.
-    df_profile.loc[0] = '---'   # poplulate cells of first row with '---'
+    df_profile.loc[0] = '---'   # populate cells of first row with '---'
+    df_profile_single_row = df_profile      # create a single row profile df for future appending. all cells contain '---'
 
     df_static = df_import.loc[:,'static_variable':'static_value']  # creates new data frame for static variables only.
     temp = df_static.to_markdown(index=False, tablefmt='pipe', colalign=['center'] * len(df_static.columns))  # tabulate dataframe   # !!!!TEMP!!!
@@ -5084,14 +5088,17 @@ def profile_generator(df_import, tro, dia):
         if line_counter == 0:
             df_profile.loc[profile_counter, 'start_x'] = x  # write start_x value to df_profile dataframe
             df_profile.loc[profile_counter, 'start_y'] = y  # write start_y value to df_profile dataframe
+            df_profile.loc[profile_counter, 'start_z'] = z  # write start_z value to df_profile dataframe
             df_profile.loc[profile_counter, 'start_#'] = line_counter  # write start_# value to df_profile dataframe. start_# is the row #  corresponding to the starting point of the segment on the original line dataframe.
         elif line_counter == 1:
             df_profile.loc[profile_counter, 'end_x'] = x  # write start_x value to df_profile dataframe
             df_profile.loc[profile_counter, 'end_y'] = y  # write start_y value to df_profile dataframe
+            df_profile.loc[profile_counter, 'end_z'] = z  # write start_z value to df_profile dataframe
             df_profile.loc[profile_counter, 'end_#'] = line_counter  # write end_# value to df_profile dataframe. end_# is the row #  corresponding to the ending point of the segment on the original line dataframe.
         else:
             df_profile.loc[profile_counter, 'start_x'] = df_profile.loc[profile_counter - 1, 'end_x']  # write start_x value to df_profile dataframe
             df_profile.loc[profile_counter, 'start_y'] = df_profile.loc[profile_counter - 1, 'end_y']  # write start_y value to df_profile dataframe
+            df_profile.loc[profile_counter, 'start_z'] = df_profile.loc[profile_counter - 1, 'end_z']  # write start_z value to df_profile dataframe
             df_profile.loc[profile_counter, 'start_#'] = df_profile.loc[profile_counter - 1, 'end_#']  # write start_# value to df_profile dataframe. copy end_# value from previous row.
             df_profile.loc[profile_counter, 'end_#'] = line_counter  # write end_# value to df_profile dataframe. end_# is the row #  corresponding to the ending point of the segment on the original line dataframe.
 
@@ -5104,6 +5111,7 @@ def profile_generator(df_import, tro, dia):
         df_profile.loc[profile_counter, '#'] = profile_counter  # write # value to df_profile dataframe
         df_profile.loc[profile_counter, 'end_x'] = x  # write end_x value to df_profile dataframe
         df_profile.loc[profile_counter, 'end_y'] = y  # write end_y value to df_profile dataframe
+        df_profile.loc[profile_counter, 'end_z'] = z  # write end_z value to df_profile dataframe
         df_profile.loc[profile_counter, 'segment'] = arc_seg  # write segment value to df_profile dataframe
         df_profile.loc[profile_counter, 'rad'] = rad  # write rad value to df_profile dataframe
         df_profile.loc[profile_counter, 'cw'] = cw  # write cw value to df_profile dataframe
@@ -5116,7 +5124,8 @@ def profile_generator(df_import, tro, dia):
 
         line_counter = line_counter + 1  # increment line counter.
         profile_counter = profile_counter + 1  # increment profile counter.
-        df_profile.loc[len(df_profile), :] = ['---']  # create new row at bottom of df with cells containing text: '---'.
+#        df_profile.loc[len(df_profile), :] = ['---']  # create new row at bottom of df with cells containing text: '---'.
+        df_profile = df_profile.append(df_profile_single_row, ignore_index=True)    # append new row at bottom of df with cells containing text: '---'.
 
     # -----------------------------------------------------------------------
     # calculate derived data for online toolpath in profile data frame
@@ -5317,7 +5326,6 @@ def profile_generator(df_import, tro, dia):
     profile_counter = 0  # initialize counter for profile df
     rows = len(df_profile)  # number of rows in df_line
     end = rows - 1  # initialize end counter
-#    start_block, end_block, name, name_debug, clear_z, start_z, cut_f, finish_f, z_f, dia = parameters_data_frame(excel_file, 'parameters')  # import parameters. !!!clear print statements!!!
     offset = df_static.loc['offset', 'static_value']  # get offset from line data frame. for constant offset only.
     mode = df_static.loc['mode', 'static_value']  # get mode from line data frame.
     while profile_counter <= end and on_line_flag == False:
@@ -5825,6 +5833,7 @@ def profile_generator(df_import, tro, dia):
 
         last_row_flag = df_profile.loc[profile_counter, 'last_row_flag']  # get last_row_flag from df_profile dataframe
         skip_flag = df_profile.loc[profile_counter, 'skip_flag']  # get skip_flag from df_profile dataframe
+        transition_arc_flag = df_profile.loc[profile_counter, 'transition_arc_flag']  # get transition_arc_flag from df_profile dataframe
         temp_loop_debug('populate output columns')  # debugging statement
 
         if skip_flag == True:  # if skip_flag = True skip while loop iteration
@@ -5888,6 +5897,12 @@ def profile_generator(df_import, tro, dia):
             df_profile.loc[profile_counter, 'output_rad'] = round(output_rad, 4)  # write output_rad from df_profile dataframe
             df_profile.loc[profile_counter, 'output_cw'] = output_cw  # write output_cw from df_profile dataframe
             df_profile.loc[profile_counter, 'output_less_180'] = output_less_180  # write output_less_180 from df_profile dataframe
+
+        if tro == False and transition_arc_flag != True:    # process start and end z for non transition line segments. !!! Does NOT account for disappearing internal arc segments !!!
+            output_start_z = df_profile.loc[profile_counter, 'start_z']     # get start_z from df_profile dataframe
+            output_end_z =  df_profile.loc[profile_counter, 'end_z']       # get end_z from df_profile dataframe
+            df_profile.loc[profile_counter, 'output_start_z'] = round(output_start_z, 4)  # write output_start_y from df_profile dataframe
+            df_profile.loc[profile_counter, 'output_end_z'] = round(output_end_z, 4)  # write output_end_y from df_profile dataframe
 
         output_comments = df_profile.loc[profile_counter, 'comments']  # get comments from df_profile dataframe
         df_profile.loc[profile_counter, 'output_comments'] = output_comments  # write output_comments from df_profile dataframe
