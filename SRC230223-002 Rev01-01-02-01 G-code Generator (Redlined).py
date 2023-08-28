@@ -2813,6 +2813,442 @@ def debug_single_row_df(df_temp):
 
     return (single_df_temp)  # return values
 
+def toolpath_data_frame_archive(name, excel_file, sheet, start_safe_z, return_safe_z, operation, dia, debug = False):
+    # ---Description---
+    # !!! OBSOLETE !!!
+    # Imports a 2D dataframe from an excel file, calculates the toolpath adjusted for offset and tool diameter and prints to a txt file the linear or trochoidal tool path in G code.
+    # returns last position of cutter and end position of arc.
+    # refer to "ALG20220329001 Toolpath Data Frame Algorithm"
+    # start and end points are located along the midline of slot for trochoidal slots.
+    # positions cutter to start point and cutting depth.
+    # cut at one depth of cut only for trochoidal pathway.
+    # cut at variable depths for linear pathway.
+    # calculates offset from edge of part profile.
+    # first_x_adjusted, first_y_adjusted, end_x, end_y, cutter_x, cutter_y, text = toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, operation, dia, debug)
+
+    # ---Variable List---
+    # name = name of file
+    # excel file = excel file name including file extension.
+    # sheet = active excel sheet
+    # start_safe_z = start_safe_z flag
+    # return_safe_z = return_safe_z flag
+    # operation = line or trochoidal pathway.
+    # dia = diameter of cutter
+
+    # ---Return Variable List---
+    # end_x_final = x coordinate of end of slot unadjusted
+    # end_y_final = y coordinate of end of slot unadjusted
+    # cutter_x_final = x coordinate of cutter position
+    # cutter_y_final = y coordinate of cutter position
+
+    # ---Change History---
+    # rev: 01-01-02-01
+    # date: 18/Aug/2023
+    # archive function. replaced with new version to be used with profile function.
+    #
+    # rev: 01-01-10-12
+    # updated debug text to print tabulated tables and rows.
+    # software test run on 18/Jul/2023
+    #
+    # rev: 01-01-01-11
+    # date: 29/May/2023
+    # description:
+    # Bug fix.toolpath_data_frame. Fixed row# 0 arc_seg able to read and print "None" on Debug txt file.
+    #
+    # rev: 01-01-01-06
+    # date: 12/Mar/2023
+    # description:
+    # Added shift x y.
+    # changed debug x, y to use end_x, end_y instead of start_x, start_y
+    # minor code house cleaning
+    # software test run on 12/Mar/2023
+    #
+    # rev: 01-01-01-04
+    # date: 08/Mar/2023
+    # description:
+    # Added debug file statements
+    # software test run on 08/Mar/2023
+    #
+    # rev: 01-01-10-12
+    # Added feed rate to move cutter to start point.
+    #
+    # rev: 01-01-10-10
+    # changed code to compliment separating line and trochoidal toolpath excel tab/ dataframe.
+    # Added static_variables function to read static variables from dataframe.
+    # Updated extract row function to support line/trochoidal separation.
+    #
+    # rev: 01-01-10-09
+    # Moved format_data_frame_variable function from inside function to outside.
+    # Added optional safe_z starting and ending rapid tool movement.
+    #
+    # rev: 01-01-10-08
+    # Shifted variables to excel sheet.
+    #
+    # rev: 01-01-10-07
+    # initial release
+    # software test run on 31/Mar/2022
+
+    def static_variables(df, tro, debug=False):
+        # ---Description---
+        # Extract and format static variables.
+        # returns formatted variables.
+        # operation_name, offset, feed, safe_z, z_f, mode, step, wos, doc = static_variables(df, tro, debug=False)
+
+        # ---Variable List---
+        # df = dataframe
+        # tro = trochoidal toolpath flag.
+
+        # ---Return Variable List---
+        # operation_name = name of operation.
+        # offset = cutting offset
+        # feed = feedrate
+        # safe_z = safe z height
+        # z_f = z plunge feed
+        # mode = 1 -> right side of travel, 2 -> left side of travel, 3 -> on line of travel.
+        # step = trochoidal step
+        # wos = width of trochoidal slot
+        # doc = depth of cut (for trochoidal only)
+
+        df.set_index('static_variable', inplace=True)  # replace index default column with static_variable column
+
+        operation_name = format_data_frame_variable(df, 'static_value', 'operation_name', debug)  # import name of operation.
+        offset = format_data_frame_variable(df, 'static_value', 'offset', debug)  # import offset.
+        feed = format_data_frame_variable(df, 'static_value', 'feed', debug)  # import feed.
+        safe_z = format_data_frame_variable(df, 'static_value', 'safe_z', debug)  # import safe z height.
+        z_f = format_data_frame_variable(df, 'static_value', 'z_f', debug)  # import plunge feed.
+        mode = format_data_frame_variable(df, 'static_value', 'mode', debug)  # import mode.
+        step = None     # null
+        wos = None      # null
+        doc = None      # null
+
+        if tro == True:
+            step = format_data_frame_variable(df, 'static_value', 'step', debug)  # import trochoidal step.
+            wos = format_data_frame_variable(df, 'static_value', 'wos', debug)  # import width of trochoidal slot.
+            doc = format_data_frame_variable(df, 'static_value', 'doc', debug)  # import depth of cut (for trochoidal only)
+
+            if isinstance(doc, float) == False:  # check if doc is a number, if not issue error.
+                abort('doc', doc)
+
+        return (operation_name, offset, feed, safe_z, z_f, mode, step, wos, doc)  # return values
+
+    def extract_row(counter, debug=False):
+        # ---Description---
+        # Extract and format variables of a single row from the data frame to the explicit variable type.
+        # returns formatted row of variables.
+        # last_row_flag, x, y, z, arc_seg, rad, cw, less_180 = extract_row(counter)
+
+        # ---Variable List---
+        # counter = row counter
+
+        # ---Return Variable List---
+        last_row_flag = format_data_frame_variable(df, 'last_row_flag', counter, debug)  # import last_row_flag value.
+        x = format_data_frame_variable(df, 'x', counter, debug)  # import x value.
+        y = format_data_frame_variable(df, 'y', counter, debug)  # import y value.
+        x, y = shift(x, y, shift_x, shift_y)   # add shift to x, y value.
+
+        if tro == False:
+            z = format_data_frame_variable(df, 'z', counter, debug)  # import z value if line toolpath.
+        elif tro == True:
+            z = None         # null z value if trochoidal toolpath.
+
+        segment = format_data_frame_variable(df, 'segment', counter, debug)  # import segment value.
+        rad = format_data_frame_variable(df, 'rad', counter, debug)  # import radius.
+        cw = format_data_frame_variable(df, 'cw', counter, debug)  # import clockwise flag.
+        less_180 = format_data_frame_variable(df, 'less_180', counter, debug)  # import less_180 flag.
+
+        # set or clear arc_seg flag.
+        if segment == 'linear':
+            arc_seg = False
+        elif segment == 'arc':
+            arc_seg = True
+        else:
+            arc_seg = None
+
+        return (last_row_flag, x, y, z, arc_seg, rad, cw, less_180)  # return values
+
+    def debug_print_row(df_temp, counter, tro):
+        # ---Description---
+        # Tabulates single, current row to text format.
+        # text_debug_temp = debug_print_row(df_temp, counter, tro)
+
+        # ---Variable List---
+        # df_temp = data frame
+        # counter = row counter
+        # tro = trochoidal flag
+
+        # ---Return Variable List---
+        # text_debug_temp = tabulated row
+
+        df_temp.iloc[[0],:] = '--raw--'   # initialize cells by writing '--raw--' into all cells
+
+        df_temp.at[0, '#'] = counter  # write counter to # column
+        df_temp.at[0, 'last_row_flag'] = last_row_flag
+        df_temp.at[0, 'x'] = df.at[counter, 'x']
+        df_temp.at[0, 'y'] = df.at[counter, 'y']
+        if tro == False:
+            df_temp.at[0, 'z'] = df.at[counter, 'z']
+        df_temp.at[0, 'segment'] = segment_debug
+        df_temp.at[0, 'rad'] = rad
+        df_temp.at[0, 'cw'] = cw
+        df_temp.at[0, 'less_180'] = less_180
+        df_temp.at[0, 'comments'] = df.at[counter, 'comments']
+        if counter == 0:
+            temp_x = start_x
+            temp_y = start_y
+        else:
+            temp_x = end_x
+            temp_y = end_y
+        df_temp.at[0, 'adjusted_x'] = temp_x
+        df_temp.at[0, 'adjusted_y'] = temp_y
+        df_temp.at[0, 'shift_x'] = shift_x
+        df_temp.at[0, 'shift_y'] = shift_y
+        df_temp.at[0, 'repeat_flag'] = repeat_flag
+
+        df_temp = df_temp.to_markdown(index=False, tablefmt='pipe', colalign=['center'] * len(df_temp.columns))     # tabulate df in txt format
+        text_debug_temp = str(df_temp)       # convert to text str
+        return (text_debug_temp)  # return values
+
+    if operation == 'line':                 # initialize tro flag.
+        tro = False                         # line toolpath.
+    elif operation == 'trochoidal':
+        tro = True                          # trochoidal toolpath.
+    else:
+        abort('operation', operation)        # invalid operation value detected.
+
+    df = pd.read_excel(excel_file, sheet_name = sheet, na_filter=False)      # import excel file into dataframe.
+    operation_name, offset, feed, safe_z, z_f, mode, step, wos, doc = static_variables(df, tro, debug=False)  # assign static parameters.
+    df = pd.read_excel(excel_file, sheet_name = sheet, na_filter=False)      # reimport excel file into dataframe. !!! workaround for restoring index.!!!
+
+    if debug == True:       # debug
+        print(f'{df}\n')
+
+    rows = df.shape[0]      # total number of rows in dataframe.
+    last_row = rows - 1     # initialize number of last row
+    counter = 0             # initialize counter
+    row_df = debug_single_row_df(df)    # initialize single row data frame.
+
+    text_debug = debug_print_table(df, operation, sheet, rows)    # print dataframe as read from excel file
+    text_debug = indent(text_debug, 8)  # indent spacing
+    text_debug = text_debug + '\n\n'  # spacing
+    write_to_file(name_debug, text_debug)  # write to debug file
+
+    # print static variables to debug file
+    df_temp = df[['static_variable', 'static_value']]  # drop all columns except 'static_variable'and 'static_value'
+    df_temp['static_variable_index'] = df_temp.loc[:, 'static_variable']    # create static_variable_index column. duplicate of static_variable column
+    df_temp.set_index('static_variable_index', inplace=True)  # replace index default column with static_variable_index column
+    df_temp = df_temp.assign(static_value='--raw--')    # initialize cells by writing '--raw--' into all cells in static_value column
+
+    df_temp.at['offset', 'static_value'] = offset  # write offset
+    df_temp.at['feed', 'static_value'] = feed  # feed
+    df_temp.at['safe_z', 'static_value'] = safe_z  # write safe_z
+    df_temp.at['z_f', 'static_value'] = z_f  # write z_f
+    df_temp.at['mode', 'static_value'] = mode  # write mode
+
+    if tro == True:
+        df_temp.at['step', 'static_value'] = step  # write step
+        df_temp.at['wos', 'static_value'] = wos  # write wos
+        df_temp.at['doc', 'static_value'] = doc  # write doc
+
+    df_temp = df_temp.to_markdown(index=False, tablefmt='pipe', colalign=['center'] * len(df_temp.columns))  # tabulate dataframe
+    text_debug = str(df_temp)
+    text_debug = indent(text_debug, 8)  # indent spacing
+    text_debug = text_debug + '\n\n'  # spacing
+    write_to_file(name_debug, text_debug)  # write to debug file
+
+    # initialize parameters
+    last_row_flag, start_x, start_y, start_z, arc_seg, rad, cw, less_180 = extract_row(counter)  # extract row 0 values.
+
+    skip_debug = False  # initialize
+    if arc_seg == False:
+        segment_debug = 'linear'
+    elif arc_seg == True:
+        segment_debug = 'arc'
+    elif arc_seg == None:
+        segment_debug = 'None'
+
+        text_debug = debug_print_row(row_df, counter, tro)  # tabulate single row
+        text_debug = indent(text_debug, 8)  # indent table
+        text_debug = text_debug + '\n\n'  # spacing
+        write_to_file(name_debug, text_debug)  # write to debug file
+
+    counter = counter + 1                                           # increment counter
+    last_row_flag, end_x, end_y, end_z, arc_seg, rad, cw, less_180 = extract_row(counter)  # extract row 1 values.
+
+    start_block = \
+    f'''
+    (---toolpath_data_frame start---)
+    (---description---)
+    (Imports a 2D dataframe from an excel file, calculates the toolpath adjusted for offset and tool diameter and prints to a txt file the single or trochoidal tool path in G code.)
+    (returns last position of cutter and end position of toolpath.)
+    (refer to "ALG20220329001 Toolpath Data Frame Algorithm")
+    (start and end points are located at the center points of toolpath.)
+    (does not set cutting feed.)
+    (---parameter---)            
+    (cutter diameter: {"%.3f" % dia})        
+    (offset: {"%.3f" % offset})
+    (excel_file: {excel_file})
+    (sheet: {sheet})
+    '''
+
+    text = start_block
+
+    first_slot = True           # initialize trochodial first slot
+    last_slot = False           # initialize trochodial last slot
+    end_x_adjusted_pre = None   # Initialize
+    end_y_adjusted_pre = None   # Initialize
+    rad_adjusted = None         # Initialize
+
+    if tro == True:             # initialize effective width of slot. Trochodial = wos, single line = tool diameter.
+        effective_wos = wos
+        first_z = doc           # initialize z height of starting point.
+    else:
+        effective_wos = dia
+        first_z = start_z       # initialize z height of starting point.
+
+    while counter <= last_row:      # recursive loop
+
+        if skip_debug == False:  # skip if True.
+
+            if arc_seg == False:
+                segment_debug = 'linear'
+            elif arc_seg == True:
+                segment_debug = 'arc'
+            elif arc_seg == None:
+                segment_debug = 'None'
+
+            text_debug = debug_print_row(row_df, counter, tro) + '\n\n'  # tabulate single row
+            text_debug = indent(text_debug, 8)
+            write_to_file(name_debug, text_debug)  # write to debug file
+
+        elif skip_debug == True:
+            skip_debug = False      # reset flag.
+
+        if counter == last_row or last_row_flag == True:
+            last_slot = True        # set last_slot = True for trochodial toolpath.
+
+        if arc_seg == False:        # straight line segment
+            start_x_adjusted, start_y_adjusted, end_x_adjusted, end_y_adjusted = linear_offset_adjustment(effective_wos, offset, start_x, start_y,end_x, end_y, mode)     # adjust line for offset and tool diameter.
+        elif arc_seg == True:       # arc line segment
+            start_x_adjusted, start_y_adjusted, end_x_adjusted, end_y_adjusted, rad_adjusted = arc_offset_adjustment(effective_wos, offset, start_x, start_y, end_x, end_y, rad, cw, less_180, mode)     # adjust arc for offset and tool diameter.
+
+        if counter == 1:
+            cutter_x = start_x_adjusted             # initialize cutter position at first adjusted position.
+            cutter_y = start_y_adjusted             # initialize cutter position at first adjusted position.
+            first_x_adjusted = start_x_adjusted     # first point of the segment.
+            first_y_adjusted = start_y_adjusted     # first point of the segment.
+#            start_cutter = ''       # initialize
+            if start_safe_z == True:
+                start_cutter = \
+            f'''G0 Z{"%.4f" % safe_z}				(Rapid to safe height)
+            G0 X{"%.4f" % first_x_adjusted} Y{"%.4f" % first_y_adjusted}                 (Rapid to start point)
+            '''
+            else:
+                start_cutter = \
+            f'''G1 X{"%.4f" % first_x_adjusted} Y{"%.4f" % first_y_adjusted} F{feed}                 (move at cut_f to start point)
+            '''
+
+            if isinstance(first_z, float) == True:  # check if start_z is a number, if not skip.
+                start_cutter = start_cutter + \
+            f'''
+            G1 Z{"%.4f" % first_z}	F{"%.4f" % z_f}			(Plunge to cutting height)
+            '''
+            start_cutter = start_cutter + \
+            f'''
+            F{feed}     (set cutting feed)
+            '''
+            text = text + start_cutter
+
+        if debug == True:
+            print(f'row/counter = {counter}')
+            print(f'end_x_adjusted_pre = {end_x_adjusted_pre}')
+            print(f'start_x_adjusted = {start_x_adjusted}')
+            print(f'end_y_adjusted_pre = {end_y_adjusted_pre}')
+            print(f'start_y_adjusted = {start_y_adjusted}')
+            print(f'end_x_adjusted = {end_x_adjusted}')
+            print(f'end_y_adjusted = {end_y_adjusted}')
+            print(f'rad_adjusted = {rad_adjusted}')
+            print(f'arc_seg = {arc_seg}')
+            print(f'cw = {cw}')
+            print(f'less_180 = {less_180}')
+            print(f'tro = {tro}')
+            print(f'start_x = {start_x}')
+            print(f'start_y = {start_y}')
+            print(f'start_z = {start_z}')
+            print(f'end_x = {end_x}')
+            print(f'end_y = {end_y}')
+            print(f'end_z = {end_z}')
+            print(f'mode = {mode}')
+            print(f'operation = {operation}\n')
+
+        if ((start_x_adjusted != end_x_adjusted_pre) or (start_y_adjusted != end_y_adjusted_pre)) and counter != 1:            # detect acute/non-tangent transition point excluding 1st segment.
+
+            if debug == True:
+                print('non-tangent transition detected')
+                print(f'row/counter = {counter}')
+                print(f'end_x_adjusted_pre = {end_x_adjusted_pre}')
+                print(f'start_x_adjusted = {start_x_adjusted}')
+                print(f'end_y_adjusted_pre = {end_y_adjusted_pre}')
+                print(f'start_y_adjusted = {start_y_adjusted}\n')
+
+            counter = counter - 1   # decrement counter.
+
+            skip_debug = True   # readjustment of non-tangent transition. skip debug statement.
+
+            # intialize parameters for transition arc.
+            last_slot = False       # clear last_slot if set.
+            last_row_flag = False   # clear last_row_flag if set.
+            end_x_adjusted = start_x_adjusted   # intialize x end point of transition arc with start point of next toolpath segment.
+            end_y_adjusted = start_y_adjusted   # intialize y end point of transition arc with start point of next toolpath segment.
+            start_x_adjusted = end_x_adjusted_pre   # intialize x start point of transition arc with end point of previous toolpath segment.
+            start_y_adjusted = end_y_adjusted_pre   # intialize y start point of transition arc with end point of previous toolpath segment.
+            rad_adjusted = effective_wos/2 + offset # # intialize rad of transition arc to tangentially transition between the start and end point of previous and next toolpath segment respectively.
+            rad_adjusted = round(rad_adjusted, 5)  # round to 5 decimal places.
+            less_180 = True     # arc will never be more than 180deg.
+            arc_seg = True
+            end_x = start_x     # reset start x value
+            end_y = start_y     # reset start y value
+            end_z = None        # reset start z value. no height change during transition arc.
+
+            if mode == 1:       # !!!! CAUTION!!!! Assumes transition arc on the external/boss profile cuts. Does not check for overlapping internal/pocket correction. !!!!!
+                cw = False
+            elif mode == 2:
+                cw = True
+
+        if tro == False:    # linear toolpath segment
+            if arc_seg == False:
+                cutter_x, cutter_y, cutter_z, text_temp = line(end_x_adjusted, end_y_adjusted, name, feed, end_z)  # print G-code for adjusted line segment.
+            else:
+                cutter_x, cutter_y, cutter_z, text_temp = arc(end_x_adjusted, end_y_adjusted, name, rad_adjusted, cw, less_180, feed, end_z)  # print G-code for adjusted arc segment.
+        elif tro == True:       # trochoidal toolpath segment
+            if arc_seg == False:
+                discard, discard, cutter_x, cutter_y, text_temp = tro_slot(start_x_adjusted, start_y_adjusted, end_x_adjusted, end_y_adjusted, step, wos, dia, name, cutter_x, cutter_y, first_slot, last_slot)   # print G-code for adjusted trichodial line segment.
+            else:
+                discard, discard, cutter_x, cutter_y, text_temp = tro_arc(start_x_adjusted, start_y_adjusted, end_x_adjusted, end_y_adjusted, step, wos, dia, rad_adjusted, cw, less_180, name, cutter_x, cutter_y, first_slot, last_slot)     # print G-code for adjusted trichodial arc segment.
+            first_slot = False      # clear first slot flag
+
+        text = text + text_temp      # store G-code into a text variable before printing to a text file.
+
+        break_flag, text_temp = last_row_detect(df, sheet, last_row_flag, last_row, counter, 8)  # detect last row
+        if counter == last_row or break_flag == True:       # detect last row row or last row flag
+            if return_safe_z == True:
+                end_cutter = \
+                f'''
+                G0 Z{"%.4f" % safe_z}				(Rapid to safe height)
+                '''
+                text = text + end_cutter
+
+            text = text + text_temp
+
+            return (first_x_adjusted, first_y_adjusted, end_x, end_y, cutter_x, cutter_y, text)       # last point. exit function.
+
+        counter = counter + 1                   # increment counter
+        end_x_adjusted_pre = end_x_adjusted     # update previous x value
+        end_y_adjusted_pre = end_y_adjusted     # update previous y value
+        start_x = end_x                         # update start x value
+        start_y = end_y                         # update start y value
+
+        last_row_flag, end_x, end_y, end_z, arc_seg, rad, cw, less_180 = extract_row(counter)
+
 def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, operation, dia, debug = False):
     # ---Description---
     # Imports a 2D dataframe from an excel file, calculates the toolpath adjusted for offset and tool diameter and prints to a txt file the linear or trochoidal tool path in G code.
@@ -5608,15 +6044,13 @@ while counter<=last_row:
         if isinstance(return_safe_z, bool) == False:  # check if return_safe_z is a boolean, if not issue error.
             abort('return_safe_z', return_safe_z)  # abort. write error message.
 
-        row_df.at[0, 'start_safe_z'] = start_safe_z
-        row_df.at[0, 'return_safe_z'] = return_safe_z
+        row_df.at[0, 'start_safe_z'] = start_safe_z   # for debug row
+        row_df.at[0, 'return_safe_z'] = return_safe_z   # for debug row
         text_debug = debug_print_row(row_df) + '\n'  # populate debug row.
         text_debug = indent(text_debug, 0)  # indent text
         write_to_file(name_debug, text_debug)  # write to debug file
 
-
-
-        first_x_adjusted, first_y_adjusted, end_x, end_y, cutter_x, cutter_y, text = toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, operation, dia, debug = False)
+        discard, discard, discard, discard, discard, discard, text = toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, operation, dia, debug = False)
         write_to_file(name, text)
 
     elif operation == 'drill':
