@@ -2809,7 +2809,7 @@ def debug_single_row_df(df_temp):
     single_df_temp['shift_y'] = ''  # create additional column
     single_df_temp['repeat_flag'] = ''  # create additional column
     single_df_temp = single_df_temp.drop(single_df_temp.index[1:])  # remove all rows except for the first row.
-    single_df_temp.iloc[[0],:] = '--raw--'  # initialize cells by writing '--raw--' into all cells
+    single_df_temp.iloc[[0],:] = '---'  # initialize cells by writing '---' into all cells
 
     return (single_df_temp)  # return values
 
@@ -2979,7 +2979,7 @@ def toolpath_data_frame_archive(name, excel_file, sheet, start_safe_z, return_sa
         # ---Return Variable List---
         # text_debug_temp = tabulated row
 
-        df_temp.iloc[[0],:] = '--raw--'   # initialize cells by writing '--raw--' into all cells
+        df_temp.iloc[[0],:] = '---'   # initialize cells by writing '---' into all cells
 
         df_temp.at[0, '#'] = counter  # write counter to # column
         df_temp.at[0, 'last_row_flag'] = last_row_flag
@@ -3036,7 +3036,7 @@ def toolpath_data_frame_archive(name, excel_file, sheet, start_safe_z, return_sa
     df_temp = df[['static_variable', 'static_value']]  # drop all columns except 'static_variable'and 'static_value'
     df_temp['static_variable_index'] = df_temp.loc[:, 'static_variable']    # create static_variable_index column. duplicate of static_variable column
     df_temp.set_index('static_variable_index', inplace=True)  # replace index default column with static_variable_index column
-    df_temp = df_temp.assign(static_value='--raw--')    # initialize cells by writing '--raw--' into all cells in static_value column
+    df_temp = df_temp.assign(static_value='---')    # initialize cells by writing '---' into all cells in static_value column
 
     df_temp.at['offset', 'static_value'] = offset  # write offset
     df_temp.at['feed', 'static_value'] = feed  # feed
@@ -3415,7 +3415,7 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
         # ---Return Variable List---
         # text_debug_temp = tabulated row
 
-        df_temp.iloc[[0],:] = '--raw--'   # initialize cells by writing '--raw--' into all cells
+        df_temp.iloc[[0],:] = '---'   # initialize cells by writing '---' into all cells
 
         df_temp.at[0, '#'] = counter  # write counter to # column
         df_temp.at[0, 'last_row_flag'] = last_row_flag
@@ -3472,7 +3472,7 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
     df_temp = df[['static_variable', 'static_value']]  # drop all columns except 'static_variable'and 'static_value'
     df_temp['static_variable_index'] = df_temp.loc[:, 'static_variable']    # create static_variable_index column. duplicate of static_variable column
     df_temp.set_index('static_variable_index', inplace=True)  # replace index default column with static_variable_index column
-    df_temp = df_temp.assign(static_value='--raw--')    # initialize cells by writing '--raw--' into all cells in static_value column
+    df_temp = df_temp.assign(static_value='---')    # initialize cells by writing '---' into all cells in static_value column
 
     df_temp.at['offset', 'static_value'] = offset  # write offset
     df_temp.at['feed', 'static_value'] = feed  # feed
@@ -3490,6 +3490,11 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
     text_debug = indent(text_debug, 8)  # indent spacing
     text_debug = text_debug + '\n\n'  # spacing
     write_to_file(name_debug, text_debug)  # write to debug file
+
+    #===================
+    print('exit OK')
+    exit()
+    #===================
 
     # initialize parameters
     last_row_flag, start_x, start_y, start_z, arc_seg, rad, cw, less_180 = extract_row(counter)  # extract row 0 values.
@@ -3526,7 +3531,7 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
     (sheet: {sheet})
     '''
 
-    text = start_block
+    text = start_block          # initialize text
 
     first_slot = True           # initialize trochodial first slot
     last_slot = False           # initialize trochodial last slot
@@ -3556,8 +3561,8 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
             text_debug = indent(text_debug, 8)
             write_to_file(name_debug, text_debug)  # write to debug file
 
-        elif skip_debug == True:
-            skip_debug = False      # reset flag.
+#        elif skip_debug == True:
+#            skip_debug = False      # reset flag.
 
         if counter == last_row or last_row_flag == True:
             last_slot = True        # set last_slot = True for trochodial toolpath.
@@ -3922,7 +3927,7 @@ def peck_drill_data_frame(name, excel_file, sheet):
         # ---Return Variable List---
         # text_debug_temp = tabulated row
 
-        df_temp.iloc[[0],:] = '--raw--'  # initialize cells by writing '--raw--' into all cells
+        df_temp.iloc[[0],:] = '---'  # initialize cells by writing '---' into all cells
         df_temp.at[0, '#'] = counter  # write counter to # column
         df_temp.at[0, 'last_row_flag'] = last_row_flag
         df_temp.at[0, 'x'] = df.at[counter, 'x']
@@ -4044,7 +4049,7 @@ def surface_data_frame(name, excel_file, sheet):
         # ---Return Variable List---
         # text_debug_temp = tabulated row
 
-        df_temp.iloc[[0],:] = '--raw--'  # initialize cells by writing '--raw--' into all cells
+        df_temp.iloc[[0],:] = '---'  # initialize cells by writing '---' into all cells
         df_temp.at[0, '#'] = counter  # write counter to # column
         df_temp.at[0, 'last_row_flag'] = last_row_flag
         df_temp.at[0, 'origin_x'] = df.at[counter, 'origin_x']
@@ -4158,7 +4163,7 @@ def spiral_drill_data_frame(name, excel_file, sheet):
         # ---Return Variable List---
         # text_debug_temp = tabulated row
 
-        df_temp.iloc[[0],:] = '--raw--'  # initialize cells by writing '--raw--' into all cells
+        df_temp.iloc[[0],:] = '---'  # initialize cells by writing '---' into all cells
         df_temp.at[0, '#'] = counter  # write counter to # column
         df_temp.at[0, 'last_row_flag'] = last_row_flag
         df_temp.at[0, 'origin_x'] = df.at[counter, 'origin_x']
@@ -4269,7 +4274,7 @@ def spiral_surface_data_frame(name, excel_file, sheet):
         # ---Return Variable List---
         # text_debug_temp = tabulated row
 
-        df_temp.iloc[[0],:] = '--raw--'  # initialize cells by writing '--raw--' into all cells
+        df_temp.iloc[[0],:] = '---'  # initialize cells by writing '---' into all cells
         df_temp.at[0, '#'] = counter  # write counter to # column
         df_temp.at[0, 'last_row_flag'] = last_row_flag
         df_temp.at[0, 'origin_x'] = df.at[counter, 'origin_x']
@@ -4386,7 +4391,7 @@ def corner_slice_data_frame(name, excel_file, sheet):
         # ---Return Variable List---
         # text_debug_temp = tabulated row
 
-        df_temp.iloc[[0],:] = '--raw--'  # initialize cells by writing '--raw--' into all cells
+        df_temp.iloc[[0],:] = '---'  # initialize cells by writing '---' into all cells
         df_temp.at[0, '#'] = counter  # write counter to # column
         df_temp.at[0, 'last_row_flag'] = last_row_flag
         df_temp.at[0, 'start_x'] = df.at[counter, 'start_x']
@@ -4419,8 +4424,8 @@ def corner_slice_data_frame(name, excel_file, sheet):
     counter = 0             # initialize counter
     text = ''             # initialize
     row_df = debug_single_row_df(df)    # initialize single row data frame.
-    row_df.insert(loc= len(row_df.columns)-3, column='adjusted_end_x', value='--raw--')    # insert new column 'adjusted_end_x' 3rd from end into single row data frame.
-    row_df.insert(loc= len(row_df.columns)-3, column='adjusted_end_y', value='--raw--')    # insert new column 'adjusted_end_y' 3rd from end into single row data frame.
+    row_df.insert(loc= len(row_df.columns)-3, column='adjusted_end_x', value='---')    # insert new column 'adjusted_end_x' 3rd from end into single row data frame.
+    row_df.insert(loc= len(row_df.columns)-3, column='adjusted_end_y', value='---')    # insert new column 'adjusted_end_y' 3rd from end into single row data frame.
     row_df.rename(columns={"adjusted_x": "adjusted_start_x", "adjusted_y": "adjusted_start_y"}, inplace=True)   # rename adjusted start columns
 
     text_debug = debug_print_table(df, operation, sheet, rows)
@@ -4506,7 +4511,7 @@ def spiral_boss_data_frame(name, excel_file, sheet):
         # ---Return Variable List---
         # text_debug_temp = tabulated row
 
-        df_temp.iloc[[0],:] = '--raw--'  # initialize cells by writing '--raw--' into all cells
+        df_temp.iloc[[0],:] = '---'  # initialize cells by writing '---' into all cells
         df_temp.at[0, '#'] = counter  # write counter to # column
         df_temp.at[0, 'last_row_flag'] = last_row_flag
         df_temp.at[0, 'origin_x'] = df.at[counter, 'origin_x']
@@ -5996,15 +6001,15 @@ def debug_df_row(df_temp, counter):
     # ---Return Variable List---
     # df_temp = tabulated row
 
-    df_temp.iloc[[0],:] = '--raw--'  # initialize cells by writing '--raw--' into all cells
+    df_temp.iloc[[0],:] = '---'  # initialize cells by writing '---' into all cells
     df_temp.at[0, '#'] = counter  # write counter to # column
     df_temp.at[0, 'last_row_flag'] = last_row_flag_debug
     df_temp.at[0, 'operation'] = operation
     df_temp.at[0, 'sheet_name'] = sheet_debug
     df_temp.at[0, 'comments'] = df_main.at[counter, 'comments']
 
-    df_temp.at[0, 'adjusted_x'] = '--raw--'     # initialize cells by writing '--raw--'
-    df_temp.at[0, 'adjusted_y'] = '--raw--'     # initialize cells by writing '--raw--'
+    df_temp.at[0, 'adjusted_x'] = '---'     # initialize cells by writing '---'
+    df_temp.at[0, 'adjusted_y'] = '---'     # initialize cells by writing '---'
     df_temp.at[0, 'shift_x'] = shift_x
     df_temp.at[0, 'shift_y'] = shift_y
     df_temp.at[0, 'repeat_flag'] = repeat_flag
@@ -6027,13 +6032,13 @@ def debug_print_row(df_temp):
     return (text_debug_temp)  # return values
 
 #===========================================================================
-df_import = pd.read_excel(excel_file, 'test case 04', na_filter=False)      # import excel file into dataframe.
-df_temp = df_import.to_markdown(index=False, tablefmt='pipe', colalign=['center']*len(df_import.columns))   # tabulate main df
-print(df_temp)
-tro = False     # line not tro
-df_profile, debug_df_profile, abort_flag = profile_generator(df_import, tro, dia)
+#df_import = pd.read_excel(excel_file, 'test case 04', na_filter=False)      # import excel file into dataframe.
+#df_temp = df_import.to_markdown(index=False, tablefmt='pipe', colalign=['center']*len(df_import.columns))   # tabulate main df
+#print(df_temp)
+#tro = False     # line not tro
+#df_profile, debug_df_profile, abort_flag = profile_generator(df_import, tro, dia)
 
-exit()
+#exit()
 
 #===========================================================================
 
