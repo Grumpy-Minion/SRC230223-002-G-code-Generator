@@ -245,37 +245,46 @@ def toolbox_data_frame():
     print('modifies cell in column labeled: B, row index: 1 to value: Hello')
     print(str(df)+'\n')
 
+    # create new row, index: 4.5 with cells containing unique text. needs identical number of cells.
     df.loc[4.5] = ['1', '2', '3', '4', '5']  # create new row, index: 4.5 with cells containing unique text. needs identical number of cells.
     print('create new row, index: 4.5 with cells containing unique text. needs identical number of cells.')
     print(str(df) + '\n')
 
+    # reset index
     df = df.sort_index().reset_index(drop=True)  # sort rows according to index values and reset to running integers.
     print('reset index')
     print(str(df)+'\n')
 
+    # print number of rows in df
     print('length: '+ str(len(df)) + '\n')        # print number of rows in df
 
+    # create new row at bottom of df with cells containing text: '---'
     df.loc[len(df),:] = ['---']     # create new row at bottom of df with cells containing text: '---'.
     print('create new row at bottom of df with cells containing text: ---')
     print(str(df)+'\n')
 
+    # modifies cell in bottom row, column labeled: 'A' to value: 'new row'
     df.loc[(len(df)-1),'A'] = 'NEW ROW'   # modifies cell in bottom row, column labeled: 'A' to value: 'new row'
     print('modifies cell in bottom row, column labeled: \'A\' to value: \'NEW ROW\'')
     print(str(df)+'\n')
 
+    # remove all rows except for the first row.
     df = df.drop(df.index[1:])  # remove all rows except for the first row.
     print('remove all rows except for the first row.')
     print(str(df)+'\n')
 
+    # removes all columns up to 'B' columns
     df = df.loc[:, :'B']  # removes all columns up to 'B' columns
     print('removes all columns up to \'B\' columns')
     print(str(df)+'\n')
 
+    # write 'Q','W','E','R','T' to column 'A'
     df = pd.DataFrame(np.nan, index=[0, 1, 2, 3, 4], columns=['A', 'B', 'C', 'D'])  # creates empty data frame with indexed rows and labeled columns.
     df.loc[0:4,'A'] = ['Q','W','E','R','T']  # write 'Q','W','E','R','T' to column 'A'.
     print('write \'Q\',\'W\',\'E\',\'R\',\'T\' to column \'A\'')
     print(str(df)+'\n')
 
+    # replace index default column with 'A' column
     df.set_index('A', inplace=True)  # replace index default column with 'A' column
     print('replace index default column with \'A\' column')
     print(str(df)+'\n')
@@ -4481,7 +4490,7 @@ def profile_generator(df_import, tro, dia):
     # Generates a dataframe populated with coordinates adjusted for offset, convex apexes, disappearing/converging internal arcs.
     # Scans and detects concave apexes, undersized internal arc (i.e. tool dia > arc dia). Sets an abort flag if found.
     # Refer to "ALG230727-001 Profile Algorithm"
-    # df_profile, debug_df_profile, return_abort_flag = profile_generator(df_import, tro, dia)
+    # df_profile, debug_df_profile, detect_abort_flag = profile_generator(df_import, tro, dia)
 
     # ---Variable List---
     # df_import = line or trochoidal formatted dataframe
@@ -4491,7 +4500,7 @@ def profile_generator(df_import, tro, dia):
     # ---Return Variable List---
     # df_profile = data frame of adjusted toolpath
     # debug_df_profile = text of tabulated and formatted data frame (for debugging only)
-    # return_abort_flag = return abort flag
+    # detect_abort_flag = return abort flag
 
     # ---Change History---
     # rev: 01-01-02-01
@@ -4598,8 +4607,6 @@ def profile_generator(df_import, tro, dia):
     df_profile = df_profile.loc[:, :'comments']  # create dataframe up to 'comments' columns
     df_profile = df_profile.drop(df_profile.index[1:])  # remove all rows except for the first row. = df_temp.drop(df_temp.index[1:])  # remove all rows except for the first row.
     df_profile.loc[0] = '---'   # poplulate cells of first row with '---'
-
-    return_abort_flag = False      # initialize flag
 
     df_static = df_import.loc[:,'static_variable':'static_value']  # creates new data frame for static variables only.
     temp = df_static.to_markdown(index=False, tablefmt='pipe', colalign=['center'] * len(df_static.columns))  # tabulate dataframe   # !!!!TEMP!!!
@@ -5454,28 +5461,33 @@ def profile_generator(df_import, tro, dia):
 
         profile_counter = profile_counter + 1  # increment profile counter.
 
-    toolbox_data_frame()
+    # -----------------------------------------------------------------------
+    # detect abort_flag
+    # -----------------------------------------------------------------------
 
-    # creates empty data frame
-    df = pd.DataFrame(np.nan, index=[0],columns=['A', 'B', 'C', 'D'])  # creates empty data frame with indexed rows and labeled columns.
-    print('create data frame')
-    print(str(df) + '\n')
+    profile_counter = 0  # initialize counter for profile df
+    rows = len(df_profile)  # number of rows in df_line
+    end = rows - 1  # initialize end counter
+    detect_abort_flag = False  # initialize detect_abort_flag
 
-    df.loc[0,:] ='---'
-    print('wrie')
-    print(str(df)+'\n')
+    while profile_counter <= end:
 
-    df = df.sort_index().reset_index(drop=True)  # sort rows according to index values and reset to running integers.
-    print('reset index')
-    print(str(df)+'\n')
+        last_row_flag = df_profile.loc[profile_counter, 'last_row_flag']  # get last_row_flag from df_profile dataframe
+        abort_flag = df_profile.loc[profile_counter, 'abort_flag']  # get abort_flag from df_profile dataframe
+        temp_loop_debug('detect abort_flag')  # debugging statement
 
-    df.loc[len(df), :] = ['---']  # create new row at bottom of df with cells containing text: '---'.
-    print('create new row at bottom of df with cells containing text: ---')
-    print(str(df) + '\n')
+        if abort_flag == True:      # check for abort_flag = True
+            detect_abort_flag = True       # set detect_abort_flag
+            break  # check last_row_flag    # exit loop
+
+        if last_row_flag == True or profile_counter == end:  # break while loop if last_row_flag detected or if last row is read.
+            break  # check last_row_flag
+
+        profile_counter = profile_counter + 1  # increment profile counter.
 
     debug_df_profile = df_profile.to_markdown(index=False, tablefmt='pipe', colalign=['center'] * len(df_profile.columns))  # tabulate main df !!!!TEMP!!!
     temp_text_df_debug(df_profile)  # !!!!TEMP!!!
-    return (df_profile, debug_df_profile, return_abort_flag)
+    return (df_profile, debug_df_profile, detect_abort_flag)
 
 # ---------Import Parameters------------
 
