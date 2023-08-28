@@ -4474,6 +4474,1009 @@ def repeat_check(repeat_flag, repeat_done_flag, stored_counter, counter):
 
     return (repeat_flag, repeat_done_flag, counter)
 
+def profile_generator(df_import, tro, dia):
+    # ---Description---
+    # Imports a line or trochoidal formatted dataframe.
+    # Extract the coordinates from the imported dataframe and processes the toolpath.
+    # Generates a dataframe populated with coordinates adjusted for offset, convex apexes, disappearing/converging internal arcs.
+    # Scans and detects concave apexes, undersized internal arc (i.e. tool dia > arc dia). Sets an abort flag if found.
+    # Refer to "ALG230727-001 Profile Algorithm"
+    # df_profile, debug_df_profile, return_abort_flag = profile_generator(df_import, tro, dia)
+
+    # ---Variable List---
+    # df_import = line or trochoidal formatted dataframe
+    # tro = trochoidal flag
+    # dia = tool diameter
+
+    # ---Return Variable List---
+    # df_profile = data frame of adjusted toolpath
+    # debug_df_profile = text of tabulated and formatted data frame (for debugging only)
+    # return_abort_flag = return abort flag
+
+    # ---Change History---
+    # rev: 01-01-02-01
+    # date: 18/Aug/2023
+    # Initial Release
+    # software test run on 18/Aug/2023
+
+    def temp_text_df_debug(df_profile):
+
+        df_temp = df_profile.to_markdown(index=False, tablefmt='pipe', floatfmt=".6f",colalign=['center'] * len(df_profile.columns))  # format df into table
+        print('\n')
+        print(str(df_temp))
+
+        df_profile = df_profile.loc[:, :'output_comments']  # removes all columns up to 'output_comments' columns
+        df_temp = df_profile.to_markdown(index=False, tablefmt='pipe', floatfmt=".4f",colalign=['center'] * len(df_profile.columns))  # format df into table
+        text_debug = '\n' + str(df_temp)  # convert to text
+        text_debug = indent(text_debug, 0)  # indent to margin
+        write_to_file(name_debug, text_debug)  # write to debug file
+
+    def extract_row(counter, df, tro, debug=False):
+        # ---Description---
+        # Extract and format variables of a single row from the data frame to the explicit variable type.
+        # returns formatted row of variables.
+        # last_row_flag, x, y, z, arc_seg, rad, cw, less_180 = extract_row(counter, df, tro)
+
+        # ---Variable List---
+        # counter = row counter
+
+        # ---Return Variable List---
+        # last_row_flag
+        # x
+        # y
+        # z
+        # segment
+        # rad
+        # cw
+        # less_180
+
+        last_row_flag = format_data_frame_variable(df, 'last_row_flag', counter, debug)  # import last_row_flag value.
+        x = format_data_frame_variable(df, 'x', counter, debug)  # import x value.
+        y = format_data_frame_variable(df, 'y', counter, debug)  # import y value.
+        #z = format_data_frame_variable(df, 'z', counter, debug)  # import z value.
+        #    x, y = shift(x, y, shift_x, shift_y)  # add shift to x, y value.
+
+        if tro == False:
+            z = format_data_frame_variable(df, 'z', counter, debug)  # import z value if line toolpath.
+        elif tro == True:
+            z = None  # null z value if trochoidal toolpath.
+
+        segment = format_data_frame_variable(df, 'segment', counter, debug)  # import segment value.
+        rad = format_data_frame_variable(df, 'rad', counter, debug)  # import radius.
+        cw = format_data_frame_variable(df, 'cw', counter, debug)  # import clockwise flag.
+        less_180 = format_data_frame_variable(df, 'less_180', counter, debug)  # import less_180 flag.
+
+        # set or clear arc_seg flag.
+        if segment == 'linear':
+            arc_seg = False
+        elif segment == 'arc':
+            arc_seg = True
+        else:
+            arc_seg = None
+
+        return (last_row_flag, x, y, z, segment, rad, cw, less_180)  # return values
+
+    def temp_loop_debug(title):
+
+        print('\n')
+        print(str(title))
+        print('profile_counter: ' + str(profile_counter))
+        print('end: ' + str(end))
+        print('last_row_flag: ' + str(last_row_flag))
+        print('segment: ' + str(segment))
+
+    def temp_loop_debug_01(title):
+
+        print('\n')
+        print(str(title))
+        print('profile_counter: ' + str(profile_counter))
+        print('end: ' + str(end))
+        print('last_row_flag: ' + str(last_row_flag))
+
+    def add_comment(row, text):
+        # add comment to comment column
+        # add_comment(row, text)
+
+        # ---Variable List---
+        # row = row in the data frame to add commnet
+        # text  = text to add to comment
+
+        # ---Return Variable List---
+        # N/A
+
+        comment = df_profile.loc[row, 'comments']  # read comments from data frame
+        if comment == '---':
+            comment = str(text)  # remove initial '---' format and replace with text
+        else:
+            comment = comment + str(text)
+        df_profile.loc[row, 'comments'] = comment
+
+    doc_number = datetime.now().strftime("%Y%m%d-%H%M%S")  # get date time stamp (YYYYMMDD-HHMMSS) for file name. !!!!TEMP!!!
+    name_debug = 'Profile Debug ' + str(doc_number)  # name of debug text file.  !!!!TEMP!!!
+
+    df_profile = pd.read_excel(excel_file, 'profile-00', na_filter=False)  # import profile tab from excel file into dataframe.
+    df_profile = df_profile.loc[:, :'comments']  # create dataframe up to 'comments' columns
+    df_profile = df_profile.drop(df_profile.index[1:])  # remove all rows except for the first row. = df_temp.drop(df_temp.index[1:])  # remove all rows except for the first row.
+    df_profile.loc[0] = '---'   # poplulate cells of first row with '---'
+
+    return_abort_flag = False      # initialize flag
+
+    df_static = df_import.loc[:,'static_variable':'static_value']  # creates new data frame for static variables only.
+    temp = df_static.to_markdown(index=False, tablefmt='pipe', colalign=['center'] * len(df_static.columns))  # tabulate dataframe   # !!!!TEMP!!!
+    print(str(temp))   # !!!!TEMP!!!
+    print('\n') # !!!!TEMP!!!
+    df_static.set_index('static_variable', inplace=True)  # replace index default column with 'static_variable' column
+
+    df_line = df_import.loc[:, :'comments']  # create dataframe up to 'comments' columns
+    temp = df_line.to_markdown(index=False, tablefmt='pipe', colalign=['center'] * len(df_line.columns))  # tabulate dataframe   # !!!!TEMP!!!
+    print(temp)   # !!!!TEMP!!!
+    print('\n')   # !!!!TEMP!!!
+
+    rows = len(df_line)  # print number of rows in df_line
+
+    # ----------------------------------
+    # look for online cut
+    # ----------------------------------
+    mode = df_static.loc['mode', 'static_value']  # read mode from static_df
+    on_line_flag = False  # initialize
+    if mode == 3:  # look for online cut
+        on_line_flag = True  # set on_line_flag
+        print('==========================')   # !!!!TEMP!!!
+        print('on_line_flag: ' + str(on_line_flag))   # !!!!TEMP!!!
+        print('==========================\n')   # !!!!TEMP!!!
+
+    # -----------------------------------------------------------------------
+    # construct segments and populate fundamental data in profile data frame
+    # -----------------------------------------------------------------------
+    line_counter = 0  # initialize counter for line df
+    profile_counter = 0  # initialize counter for profile df
+    end = rows - 1  # initialize end counter
+    while line_counter <= end:
+
+        last_row_flag, x, y, z, arc_seg, rad, cw, less_180 = extract_row(line_counter, df_line, tro)
+
+        temp_loop_debug_01('construct segments and populate fundamental data in profile data frame')  # debug only
+        print(f'line counter: ' + str(line_counter))
+
+        if line_counter == 0:
+            df_profile.loc[profile_counter, 'start_x'] = x  # write start_x value to df_profile dataframe
+            df_profile.loc[profile_counter, 'start_y'] = y  # write start_y value to df_profile dataframe
+            df_profile.loc[profile_counter, 'start_#'] = line_counter  # write start_# value to df_profile dataframe. start_# is the row #  corresponding to the starting point of the segment on the original line dataframe.
+        elif line_counter == 1:
+            df_profile.loc[profile_counter, 'end_x'] = x  # write start_x value to df_profile dataframe
+            df_profile.loc[profile_counter, 'end_y'] = y  # write start_y value to df_profile dataframe
+            df_profile.loc[profile_counter, 'end_#'] = line_counter  # write end_# value to df_profile dataframe. end_# is the row #  corresponding to the ending point of the segment on the original line dataframe.
+        else:
+            df_profile.loc[profile_counter, 'start_x'] = df_profile.loc[profile_counter - 1, 'end_x']  # write start_x value to df_profile dataframe
+            df_profile.loc[profile_counter, 'start_y'] = df_profile.loc[profile_counter - 1, 'end_y']  # write start_y value to df_profile dataframe
+            df_profile.loc[profile_counter, 'start_#'] = df_profile.loc[profile_counter - 1, 'end_#']  # write start_# value to df_profile dataframe. copy end_# value from previous row.
+            df_profile.loc[profile_counter, 'end_#'] = line_counter  # write end_# value to df_profile dataframe. end_# is the row #  corresponding to the ending point of the segment on the original line dataframe.
+
+        if line_counter == 0:  # if line_counter = 0 skip while loop iteration
+            line_counter = line_counter + 1  # increment counter.
+            continue  # skip while loop iteration
+
+        df_profile.loc[profile_counter, 'offset_start'] = df_static.loc['offset', 'static_value']  # write static_value to df_profile dataframe. at point of creation, offset is constant.
+        df_profile.loc[profile_counter, 'offset_end'] = df_static.loc['offset', 'static_value']  # write static_value to df_profile dataframe. at point of creation, offset is constant.
+        df_profile.loc[profile_counter, '#'] = profile_counter  # write # value to df_profile dataframe
+        df_profile.loc[profile_counter, 'end_x'] = x  # write end_x value to df_profile dataframe
+        df_profile.loc[profile_counter, 'end_y'] = y  # write end_y value to df_profile dataframe
+        df_profile.loc[profile_counter, 'segment'] = arc_seg  # write segment value to df_profile dataframe
+        df_profile.loc[profile_counter, 'rad'] = rad  # write rad value to df_profile dataframe
+        df_profile.loc[profile_counter, 'cw'] = cw  # write cw value to df_profile dataframe
+        df_profile.loc[profile_counter, 'less_180'] = less_180  # write less_180 value to df_profile dataframe
+        df_profile.loc[profile_counter, 'last_row_flag'] = False  # clear last_row_flag on df_profile dataframe
+
+        if last_row_flag == True or line_counter == end:  # break while loop if last_row_flag detected or if last row is read.
+            df_profile.loc[profile_counter, 'last_row_flag'] = True  # set last_row_flag on df_profile dataframe
+            break
+
+        line_counter = line_counter + 1  # increment line counter.
+        profile_counter = profile_counter + 1  # increment profile counter.
+        df_profile.loc[len(df_profile), :] = ['---']  # create new row at bottom of df with cells containing text: '---'.
+
+    # -----------------------------------------------------------------------
+    # calculate derived data for online toolpath in profile data frame
+    # -----------------------------------------------------------------------
+    profile_counter = 0  # initialize counter for profile df
+    rows = len(df_profile)  # number of rows in df_line
+    end = rows - 1  # initialize end counter
+    while profile_counter <= end:
+
+        last_row_flag = df_profile.loc[profile_counter, 'last_row_flag']  # get last_row_flag from df_profile dataframe
+        segment = df_profile.loc[profile_counter, 'segment']  # get segment type from df_profile dataframe
+        start_x = df_profile.loc[profile_counter, 'start_x']  # get start_x value from df_profile dataframe
+        start_y = df_profile.loc[profile_counter, 'start_y']  # get start_y value from df_profile dataframe
+        end_x = df_profile.loc[profile_counter, 'end_x']  # get end_x value from df_profile dataframe
+        end_y = df_profile.loc[profile_counter, 'end_y']  # get end_y value from df_profile dataframe
+        rad = df_profile.loc[profile_counter, 'rad']  # get rad value from df_profile dataframe
+        cw = df_profile.loc[profile_counter, 'cw']  # get cw value from df_profile dataframe
+        less_180 = df_profile.loc[profile_counter, 'less_180']  # get less_180 value from df_profile dataframe
+
+        temp_loop_debug('calculate derived data for online toolpath in profile data frame')  # debug only
+
+        if segment == 'linear':
+            angle, length, origin_x, origin_y = absolute_cartesian_to_relative_polar(start_x, start_y, end_x, end_y)
+            df_profile.loc[
+                profile_counter, 'vector_angle_start'] = angle  # write vector_angle_start to df_profile dataframe (round to 2 decimal places)
+            df_profile.loc[
+                profile_counter, 'vector_angle_end'] = angle  # write vector_angle_end to df_profile dataframe (round to 2 decimal places)
+            df_profile.loc[
+                profile_counter, 'length'] = length  # write length to df_profile dataframe (round to 4 decimal places)
+        elif segment == 'arc':
+            center_x, center_y, start_angle, end_angle, arc_length, arc_angle = arc_data(start_x, start_y, end_x, end_y,
+                                                                                         rad, cw, less_180)
+            df_profile.loc[
+                profile_counter, 'arc_center_x'] = center_x  # write arc_center_x to df_profile dataframe (round to 4 decimal places)
+            df_profile.loc[
+                profile_counter, 'arc_center_y'] = center_y  # write arc_center_y to df_profile dataframe (round to 4 decimal places)
+            df_profile.loc[
+                profile_counter, 'vector_angle_start'] = start_angle  # write vector_angle_start to df_profile dataframe (round to 2 decimal places)
+            df_profile.loc[
+                profile_counter, 'vector_angle_end'] = end_angle  # write vector_angle_end to df_profile dataframe (round to 2 decimal places)
+            df_profile.loc[
+                profile_counter, 'length'] = arc_length  # write length to df_profile dataframe (round to 4 decimal places)
+
+        angle, length, origin_x, origin_y = absolute_cartesian_to_relative_polar(start_x, start_y, end_x, end_y)
+        df_profile.loc[
+            profile_counter, 'direction'] = angle  # write direction of start to end point irregardless of line or arc (round to 2 decimal places)
+
+        if profile_counter == 0:  # if line_counter = 0 skip while loop iteration
+            profile_counter = profile_counter + 1  # increment counter.
+            continue  # skip while loop iteration
+        else:
+            df_profile.loc[profile_counter, 'vector_angle_pre'] = df_profile.loc[
+                profile_counter - 1, 'vector_angle_end']  # write vector_angle_pre to df_profile dataframe (round to 2 decimal places)
+
+        if last_row_flag == True or profile_counter == end:  # break while loop if last_row_flag detected or if last row is read.
+            break  # check last_row_flag
+
+        profile_counter = profile_counter + 1  # increment profile counter.
+
+    # -----------------------------------------------------------------------
+    # scan for apex and undersized arc
+    # -----------------------------------------------------------------------
+    mode = df_static.loc['mode', 'static_value']  # read mode from static_df
+    profile_counter = 0  # initialize counter for profile df
+    rows = len(df_profile)  # number of rows in df_line
+    end = rows - 1  # initialize end counter
+    # initialize flags
+    start_concave_apex_flag = False
+    start_convex_apex_flag = False
+    start_inverted_apex_flag = False
+    undersized_internal_arc_flag = False
+    abort_flag = False
+    while profile_counter <= end and on_line_flag == False:
+
+        start_concave_apex_flag = False  # reset flag
+        start_convex_apex_flag = False  # reset flag
+        start_inverted_apex_flag = False  # reset flag
+        undersized_internal_arc_flag = False  # reset flag
+        abort_flag = False  # reset flag
+
+        last_row_flag = df_profile.loc[profile_counter, 'last_row_flag']  # get last_row_flag from df_profile dataframe
+
+        temp_loop_debug('scan for apex and undersized arc')  # debug only
+
+        # scan for apex and determine apex type.
+        if profile_counter > 0:
+
+            vector_angle_pre = df_profile.loc[profile_counter, 'vector_angle_pre']  # get vector_angle_pre from df_profile dataframe
+            vector_angle_start = df_profile.loc[profile_counter, 'vector_angle_start']  # get vector_angle_start from df_profile dataframe
+            vector = vector_angle_start - vector_angle_pre  # calculate change in vector between current segment and segment before
+            vector = round(vector, 1)  # round to 1 decimal place to prevent false apex trigger.
+            #        vector = round(vector,3)        # round to 3 decimal place to prevent false apex trigger. in radians
+
+            if vector < 0:  # calculate absolute angle.
+                #            vector = vector + 360
+                vector = format_angle(vector)  # in radians
+
+            if vector == 0 or vector == 360:  # segment transition is tangent and in same direction
+                #        if vector == 0 or vector == (2*math.pi):  # segment transition is tangent and in same direction. in radians
+                start_concave_apex_flag = False
+                start_convex_apex_flag = False
+                start_inverted_apex_flag = False
+            elif vector > 0 and vector < 180:  # segment transition not tangent. deviates to the left.
+                #        elif vector > 0 and vector < math.pi:  # segment transition not tangent. deviates to the left. in radians
+                if mode == 1:
+                    start_concave_apex_flag = False
+                    start_convex_apex_flag = True
+                    start_inverted_apex_flag = False
+                elif mode == 2:
+                    start_concave_apex_flag = True
+                    start_convex_apex_flag = False
+                    start_inverted_apex_flag = False
+            elif vector > 180 and vector < 360:  # segment transition not tangent. deviates to the right.
+                #        elif vector > math.pi and vector < (2*math.pi):  # segment transition not tangent. deviates to the right. in radians
+                if mode == 1:
+                    start_concave_apex_flag = True
+                    start_convex_apex_flag = False
+                    start_inverted_apex_flag = False
+                elif mode == 2:
+                    start_concave_apex_flag = False
+                    start_convex_apex_flag = True
+                    start_inverted_apex_flag = False
+            elif vector == 180:  # segment transition is tangent but inverted.
+                #        elif vector == math.pi:  # segment transition is tangent but inverted. in radians
+                start_concave_apex_flag = False
+                start_convex_apex_flag = True  # convex apex irregardless mode 1 or 2. i.e. left or right side of travel
+                start_inverted_apex_flag = True
+
+            if start_concave_apex_flag == True:
+                abort_flag = True  # set abort_flag. do not allow sharp internal corners
+
+            df_profile.loc[profile_counter, 'start_concave_apex_flag'] = start_concave_apex_flag
+            df_profile.loc[profile_counter, 'start_convex_apex_flag'] = start_convex_apex_flag
+            df_profile.loc[profile_counter, 'start_inverted_apex_flag'] = start_inverted_apex_flag
+
+        segment = df_profile.loc[profile_counter, 'segment']  # read segment
+        cw = df_profile.loc[profile_counter, 'cw']  # read cw flag
+        rad = df_profile.loc[profile_counter, 'rad']  # read rad flag
+
+        # scan for undersized arcs
+        if segment == 'arc':
+            if (mode == 1 and cw == True) or (mode == 2 and cw == False):  # scan for internal arc
+                if rad * 2 < dia:
+                    undersized_internal_arc_flag = True  # detect undersized arc
+                    abort_flag = True
+
+            df_profile.loc[profile_counter, 'undersized_internal_arc_flag'] = undersized_internal_arc_flag  # write undersized_internal_arc_flag to df
+
+        df_profile.loc[profile_counter, 'abort_flag'] = abort_flag  # write abort_flag to df
+
+        if last_row_flag == True or profile_counter == end:  # break while loop if last_row_flag detected or if last row is read.
+            break  # check last_row_flag
+
+        profile_counter = profile_counter + 1  # increment profile counter.
+
+    # -----------------------------------------------------------------------
+    # insert row at convex apex points
+    # -----------------------------------------------------------------------
+    profile_counter = 0  # initialize counter for profile df
+    rows = len(df_profile)  # number of rows in df_line
+    end = rows - 1  # initialize end counter
+    while profile_counter <= end and on_line_flag == False:
+
+        temp_loop_debug('insert row at convex apex points')  # debug only
+
+        start_convex_apex_flag = df_profile.loc[profile_counter, 'start_convex_apex_flag']  # get start_convex_apex_flag from df_profile dataframe
+        last_row_flag = df_profile.loc[profile_counter, 'last_row_flag']  # get last_row_flag from df_profile dataframe
+
+        #    print('start_convex_apex_flag: ' + str(start_convex_apex_flag))
+        if start_convex_apex_flag == True:
+
+            temp_counter = (profile_counter - 1) + 0.1
+            print('temp_counter: ' + str(temp_counter))
+            df_profile.loc[temp_counter, :] = '---'  # create new row, index: profile_counter+0.1 with cells containing text: '---'. to be later reindexed to be inserted before apex row.
+            df_profile.loc[temp_counter, 'last_row_flag'] = False  # clear last_row_flag
+            df_profile.loc[temp_counter, 'transition_arc_flag'] = True  # set transition_arc_flag
+            df_profile.loc[temp_counter, 'segment'] = 'arc'  # set segment type to arc
+            add_comment(temp_counter, 'transition arc. ')  # add comment to comments column
+
+            if mode == 2:
+                df_profile.loc[temp_counter, 'cw'] = True  # set cw to True. cutter travel on left hand side of profile will always make a cw arc.
+            elif mode == 1:
+                df_profile.loc[temp_counter, 'cw'] = False  # set cw to Flase. cutter travel on right hand side of profile will always make a ccw arc.
+            df_profile.loc[temp_counter, 'less_180'] = True  # transition arc will always be acute. impossible to be obtuse.
+            df_profile.loc[temp_counter, 'arc_center_x'] = df_profile.loc[profile_counter, 'start_x']  # x coordinate of center of arc
+            df_profile.loc[temp_counter, 'arc_center_y'] = df_profile.loc[profile_counter, 'start_y']  # y coordinate of center of arc
+
+        if last_row_flag == True or profile_counter == end:  # break while loop if last_row_flag detected or if last row is read.
+            df_profile = df_profile.sort_index().reset_index(drop=True)  # sort rows according to index values and reset to running integers.
+            df_profile.loc[:, '#'] = df_profile.index  # copy index column to # column
+            break  # check last_row_flag
+
+        profile_counter = profile_counter + 1  # increment profile counter.
+
+    # -----------------------------------------------------------------------
+    # calculate adjusted parameters sans transition arcs
+    # -----------------------------------------------------------------------
+    profile_counter = 0  # initialize counter for profile df
+    rows = len(df_profile)  # number of rows in df_line
+    end = rows - 1  # initialize end counter
+#    start_block, end_block, name, name_debug, clear_z, start_z, cut_f, finish_f, z_f, dia = parameters_data_frame(excel_file, 'parameters')  # import parameters. !!!clear print statements!!!
+    offset = df_static.loc['offset', 'static_value']  # get offset from line data frame. for constant offset only.
+    mode = df_static.loc['mode', 'static_value']  # get mode from line data frame.
+    while profile_counter <= end and on_line_flag == False:
+
+        last_row_flag = df_profile.loc[profile_counter, 'last_row_flag']  # get last_row_flag from df_profile dataframe
+        segment = df_profile.loc[profile_counter, 'segment']  # get segment type. linear or arc
+        transition_arc_flag = df_profile.loc[profile_counter, 'transition_arc_flag']  # get transition_arc_flag
+        start_x = df_profile.loc[profile_counter, 'start_x']  # get start_x
+        start_y = df_profile.loc[profile_counter, 'start_y']  # get start_y
+        end_x = df_profile.loc[profile_counter, 'end_x']  # get end_x
+        end_y = df_profile.loc[profile_counter, 'end_y']  # get end_y
+        rad = df_profile.loc[profile_counter, 'rad']  # get rad
+        cw = df_profile.loc[profile_counter, 'cw']  # get cw
+        less_180 = df_profile.loc[profile_counter, 'less_180']  # get less_180
+
+        temp_loop_debug('calculate adjusted parameters sans transition arcs')  # debug only
+        print('transition_arc_flag: ' + str(transition_arc_flag))
+
+        if segment == 'linear' and transition_arc_flag != True:
+            start_x_adjusted, start_y_adjusted, end_x_adjusted, end_y_adjusted = linear_offset_adjustment(dia, offset, start_x, start_y, end_x, end_y, mode)
+            df_profile.loc[profile_counter, 'start_x_adjusted'] = start_x_adjusted  # write start_x_adjusted
+            df_profile.loc[profile_counter, 'start_y_adjusted'] = start_y_adjusted  # write start_y_adjusted
+            df_profile.loc[profile_counter, 'end_x_adjusted'] = end_x_adjusted  # write end_x_adjusted
+            df_profile.loc[profile_counter, 'end_y_adjusted'] = end_y_adjusted  # write end_y_adjusted
+
+            angle, length, origin_x, origin_y = absolute_cartesian_to_relative_polar(start_x_adjusted, start_y_adjusted, end_x_adjusted, end_y_adjusted)
+            df_profile.loc[profile_counter, 'vector_angle_start_adjusted'] = angle  # write vector_angle_start to df_profile dataframe (round to 2 decimal places)
+            df_profile.loc[profile_counter, 'vector_angle_end_adjusted'] = angle  # write vector_angle_end to df_profile dataframe (round to 2 decimal places)
+            df_profile.loc[profile_counter, 'length_adjusted'] = length  # write length to df_profile dataframe (round to 4 decimal places)
+
+            angle, length, origin_x, origin_y = absolute_cartesian_to_relative_polar(start_x_adjusted, start_y_adjusted,end_x_adjusted, end_y_adjusted)
+            df_profile.loc[profile_counter, 'direction_adjusted'] = angle  # write direction of start to end point irregardless of line or arc (round to 2 decimal places)
+
+        if segment == 'arc' and transition_arc_flag != True:
+            start_x_adjusted, start_y_adjusted, end_x_adjusted, end_y_adjusted, rad_adjusted = arc_offset_adjustment(dia, offset, start_x, start_y, end_x, end_y, rad, cw, less_180, mode)
+            df_profile.loc[profile_counter, 'start_x_adjusted'] = start_x_adjusted  # write start_x_adjusted
+            df_profile.loc[profile_counter, 'start_y_adjusted'] = start_y_adjusted  # write start_y_adjusted
+            df_profile.loc[profile_counter, 'end_x_adjusted'] = end_x_adjusted  # write end_x_adjusted
+            df_profile.loc[profile_counter, 'end_y_adjusted'] = end_y_adjusted  # write end_y_adjusted
+            df_profile.loc[profile_counter, 'rad_adjusted'] = rad_adjusted  # write rad_adjusted
+
+            print('start_x_adjusted: ' + str(start_x_adjusted))
+            print('start_y_adjusted: ' + str(start_y_adjusted))
+            print('end_x_adjusted: ' + str(end_x_adjusted))
+            print('end_y_adjusted: ' + str(end_y_adjusted))
+            print('rad_adjusted: ' + str(rad_adjusted))
+
+            if round(rad_adjusted, 5) == 0:  # detect if concave arc has offset into a point.
+                arc_point_flag = True
+                df_profile.loc[profile_counter, 'arc_point_flag'] = arc_point_flag  # write arc_point_flag to df_profile dataframe
+                df_profile.loc[profile_counter, 'skip_flag'] = True  # set skip_flag
+                comment_temp = 'concave offset point'  # comment
+                add_comment(profile_counter, comment_temp)  # update comments
+                profile_counter = profile_counter + 1  # increment profile counter.
+                continue  # skip loop iteration.
+
+            center_x, center_y, start_angle, end_angle, arc_length, arc_angle = arc_data(start_x_adjusted, start_y_adjusted, end_x_adjusted, end_y_adjusted, rad_adjusted, cw, less_180)
+            df_profile.loc[profile_counter, 'vector_angle_start_adjusted'] = start_angle  # write vector_angle_start to df_profile dataframe (round to 2 decimal places)
+            df_profile.loc[profile_counter, 'vector_angle_end_adjusted'] = end_angle  # write vector_angle_end to df_profile dataframe (round to 2 decimal places)
+            df_profile.loc[profile_counter, 'length_adjusted'] = arc_length  # write length to df_profile dataframe (round to 4 decimal places)
+
+            angle, length, origin_x, origin_y = absolute_cartesian_to_relative_polar(start_x_adjusted, start_y_adjusted, end_x_adjusted, end_y_adjusted)
+            df_profile.loc[profile_counter, 'direction_adjusted'] = angle  # write direction of start to end point irregardless of line or arc (round to 2 decimal places)
+
+        if last_row_flag == True or profile_counter == end:  # break while loop if last_row_flag detected or if last row is read.
+            break  # check last_row_flag
+
+        profile_counter = profile_counter + 1  # increment profile counter.
+
+    # -----------------------------------------------------------------------
+    # calculate adjusted parameters for transition arcs
+    # -----------------------------------------------------------------------
+    profile_counter = 0  # initialize counter for profile df
+    rows = len(df_profile)  # number of rows in df_line
+    end = rows - 1  # initialize end counter
+    while profile_counter <= end and on_line_flag == False:
+
+        last_row_flag = df_profile.loc[profile_counter, 'last_row_flag']  # get last_row_flag from df_profile dataframe
+        transition_arc_flag = df_profile.loc[profile_counter, 'transition_arc_flag']  # get transition_arc_flag
+        cw = df_profile.loc[profile_counter, 'cw']  # get cw
+        less_180 = df_profile.loc[profile_counter, 'less_180']  # get less_180
+
+        temp_loop_debug('calculate adjusted parameters for transition arcs')  # debugging statement
+
+        if transition_arc_flag == True:
+            df_profile.loc[profile_counter, 'offset_start'] = offset  # write offset_start for transition arc
+            df_profile.loc[profile_counter, 'offset_end'] = offset  # write offset_end for transition arc
+
+            start_x_adjusted = df_profile.loc[(profile_counter - 1), 'end_x_adjusted']  # read end point of prior segment as start point of transition arc segment
+            start_y_adjusted = df_profile.loc[(profile_counter - 1), 'end_y_adjusted']  # read end point of prior segment as start point of transition arc segment
+            end_x_adjusted = df_profile.loc[(profile_counter + 1), 'start_x_adjusted']  # read start point of next segment as end point of transition arc segment
+            end_y_adjusted = df_profile.loc[(profile_counter + 1), 'start_y_adjusted']  # read start point of next segment as end point of transition arc segment
+            rad_adjusted = offset + dia / 2  # calculate rad of adjusted transition arc
+
+            df_profile.loc[profile_counter, 'start_x_adjusted'] = start_x_adjusted  # write start_x_adjusted for transition arc
+            df_profile.loc[profile_counter, 'start_y_adjusted'] = start_y_adjusted  # write start_y_adjusted for transition arc
+            df_profile.loc[profile_counter, 'end_x_adjusted'] = end_x_adjusted  # write end_x_adjusted for transition arc
+            df_profile.loc[profile_counter, 'end_y_adjusted'] = end_y_adjusted  # write end_y_adjusted for transition arc
+            df_profile.loc[profile_counter, 'rad_adjusted'] = rad_adjusted  # write rad_adjusted
+
+            center_x, center_y, start_angle, end_angle, arc_length, arc_angle = arc_data(start_x_adjusted, start_y_adjusted, end_x_adjusted, end_y_adjusted, rad_adjusted, cw, less_180)
+            df_profile.loc[profile_counter, 'vector_angle_start_adjusted'] = start_angle  # write vector_angle_start to df_profile dataframe (round to 2 decimal places)
+            df_profile.loc[profile_counter, 'vector_angle_end_adjusted'] = end_angle  # write vector_angle_end to df_profile dataframe (round to 2 decimal places)
+            df_profile.loc[profile_counter, 'length_adjusted'] = arc_length  # write length to df_profile dataframe (round to 4 decimal places)
+
+            angle, length, origin_x, origin_y = absolute_cartesian_to_relative_polar(start_x_adjusted, start_y_adjusted, end_x_adjusted, end_y_adjusted)
+            df_profile.loc[profile_counter, 'direction_adjusted'] = angle  # write direction of start to end point irregardless of line or arc (round to 2 decimal places)
+
+        if last_row_flag == True or profile_counter == end:  # break while loop if last_row_flag detected or if last row is read.
+            break  # check last_row_flag
+
+        profile_counter = profile_counter + 1  # increment profile counter.
+
+    # -----------------------------------------------------------------------
+    # calculate vector_angle_pre_adjusted
+    # -----------------------------------------------------------------------
+
+    profile_counter = 0  # initialize counter for profile df
+    rows = len(df_profile)  # number of rows in df_line
+    end = rows - 1  # initialize end counter
+
+    while profile_counter <= end and on_line_flag == False:
+
+        temp_loop_debug('calculate vector_angle_pre_adjusted')  # debugging statement
+
+        last_row_flag = df_profile.loc[profile_counter, 'last_row_flag']  # get last_row_flag from df_profile dataframe
+
+        if profile_counter == 0:  # if line_counter = 0 skip while loop iteration
+            profile_counter = profile_counter + 1  # increment counter.
+            continue  # skip while loop iteration
+
+        vector_angle_pre_adjusted = df_profile.loc[profile_counter - 1, 'vector_angle_end_adjusted']
+        df_profile.loc[profile_counter, 'vector_angle_pre_adjusted'] = vector_angle_pre_adjusted  # write vector_angle_pre_adjusted
+
+        if last_row_flag == True or profile_counter == end:  # break while loop if last_row_flag detected or if last row is read.
+            break  # check last_row_flag
+
+        profile_counter = profile_counter + 1  # increment profile counter.
+
+    # -----------------------------------------------------------------------
+    # determine segment inversion
+    # -----------------------------------------------------------------------
+
+    profile_counter = 0  # initialize counter for profile df
+    rows = len(df_profile)  # number of rows in df_line
+    end = rows - 1  # initialize end counter
+
+    while profile_counter <= end and on_line_flag == False:
+
+        last_row_flag = df_profile.loc[profile_counter, 'last_row_flag']  # get last_row_flag from df_profile dataframe
+        transition_arc_flag = df_profile.loc[profile_counter, 'transition_arc_flag']  # get transition_arc_flag from df_profile dataframe
+        arc_point_flag = df_profile.loc[profile_counter, 'arc_point_flag']  # get arc_point_flag from df_profile dataframe
+
+        temp_loop_debug('determine segment inversion')  # debugging statement
+        print(transition_arc_flag)
+
+        if transition_arc_flag != True and arc_point_flag != True:  # omit transition arcs and point arcs
+
+            direction = df_profile.loc[profile_counter, 'direction']  # get segment direction
+            direction_adjusted = df_profile.loc[profile_counter, 'direction_adjusted']  # get adjusted segment direction
+            direction_difference = direction_adjusted - direction  # calculate direction difference
+            direction_difference = round(direction_difference, 1)  # round to 1 decimal place to prevent false inversion trigger
+            #        direction_difference = round(direction_difference,3)  # round to 3 decimal place to prevent false inversion trigger. in radians.
+
+            print('direction_difference: ' + str(direction_difference))
+
+            if direction_difference == 0 or direction_difference == 360:  # no inversion found. start and end points of segment are in the same direction before and after adjustment.
+                #        if direction_difference == 0 or direction_difference == round(2*math.pi, 3):  # no inversion found. start and end points of segment are in the same direction before and after adjustment. in radians.
+                df_profile.loc[profile_counter, 'inversion_flag'] = False  # clear inversion flag
+            else:  # inversion found. start and end points of segment are not in the same direction before and after adjustment.
+                df_profile.loc[profile_counter, 'skip_flag'] = True  # set skip_flag
+                df_profile.loc[profile_counter, 'inversion_flag'] = True  # determine segment inversion if any change in start-end direction is found. does not have to be 180deg apart.
+                df_profile.loc[profile_counter - 1, 'intersect_end_flag'] = True  # set prior segment intersect end flag
+                df_profile.loc[profile_counter + 1, 'intersect_start_flag'] = True  # set subsequent segment intersect start flag
+                add_comment(profile_counter, 'segment inversion. ')  # update comments
+
+            inversion_flag = df_profile.loc[profile_counter, 'inversion_flag']
+            print('inversion_flag: ' + str(inversion_flag))
+
+        #    df_profile.loc[profile_counter, 'inversion_flag'] = False  # bypass inversion check. !!!!debug only!!!
+
+        if last_row_flag == True or profile_counter == end:  # break while loop if last_row_flag detected or if last row is read.
+            break  # check last_row_flag
+
+        profile_counter = profile_counter + 1  # increment profile counter.
+
+    # -----------------------------------------------------------------------
+    # determine intersection point
+    # -----------------------------------------------------------------------
+
+    profile_counter = 0  # initialize counter for profile df
+    rows = len(df_profile)  # number of rows in df_line
+    end = rows - 1  # initialize end counter
+
+    while profile_counter <= end and on_line_flag == False:
+
+        intersect_x = None  # intialize
+        intersect_y = None  # intialize
+        inversion_type = None  # initialize
+        segment_swap_flag = False  # initialize
+        rel_intersect_x = None  # initialize
+        rel_intersect_y = None  # initialize
+
+        last_row_flag = df_profile.loc[profile_counter, 'last_row_flag']  # get last_row_flag from df_profile dataframe
+        inversion_flag = df_profile.loc[profile_counter, 'inversion_flag']  # get inversion_flag from df_profile dataframe
+
+        temp_loop_debug('determine intersection point')  # debugging statement
+
+        if inversion_flag == True:  # scan for inverted segment
+
+            prior_segment_type = df_profile.loc[profile_counter - 1, 'segment']  # get prior segment type from df_profile dataframe
+            later_segment_type = df_profile.loc[profile_counter + 1, 'segment']  # get segment type from df_profile dataframe
+
+            prior_segment_x1 = df_profile.loc[profile_counter - 1, 'start_x_adjusted']  # read start_x_adjusted on prior segment
+            prior_segment_y1 = df_profile.loc[profile_counter - 1, 'start_y_adjusted']  # read start_y_adjusted on prior segment
+            prior_segment_x2 = df_profile.loc[profile_counter - 1, 'end_x_adjusted']  # read end_x_adjusted on prior segment
+            prior_segment_y2 = df_profile.loc[profile_counter - 1, 'end_y_adjusted']  # read end_y_adjusted on prior segment
+            if prior_segment_type == 'arc':
+                prior_segment_r = df_profile.loc[profile_counter - 1, 'rad_adjusted']  # read rad_adjusted on prior segment
+                prior_segment_arc_center_x = df_profile.loc[profile_counter - 1, 'arc_center_x']  # read arc_center_x on prior segment
+                prior_segment_arc_center_y = df_profile.loc[profile_counter - 1, 'arc_center_y']  # read arc_center_y on prior segment
+            #            prior_segment_m = (prior_segment_y2 - prior_segment_y1) / (prior_segment_x2 - prior_segment_x1)   # calculate gradient of prior segment
+            #            prior_segment_c = prior_segment_y2 - prior_segment_x2 * prior_segment_m     # calculate y intercept of prior segment
+
+            later_segment_x1 = df_profile.loc[profile_counter + 1, 'start_x_adjusted']  # read start_x_adjusted on later segment
+            later_segment_y1 = df_profile.loc[profile_counter + 1, 'start_y_adjusted']  # read start_y_adjusted on later segment
+            later_segment_x2 = df_profile.loc[profile_counter + 1, 'end_x_adjusted']  # read end_x_adjusted on later segment
+            later_segment_y2 = df_profile.loc[profile_counter + 1, 'end_y_adjusted']  # read end_y_adjusted on later segment
+            if later_segment_type == 'arc':
+                later_segment_r = df_profile.loc[profile_counter + 1, 'rad_adjusted']  # read rad_adjusted on later segment
+                later_segment_arc_center_x = df_profile.loc[profile_counter + 1, 'arc_center_x']  # read arc_center_x on later segment
+                later_segment_arc_center_y = df_profile.loc[profile_counter + 1, 'arc_center_y']  # read arc_center_y on later segment
+            #            later_segment_m = (later_segment_y2 - later_segment_y1) / (later_segment_x2 - later_segment_x1)   # calculate gradient of later segment
+            #            later_segment_c = later_segment_y2 - later_segment_x2 * later_segment_m     # calculate y intercept of later segment
+
+            print('line-arc ' + 'prior_segment_type: ' + str(prior_segment_type))  # ok
+            print('line-arc ' + 'later_segment_type: ' + str(later_segment_type))  # ok
+
+            # -------------------------------
+            # line - line intersect
+            # -------------------------------
+            if prior_segment_type == 'linear' and later_segment_type == 'linear':
+
+                parallel_flag = False  # initialize flag
+                origin_x = prior_segment_x1  # use prior segment start point as the origin.
+                origin_y = prior_segment_y1  # use prior segment start point as the origin.
+                axis_angle = absolute_angle(prior_segment_x1, prior_segment_y1, prior_segment_x2,
+                                            prior_segment_y2)  # find absolute angle of prior segment. Use segment as reference axis.
+                temp_x1, temp_y1 = shift_origin(origin_x, origin_y, later_segment_x1,
+                                                later_segment_y1)  # apply shift in origin
+                rel_x1, rel_y1 = rotate_axis(axis_angle, temp_x1, temp_y1)  # apply axis rotation
+                temp_x2, temp_y2 = shift_origin(origin_x, origin_y, later_segment_x2,
+                                                later_segment_y2)  # apply shift in origin
+                rel_x2, rel_y2 = rotate_axis(axis_angle, temp_x2, temp_y2)  # apply axis rotation
+
+                rel_angle = absolute_angle(rel_x1, rel_y1, rel_x2,
+                                           rel_y2)  # find angle of later segment relative to prior segment (reference axis).
+
+                # identify possible line-line cases
+                if round(rel_angle,
+                         1) == 0:  # later segment is parallel/ 0 deg relative to the prior segment in the same direction.
+                    #            if round(rel_angle,3) == 0:  # later segment is parallel/ 0 deg relative to the prior segment in the same direction. in radians.
+                    inversion_type = 'line-line similar parallel'
+                    parallel_flag = True  # set parallel flag
+                    if round(rel_y1, 4) == 0:  # both segments are colinear
+                        inversion_type = 'line-line similar colinear'
+                elif round(rel_angle,
+                           1) == 180:  # later segment is parallel/ 180 deg relative to the prior segment in the opposing direction.
+                    #            elif round(rel_angle,3) == round(math.pi,3):  # later segment is parallel/ 180 deg relative to the prior segment in the opposing direction. in radians.
+                    inversion_type = 'line-line opposing parallel'
+                    parallel_flag = True  # set parallel flag
+                    if round(rel_y1, 4) == 0:  # both segments are colinear
+                        inversion_type = 'line-line similar colinear'
+                elif round(rel_angle, 1) == 90 or round(rel_angle, 1) == 270:
+                    #            elif round(rel_angle, 3) == round((0.5*math.pi),3) or round(rel_angle, 3) == round((1.5*math.pi),3):
+                    rel_intersect_x = temp_x1  # later segment is normal/90deg or 270deg relative to the prior segment.
+                    inversion_type = 'line-line orthogonal intersection'
+                else:
+                    rel_m = math.tan(rel_angle / 180 * math.pi)  # calculate gradient of relative segment for y=mx+c
+                    #                rel_m = math.tan(rel_angle)  # calculate gradient of relative segment for y=mx+c in radians.
+                    rel_c = rel_y2 - rel_x2 * rel_m  # calculate y intercept of relative segment for y=mx+c
+                    rel_intersect_x = -rel_c / rel_m  # calculate x intercept. x = -c/m
+                    inversion_type = 'line-line intersecting'
+
+                print('line-line ' + 'inversion_type: ' + str(inversion_type))  # debug
+                df_profile.loc[profile_counter, 'inversion_type'] = inversion_type  # write inversion_type to data frame
+
+                temp_x1, temp_y1 = rotate_axis(-axis_angle, rel_intersect_x, 0)  # undo axis rotation
+                intersect_x, intersect_y = shift_origin(-origin_x, -origin_y, temp_x1, temp_y1)  # undo origin shift
+
+            # -------------------------------
+            # arc - arc intersect
+            # -------------------------------
+            elif prior_segment_type == 'arc' and later_segment_type == 'arc':
+
+                discard, length, discard, discard = line_data(prior_segment_arc_center_x, prior_segment_arc_center_y,
+                                                              later_segment_arc_center_x, later_segment_arc_center_y)
+                print('arc-arc ' + 'length-01: ' + str(length))  # debug
+                print('arc-arc ' + 'prior_segment_r-01: ' + str(prior_segment_r))  # debug
+                print('arc-arc ' + 'later_segment_r-01: ' + str(later_segment_r))  # debug
+
+                # identify possible arc-arc cases
+                if round(length, 4) == round((prior_segment_r + later_segment_r),
+                                             4):  # arc circles are external tangents.
+                    inversion_type = 'arc-arc external tangents'
+                elif round(length, 4) == round(abs(prior_segment_r - later_segment_r),
+                                               4):  # arc circles are internal tangents.
+                    inversion_type = 'arc-arc internal tangents'
+                elif round(length, 4) > round((prior_segment_r + later_segment_r),
+                                              4):  # arc circles are external non-intersecting.
+                    inversion_type = 'arc-arc external non-intersecting'
+                elif round(length, 4) < round(abs(prior_segment_r - later_segment_r),
+                                              4):  # arc circles are internal non-intersecting.
+                    inversion_type = 'arc-arc internal non-intersecting'
+                elif round(length, 4) == 0:  # arc circles are concentric
+                    inversion_type = 'arc-arc concentric'
+                elif round(length, 4) < round((prior_segment_r + later_segment_r),
+                                              4):  # arc circles are intersecting at 2 distinct points
+                    inversion_type = 'arc-arc distinct intersection'
+
+                print('arc-arc ' + 'inversion_type-01: ' + str(inversion_type))  # debug
+                df_profile.loc[profile_counter, 'inversion_type'] = inversion_type  # write inversion_type to data frame
+
+                # assuming that arcs have distinct intersection
+                axis_angle, length_b, discard, discard = line_data(prior_segment_arc_center_x,
+                                                                   prior_segment_arc_center_y,
+                                                                   later_segment_arc_center_x,
+                                                                   later_segment_arc_center_y)  # get parameters using arc to arc center line for reference axis
+                length_c = prior_segment_r
+                length_a = later_segment_r
+                print('arc-arc ' + 'prior_segment_arc_center_x-01: ' + str(prior_segment_arc_center_x))  # ok
+                print('arc-arc ' + 'prior_segment_arc_center_y-01: ' + str(prior_segment_arc_center_y))  # ok
+                print('arc-arc ' + 'later_segment_arc_center_x-01: ' + str(later_segment_arc_center_x))  # ok
+                print('arc-arc ' + 'later_segment_arc_center_y-01: ' + str(later_segment_arc_center_y))  # ok
+
+                print('arc-arc ' + 'length_a-01: ' + str(length_a))  # ok
+                print('arc-arc ' + 'length_b-01: ' + str(length_b))  # ok
+                print('arc-arc ' + 'length_c-01: ' + str(length_c))  # ok
+                print('arc-arc ' + 'axis_angle-01: ' + str(axis_angle))  # ok
+                # Cosine Rule
+                # a^2 = b^2 + c^2 − 2bc cos A
+                # A = cos^-1 [(b^2 + c^2 + a^2)/(2bc)]
+                # Use cosine rule to calculate angle A given lengths a, b, c
+                # Calculate d to find the intersect points
+                # refer to "PRT230721-001 Use Cases"
+                angle_a = math.degrees(math.acos((length_b ** 2 + length_c ** 2 - length_a ** 2) / (
+                            2 * length_b * length_c)))  # calculating angle at corner a using cosine rule
+                rel_y = prior_segment_r * (math.sin((
+                                                                angle_a / 180) * math.pi))  # calculating the y/perpendicular distance of an intersect point from reference axis or prior arc center to later arc center
+                rel_x = prior_segment_r * (math.cos((
+                                                                angle_a / 180) * math.pi))  # calculating the x/parallel distance of an intersect point from reference axis or prior arc center to later arc center
+                #            angle_a = math.acos((length_b**2 + length_c**2 - length_a**2)/(2*length_b*length_c))    # calculating angle at corner a using cosine rule in radians.
+                #            rel_y = prior_segment_r * math.sin(angle_a)     # calculating the y/perpendicular distance of an intersect point from reference axis or prior arc center to later arc center in radians.
+                #            rel_x = prior_segment_r * math.cos(angle_a)     # calculating the x/parallel distance of an intersect point from reference axis or prior arc center to later arc center in radians.
+                print('arc-arc ' + 'rel_y-01: ' + str(rel_y))  # ok
+                print('arc-arc ' + 'angle_a-01: ' + str(angle_a))  # ok
+
+                # determine which side the intersect point lies on relative to the reference axis
+                shifted_x, shifted_y = shift_origin(prior_segment_arc_center_x, prior_segment_arc_center_y,
+                                                    prior_segment_x2,
+                                                    prior_segment_y2)  # shift origin to prior_segment_arc_center
+                rel_prior_segment_x2, rel_prior_segment_y2 = rotate_axis(axis_angle, shifted_x,
+                                                                         shifted_y)  # rotate axis
+
+                if rel_prior_segment_y2 > 0:  # on left/positive side of reference axis
+                    rel_y = rel_y
+                elif rel_prior_segment_y2 < 0:  # on right/negative side of reference axis
+                    rel_y = -rel_y
+
+                print('arc-arc ' + 'rel_y-02: ' + str(rel_y))  # ok
+
+                temp_x1, temp_y1 = rotate_axis(-axis_angle, rel_x, rel_y)  # undo axis rotation
+                intersect_x, intersect_y = shift_origin(-prior_segment_arc_center_x, -prior_segment_arc_center_y,
+                                                        temp_x1, temp_y1)  # undo origin shift
+
+            # -------------------------------
+            # line - arc intersect
+            # -------------------------------
+            elif (prior_segment_type == 'linear' and later_segment_type == 'arc') or (
+                    prior_segment_type == 'arc' and later_segment_type == 'linear'):
+                print('line-arc ' + 'prior_segment_type: ' + str(prior_segment_type))  # ok
+                print('line-arc ' + 'later_segment_type: ' + str(later_segment_type))  # ok
+                if prior_segment_type == 'arc' and later_segment_type == 'linear':  # reverse relationship from arc-line to line-arc to normalize processing
+
+                    segment_swap_flag = True  # set segment_swap_flag
+                    temp_px1 = prior_segment_x1  # assign temp variable
+                    temp_py1 = prior_segment_y1  # assign temp variable
+                    temp_px2 = prior_segment_x2  # assign temp variable
+                    temp_py2 = prior_segment_y2  # assign temp variable
+
+                    temp_lx1 = later_segment_x1  # assign temp variable
+                    temp_ly1 = later_segment_y1  # assign temp variable
+                    temp_lx2 = later_segment_x2  # assign temp variable
+                    temp_ly2 = later_segment_y2  # assign temp variable
+
+                    temp_pr = prior_segment_r  # assign temp variable
+                    temp_pacx = prior_segment_arc_center_x  # assign temp variable
+                    temp_pacy = prior_segment_arc_center_y  # assign temp variable
+
+                    #                temp_lr = later_segment_r     # assign temp variable
+                    #                temp_lacx = lacx = later_segment_arc_center_x     # assign temp variable
+                    #                temp_lacy = later_segment_arc_center_y     # assign temp variable
+
+                    #                prior_segment_x1 = temp_lx1     # exchange prior and later variables
+                    #                prior_segment_y1 = temp_ly1     # exchange prior and later variables
+                    #                prior_segment_x2 = temp_lx2     # exchange prior and later variables
+                    #                prior_segment_y2 = temp_ly2     # exchange prior and later variables
+
+                    #                later_segment_x1 = temp_px1     # exchange prior and later variables
+                    #                later_segment_y1 = temp_py1     # exchange prior and later variables
+                    #                later_segment_x2 = temp_px2     # exchange prior and later variables
+                    #                later_segment_y2 = temp_py2     # exchange prior and later variables
+
+                    prior_segment_x1 = temp_lx2  # exchange prior and later variables
+                    prior_segment_y1 = temp_ly2  # exchange prior and later variables
+                    prior_segment_x2 = temp_lx1  # exchange prior and later variables
+                    prior_segment_y2 = temp_ly1  # exchange prior and later variables
+
+                    later_segment_x1 = temp_px2  # exchange prior and later variables
+                    later_segment_y1 = temp_py2  # exchange prior and later variables
+                    later_segment_x2 = temp_px1  # exchange prior and later variables
+                    later_segment_y2 = temp_py1  # exchange prior and later variables
+
+                    later_segment_r = temp_pr  # exchange prior and later variables
+                    later_segment_arc_center_x = temp_pacx  # exchange prior and later variables
+                    later_segment_arc_center_y = temp_pacy  # exchange prior and later variables
+
+                axis_angle, length, discard, discard = line_data(prior_segment_x1, prior_segment_y1, prior_segment_x2,
+                                                                 prior_segment_y2)  # get parameters using prior line segment for reference axis. refer to "PRT230721-001 Use Cases"
+                temp_x, temp_y = shift_origin(prior_segment_x1, prior_segment_y1, later_segment_arc_center_x,
+                                              later_segment_arc_center_y)  # apply origin shift to prior_segment_x1, prior_segment_y1 as origin
+                rel_arc_x, rel_arc_y = rotate_axis(axis_angle, temp_x,
+                                                   temp_y)  # apply axis rotation. rel_arc_y is the perpendicular distance between the line and center of arc.
+
+                print('\n' + 'rel_arc_y: ' + str(rel_arc_y))  # ok
+
+                if round(abs(rel_arc_y), 4) == round(later_segment_r, 4):  # detect tangential intersect
+                    inversion_type = 'line-arc tangential'
+                    if segment_swap_flag == True:
+                        inversion_type = 'arc-line tangential'
+                if round(abs(rel_arc_y), 4) > round(later_segment_r, 4):  # detect non-contact intersect
+                    inversion_type = 'line-arc non-contact'
+                    if segment_swap_flag == True:
+                        inversion_type = 'arc-line non-contact'
+                if round(abs(rel_arc_y), 4) < round(later_segment_r, 4):  # detect separate and distinct intersect
+                    inversion_type = 'line-arc distinct intersect'
+                    if segment_swap_flag == True:
+                        inversion_type = 'arc-line distinct intersect'
+
+                df_profile.loc[profile_counter, 'inversion_type'] = inversion_type  # write inversion_type to data frame
+                print('\n' + 'inversion_type: ' + str(inversion_type))  # ok
+
+                # Use Pythagoras rule to calculate the intersect point.
+                # refer to "PRT230721-001 Use Cases"
+                half_cord = math.sqrt(later_segment_r ** 2 - rel_arc_y ** 2)
+                rel_intersect_x = rel_arc_x - half_cord
+                print('\n' + 'rel_intersect_x: ' + str(rel_intersect_x))  # ok
+
+                # determine which intersect point to use. near point or far point along the reference axis/line segment from relative origin/line start point
+                # refer to "PRT230721-001 Use Cases"
+                if length < rel_arc_x:  # near point
+                    rel_intersect_x = rel_intersect_x
+                elif length > rel_arc_x:  # far point
+                    rel_intersect_x = rel_intersect_x + half_cord * 2
+
+                print('\n' + 'rel_intersect_x-adj: ' + str(rel_intersect_x))  # ok
+                print('\n' + 'rel_intersect_x (near): ' + str(rel_intersect_x))  # ok
+                print('\n' + 'rel_intersect_x (far): ' + str(rel_intersect_x + half_cord * 2))  # ok
+                rel_intersect_x_far = rel_intersect_x + half_cord * 2
+
+                temp_x1, temp_y1 = rotate_axis(-axis_angle, rel_intersect_x, 0)  # undo axis rotation
+                intersect_x, intersect_y = shift_origin(-prior_segment_x1, -prior_segment_y1, temp_x1,
+                                                        temp_y1)  # undo origin shift
+
+                temp_x1_far, temp_y1_far = rotate_axis(-axis_angle, rel_intersect_x_far, 0)  # undo axis rotation
+                intersect_x_far, intersect_y_far = shift_origin(-prior_segment_x1, -prior_segment_y1, temp_x1_far,
+                                                                temp_y1_far)  # undo origin shift
+                print('\n' + 'intersect_x (far): ' + str(intersect_x_far))  # ok
+                print('intersect_y (far): ' + str(intersect_y_far))  # ok
+
+            print('\n' + 'intersect_x: ' + str(intersect_x))  # ok
+            print('intersect_y: ' + str(intersect_y))  # ok
+            print('\n' + 'intersect_x (near): ' + str(intersect_x))  # ok
+            print('intersect_y (near): ' + str(intersect_y))  # ok
+
+            df_profile.loc[profile_counter - 1, 'end_x_intersect'] = intersect_x  # write intersect x to prior segment
+            df_profile.loc[profile_counter - 1, 'end_y_intersect'] = intersect_y  # write intersect y to prior segment
+            df_profile.loc[profile_counter + 1, 'start_x_intersect'] = intersect_x  # write intersect x to later segment
+            df_profile.loc[profile_counter + 1, 'start_y_intersect'] = intersect_y  # write intersect y to later segment
+
+        if last_row_flag == True or profile_counter == end:  # break while loop if last_row_flag detected or if last row is read.
+            break  # check last_row_flag
+
+        profile_counter = profile_counter + 1  # increment profile counter.
+
+    # -----------------------------------------------------------------------
+    # populate output columns
+    # -----------------------------------------------------------------------
+
+    profile_counter = 0  # initialize counter for profile df
+    rows = len(df_profile)  # number of rows in df_line
+    end = rows - 1  # initialize end counter
+
+    while profile_counter <= end:
+
+        last_row_flag = df_profile.loc[profile_counter, 'last_row_flag']  # get last_row_flag from df_profile dataframe
+        skip_flag = df_profile.loc[profile_counter, 'skip_flag']  # get skip_flag from df_profile dataframe
+        temp_loop_debug('populate output columns')  # debugging statement
+
+        if skip_flag == True:  # if skip_flag = True skip while loop iteration
+            output_comments = df_profile.loc[profile_counter, 'comments']  # get comments from df_profile dataframe
+            df_profile.loc[profile_counter, 'output_comments'] = output_comments  # write output_comments from df_profile dataframe
+            profile_counter = profile_counter + 1  # increment profile counter.
+            continue  # skip while loop iteration
+
+        if on_line_flag == True:
+            output_start_x = df_profile.loc[profile_counter, 'start_x']  # get start_x from df_profile dataframe
+            output_start_y = df_profile.loc[profile_counter, 'start_y']  # get start_y from df_profile dataframe
+            output_end_x = df_profile.loc[profile_counter, 'end_x']  # get end_x from df_profile dataframe
+            output_end_y = df_profile.loc[profile_counter, 'end_y']  # get end_y from df_profile dataframe
+            output_segment = df_profile.loc[profile_counter, 'segment']  # get segment from df_profile dataframe
+            output_rad = df_profile.loc[profile_counter, 'rad']  # get rad from df_profile dataframe
+            output_cw = df_profile.loc[profile_counter, 'cw']  # get cw from df_profile dataframe
+            output_less_180 = df_profile.loc[profile_counter, 'less_180']  # get less_180 from df_profile dataframe
+
+        if on_line_flag == False:
+
+            inversion_type = df_profile.loc[profile_counter, 'inversion_type']  # get inversion_type from df_profile dataframe
+            print('inversion_type: ' + str(inversion_type))
+            intersect_start_flag = df_profile.loc[profile_counter, 'intersect_start_flag']  # get intersect_start_flag from df_profile dataframe
+            intersect_end_flag = df_profile.loc[profile_counter, 'intersect_end_flag']  # get intersect_end_flag from df_profile dataframe
+            #        intersect_start_flag = False      # !!debug !!!
+            #        intersect_end_flag = False      # !!debug !!!
+
+            if intersect_start_flag == True:
+                add_comment(profile_counter, 'start intersect. ')
+                output_start_x = df_profile.loc[profile_counter, 'start_x_intersect']  # get start_x_intersect from df_profile dataframe
+                output_start_y = df_profile.loc[profile_counter, 'start_y_intersect']  # get start_y_intersect from df_profile dataframe
+            else:
+                output_start_x = df_profile.loc[profile_counter, 'start_x_adjusted']  # get start_x from df_profile dataframe
+                output_start_y = df_profile.loc[profile_counter, 'start_y_adjusted']  # get start_y from df_profile dataframe
+
+            if intersect_end_flag == True:
+                add_comment(profile_counter, 'end intersect. ')
+                output_end_x = df_profile.loc[profile_counter, 'end_x_intersect']  # get end_x_intersect from df_profile dataframe
+                output_end_y = df_profile.loc[profile_counter, 'end_y_intersect']  # get end_y_intersect from df_profile dataframe
+            else:
+                output_end_x = df_profile.loc[profile_counter, 'end_x_adjusted']  # get end_x from df_profile dataframe
+                output_end_y = df_profile.loc[profile_counter, 'end_y_adjusted']  # get end_y from df_profile dataframe
+
+            output_segment = df_profile.loc[profile_counter, 'segment']  # get segment from df_profile dataframe
+
+            if output_segment == 'arc':
+                output_rad = df_profile.loc[profile_counter, 'rad_adjusted']  # get rad from df_profile dataframe
+                output_cw = df_profile.loc[profile_counter, 'cw']  # get cw from df_profile dataframe
+                output_less_180 = df_profile.loc[profile_counter, 'less_180']  # get less_180 from df_profile dataframe
+
+        #    temp_text_df_debug(df_profile)  # debug only!!!!!!!!
+
+        #    df_profile.loc[profile_counter, 'output_start_x'] = round(output_start_x, 6)    # write start_x from df_profile dataframe
+        df_profile.loc[profile_counter, 'output_start_x'] = round(output_start_x, 4)  # write start_x from df_profile dataframe
+        df_profile.loc[profile_counter, 'output_start_y'] = round(output_start_y, 4)  # write output_start_y from df_profile dataframe
+        df_profile.loc[profile_counter, 'output_end_x'] = round(output_end_x, 4)  # write output_end_x from df_profile dataframe
+        df_profile.loc[profile_counter, 'output_end_y'] = round(output_end_y, 4)  # write output_end_y from df_profile dataframe
+        df_profile.loc[profile_counter, 'output_segment'] = output_segment  # write output_segment from df_profile datafram
+
+        if output_segment == 'arc':
+            df_profile.loc[profile_counter, 'output_rad'] = round(output_rad, 4)  # write output_rad from df_profile dataframe
+            df_profile.loc[profile_counter, 'output_cw'] = output_cw  # write output_cw from df_profile dataframe
+            df_profile.loc[profile_counter, 'output_less_180'] = output_less_180  # write output_less_180 from df_profile dataframe
+
+        output_comments = df_profile.loc[profile_counter, 'comments']  # get comments from df_profile dataframe
+        df_profile.loc[profile_counter, 'output_comments'] = output_comments  # write output_comments from df_profile dataframe
+
+        if last_row_flag == True or profile_counter == end:  # break while loop if last_row_flag detected or if last row is read.
+            break  # check last_row_flag
+
+        profile_counter = profile_counter + 1  # increment profile counter.
+
+    toolbox_data_frame()
+
+    # creates empty data frame
+    df = pd.DataFrame(np.nan, index=[0],columns=['A', 'B', 'C', 'D'])  # creates empty data frame with indexed rows and labeled columns.
+    print('create data frame')
+    print(str(df) + '\n')
+
+    df.loc[0,:] ='---'
+    print('wrie')
+    print(str(df)+'\n')
+
+    df = df.sort_index().reset_index(drop=True)  # sort rows according to index values and reset to running integers.
+    print('reset index')
+    print(str(df)+'\n')
+
+    df.loc[len(df), :] = ['---']  # create new row at bottom of df with cells containing text: '---'.
+    print('create new row at bottom of df with cells containing text: ---')
+    print(str(df) + '\n')
+
+    debug_df_profile = df_profile.to_markdown(index=False, tablefmt='pipe', colalign=['center'] * len(df_profile.columns))  # tabulate main df !!!!TEMP!!!
+    temp_text_df_debug(df_profile)  # !!!!TEMP!!!
+    return (df_profile, debug_df_profile, return_abort_flag)
+
 # ---------Import Parameters------------
 
 excel_file = 'LOG20220414001 G-code Parameters.xlsx'       # !!!! identify name of excel file to import data from. !!!!
@@ -4560,6 +5563,17 @@ def debug_print_row(df_temp):
     text_debug_temp = str(df_temp)  # convert to text str
     return (text_debug_temp)  # return values
 
+#===========================================================================
+df_import = pd.read_excel(excel_file, 'test case 04', na_filter=False)      # import excel file into dataframe.
+df_temp = df_import.to_markdown(index=False, tablefmt='pipe', colalign=['center']*len(df_import.columns))   # tabulate main df
+print(df_temp)
+tro = False     # line not tro
+df_profile, debug_df_profile, abort_flag = profile_generator(df_import, tro, dia)
+
+exit()
+
+#===========================================================================
+
 # import content of excel file.
 while counter<=last_row:
 
@@ -4587,6 +5601,8 @@ while counter<=last_row:
         text_debug = debug_print_row(row_df) + '\n'  # populate debug row.
         text_debug = indent(text_debug, 0)  # indent text
         write_to_file(name_debug, text_debug)  # write to debug file
+
+
 
         first_x_adjusted, first_y_adjusted, end_x, end_y, cutter_x, cutter_y, text = toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, operation, dia, debug = False)
         write_to_file(name, text)
