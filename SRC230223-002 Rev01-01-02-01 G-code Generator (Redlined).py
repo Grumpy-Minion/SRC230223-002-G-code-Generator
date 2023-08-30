@@ -4984,7 +4984,7 @@ def profile_generator(df_import, tro, dia):
     # Extract the coordinates from the imported dataframe and processes the toolpath.
     # Generates a dataframe populated with coordinates adjusted for offset, convex apexes, disappearing/converging internal arcs.
     # Scans and detects concave apexes, undersized internal arc (i.e. tool dia > arc dia). Sets an abort flag if found.
-    # Refer to "ALG230727-001 Profile Algorithm"
+    # Refer to "ALG230727-001 Profile Generator Algorithm "
     # df_profile, debug_df_profile, detect_abort_flag = profile_generator(df_import, tro, dia)
 
     # ---Variable List---
@@ -5005,9 +5005,9 @@ def profile_generator(df_import, tro, dia):
 
     def temp_text_df_debug(df_profile):
 
-        df_temp = df_profile.to_markdown(index=False, tablefmt='pipe', floatfmt=".6f",colalign=['center'] * len(df_profile.columns))  # format df into table
-        print('\n')
-        print(str(df_temp))
+        df_temp = df_profile.to_markdown(index=False, tablefmt='pipe', floatfmt=".6f",colalign=['center'] * len(df_profile.columns))  # format df into table # debug !!!TEMP!!!
+        print('\n')     # debug !!!TEMP!!!
+        print(str(df_temp))     # debug !!!TEMP!!!
 
         df_profile = df_profile.loc[:, :'output_comments']  # removes all columns up to 'output_comments' columns
         df_temp = df_profile.to_markdown(index=False, tablefmt='pipe', floatfmt=".4f",colalign=['center'] * len(df_profile.columns))  # format df into table
@@ -5019,7 +5019,7 @@ def profile_generator(df_import, tro, dia):
         # ---Description---
         # Extract and format variables of a single row from the data frame to the explicit variable type.
         # returns formatted row of variables.
-        # last_row_flag, x, y, z, arc_seg, rad, cw, less_180 = extract_row(counter, df, tro)
+        # last_row_flag, x, y, z, segment, rad, cw, less_180 = extract_row(counter, df, tro)
 
         # ---Variable List---
         # counter = row counter
@@ -5049,17 +5049,9 @@ def profile_generator(df_import, tro, dia):
         cw = format_data_frame_variable(df, 'cw', counter, debug)  # import clockwise flag.
         less_180 = format_data_frame_variable(df, 'less_180', counter, debug)  # import less_180 flag.
 
-        # set or clear arc_seg flag.
-        if segment == 'linear':
-            arc_seg = False
-        elif segment == 'arc':
-            arc_seg = True
-        else:
-            arc_seg = None
-
         return (last_row_flag, x, y, z, segment, rad, cw, less_180)  # return values
 
-    def temp_loop_debug(title):
+    def temp_loop_debug(title): # debug !!!TEMP!!!
 
         print('\n')
         print(str(title))
@@ -5068,7 +5060,7 @@ def profile_generator(df_import, tro, dia):
         print('last_row_flag: ' + str(last_row_flag))
         print('segment: ' + str(segment))
 
-    def temp_loop_debug_01(title):
+    def temp_loop_debug_01(title): # debug !!!TEMP!!!
 
         print('\n')
         print(str(title))
