@@ -3421,7 +3421,7 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
         return (text_debug_temp)  # return values
 
     # -----------------------------------------------------------------------
-    # Initialize tro flag
+    # 1693393585 Initialize tro flag
     # -----------------------------------------------------------------------
     if operation == 'line':                 # initialize tro flag.
         tro = False                         # line toolpath.
@@ -3431,7 +3431,7 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
         abort('operation', operation)        # invalid operation value detected.
 
     # -----------------------------------------------------------------------
-    # Import data frame and assign static variables
+    # 1693393611 Import data frame and assign static variables
     # -----------------------------------------------------------------------
     df = pd.read_excel(excel_file, sheet_name = sheet, na_filter=False)      # import excel file into dataframe.
     operation_name, offset, feed, safe_z, z_f, mode, step, wos, doc = static_variables(df, tro, debug=False)  # assign static parameters.
@@ -3441,7 +3441,7 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
         print(f'{df}\n')
 
     # -----------------------------------------------------------------------
-    # Write static variables to debug file
+    # 1693393915 Write static variables to debug file
     # -----------------------------------------------------------------------
 
     rows = df.shape[0]      # total number of rows in dataframe.
@@ -3475,7 +3475,7 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
     write_to_file(name_debug, text_debug)   # write to debug file
 
     # -----------------------------------------------------------------------
-    # Initialize variable: effective_wos
+    # 1693393736 Initialize variable: effective_wos
     # -----------------------------------------------------------------------
 
     if tro == True:             # initialize effective width of slot/cutter. Trochodial = wos, single line = tool diameter.
@@ -3484,13 +3484,13 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
         effective_wos = dia     # single line = tool diameter
 
     # -----------------------------------------------------------------------
-    # Generate profile dataframe with profile_generator
+    # 1693393750 Generate profile dataframe with profile_generator
     # -----------------------------------------------------------------------
 
     df_profile, debug_df_profile, detect_abort_flag = profile_generator(df, tro, effective_wos)       # process data frame to generate profile data frame
 
     # -----------------------------------------------------------------------
-    # Initialize variables
+    # 1693393773 Initialize variables
     # -----------------------------------------------------------------------
 
     profile_counter = 0     # initialize counter for profile df
@@ -3548,13 +3548,12 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
         first_z = start_z       # initialize z height of starting point.
 
     # -----------------------------------------------------------------------
-    # Iterative loop to generate G-code from profile data frame row by row
+    # 1693393845 Iterative loop to generate G-code from profile data frame row by row
     # -----------------------------------------------------------------------
-
     while profile_counter <= end:      # recursive loop
 
         # -----------------------------------------------------------------------
-        # Extract variables from row
+        # 1693394015 Extract variables from row
         # -----------------------------------------------------------------------
 
         last_row_flag = df_profile.loc[profile_counter, 'last_row_flag']  # get last_row_flag from df_profile dataframe
@@ -3583,7 +3582,7 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
             end_z = None
 
         # -----------------------------------------------------------------------
-        # Write single row to debug file
+        # 1693394021 Write single row to debug file
         # -----------------------------------------------------------------------
 
         text_debug = debug_print_row(row_df, profile_counter) + '\n\n'  # tabulate single row
@@ -3591,7 +3590,7 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
         write_to_file(name_debug, text_debug)  # write to debug file
 
         # -----------------------------------------------------------------------
-        # skip_flag?
+        # 1693394035 skip_flag?
         # -----------------------------------------------------------------------
 
         if skip_flag == True:       # skip segment. segment inversion.
@@ -3602,7 +3601,7 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
             last_slot = True        # set last_slot = True for trochodial toolpath.
 
         # -----------------------------------------------------------------------
-        # first segment?
+        # 1693394146 first segment?
         # -----------------------------------------------------------------------
 
         if profile_counter == 0:            # first segment
@@ -3612,12 +3611,13 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
             first_y_adjusted = start_y      # first point of the segment.
 
             # -----------------------------------------------------------------------
-            # Start safe_z?
+            # 1693394212 Start safe_z?
             # -----------------------------------------------------------------------
 
             if start_safe_z == True:
 
                 # -----------------------------------------------------------------------
+                # 1693394237
                 # start at safe z.
                 # Generate G-code to move cutter to:
                 # Safe z height.
@@ -3632,6 +3632,7 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
             else:
 
                 # -----------------------------------------------------------------------
+                # 1693394251
                 # Do not start at safe z.
                 # Generate G-code to move cutter to:
                 # Move to start x, y of slot/line at cut_f speed
@@ -3649,7 +3650,7 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
             '''
 
             # -----------------------------------------------------------------------
-            # Set cut_f
+            # 1693394306 Set cut_f
             # -----------------------------------------------------------------------
 
             start_cutter = start_cutter + \
@@ -3659,20 +3660,20 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
             text = text + start_cutter
 
             # -----------------------------------------------------------------------
-            # Trichodial?
+            # 1693394306 Trichodial?
             # -----------------------------------------------------------------------
 
         if tro == False:    # linear toolpath segment
 
             # -----------------------------------------------------------------------
-            # Generate G-Code for straight line.
+            # 1693394426 Generate G-Code for straight line.
             # -----------------------------------------------------------------------
 
             if segment == 'linear':
                 cutter_x, cutter_y, cutter_z, text_temp = line(end_x, end_y, name, feed, end_z)  # print G-code for adjusted line segment.
 
             # -----------------------------------------------------------------------
-            # Generate G-Code for arc.
+            # 1693394433 Generate G-Code for arc.
             # -----------------------------------------------------------------------
 
             elif segment == 'arc':
@@ -3681,45 +3682,45 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
         elif tro == True:       # trochoidal toolpath segment
 
             # -----------------------------------------------------------------------
-            # Generate G-Code for trichodial straight slot.
+            # 1693394459 Generate G-Code for trichodial straight slot.
             # -----------------------------------------------------------------------
 
             if segment == 'linear':
                 discard, discard, cutter_x, cutter_y, text_temp = tro_slot(start_x, start_y, end_x, end_y, step, wos, dia, name, cutter_x, cutter_y, first_slot, last_slot)   # print G-code for adjusted trichodial line segment.
 
             # -----------------------------------------------------------------------
-            # Generate G-Code for trichodial arc.
+            # 1693394449 Generate G-Code for trichodial arc.
             # -----------------------------------------------------------------------
 
             elif segment == 'arc':
                 discard, discard, cutter_x, cutter_y, text_temp = tro_arc(start_x, start_y, end_x, end_y, step, wos, dia, rad, cw, less_180, name, cutter_x, cutter_y, first_slot, last_slot)     # print G-code for adjusted trichodial arc segment.
 
             # -----------------------------------------------------------------------
-            # trichodial first slot = False
+            # 1693394484 trichodial first slot = False
             # -----------------------------------------------------------------------
 
             first_slot = False      # clear first slot flag
 
         # -----------------------------------------------------------------------
-        # Write to text bank
+        # 1693394473 Write to text bank
         # -----------------------------------------------------------------------
 
         text = text + text_temp      # store G-code into a text variable before printing to a text file.
 
         # -----------------------------------------------------------------------
-        # Last segment or break_flag = True?
+        # 1693394582 Last segment or break_flag = True?
         # -----------------------------------------------------------------------
 
         if profile_counter == end or last_row_flag == True:       # detect last row row or last row flag
 
             # -----------------------------------------------------------------------
-            # Go to safe_z?
+            # 1693394623 Go to safe_z?
             # -----------------------------------------------------------------------
 
             if return_safe_z == True:
 
                 # -----------------------------------------------------------------------
-                # Go to safe z
+                # 1693394636 Go to safe z
                 # -----------------------------------------------------------------------
 
                 end_cutter = \
@@ -3728,14 +3729,13 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
                 '''
                 text = text + end_cutter
 
-                # -----------------------------------------------------------------------
-                # End
-                # -----------------------------------------------------------------------
-
+            # -----------------------------------------------------------------------
+            # 1693394998 End
+            # -----------------------------------------------------------------------
             return (first_x_adjusted, first_y_adjusted, end_x, end_y, cutter_x, cutter_y, text)       # last point. exit function.
 
         # -----------------------------------------------------------------------
-        # Increment counter
+        # 1693394594 Increment counter
         # -----------------------------------------------------------------------
 
         profile_counter = profile_counter + 1   # increment counter
@@ -5131,7 +5131,6 @@ def profile_generator(df_import, tro, dia):
     # =======================================================================
     # 1693380113 Construct segments and populate fundamental data in profile data frame
     # =======================================================================
-
     # -----------------------------------------------------------------------
     # 1693380770 Initialize counters
     # -----------------------------------------------------------------------
@@ -5333,16 +5332,22 @@ def profile_generator(df_import, tro, dia):
             vector = vector_angle_start - vector_angle_pre  # calculate change in vector between current segment and segment before
             vector = round(vector, 1)  # round to 1 decimal place to prevent false apex trigger.
             #        vector = round(vector,3)        # round to 3 decimal place to prevent false apex trigger. in radians
-
             if vector < 0:  # calculate absolute angle.
                 #            vector = vector + 360
                 vector = format_angle(vector)  # in radians
-
+            # -----------------------------------------------------------------------
+            # 1693388949 vector == 0 or vector == 360?
+            # 1693389014 clear all apex flags segment. transition is tangent and in same direction
+            # -----------------------------------------------------------------------
             if vector == 0 or vector == 360:  # segment transition is tangent and in same direction
                 #        if vector == 0 or vector == (2*math.pi):  # segment transition is tangent and in same direction. in radians
                 start_concave_apex_flag = False
                 start_convex_apex_flag = False
                 start_inverted_apex_flag = False
+            # -----------------------------------------------------------------------
+            # 1693389076 vector > 0 and vector < 180?
+            # 1693389101 segment transition not tangent. deviates to the left. set start_convex_apex_flag
+            # -----------------------------------------------------------------------
             elif vector > 0 and vector < 180:  # segment transition not tangent. deviates to the left.
                 #        elif vector > 0 and vector < math.pi:  # segment transition not tangent. deviates to the left. in radians
                 if mode == 1:
@@ -5353,6 +5358,10 @@ def profile_generator(df_import, tro, dia):
                     start_concave_apex_flag = True
                     start_convex_apex_flag = False
                     start_inverted_apex_flag = False
+            # -----------------------------------------------------------------------
+            # 1693389483 vector > 180 and vector < 360?
+            # 1693389501 segment transition not tangent. deviates to the right. set start_convex_apex_flag
+            # -----------------------------------------------------------------------
             elif vector > 180 and vector < 360:  # segment transition not tangent. deviates to the right.
                 #        elif vector > math.pi and vector < (2*math.pi):  # segment transition not tangent. deviates to the right. in radians
                 if mode == 1:
@@ -5363,19 +5372,30 @@ def profile_generator(df_import, tro, dia):
                     start_concave_apex_flag = False
                     start_convex_apex_flag = True
                     start_inverted_apex_flag = False
+            # -----------------------------------------------------------------------
+            # 1693389920 vector == 180?
+            # 1693389928 segment transition is tangent but inverted.
+            # -----------------------------------------------------------------------
             elif vector == 180:  # segment transition is tangent but inverted.
                 #        elif vector == math.pi:  # segment transition is tangent but inverted. in radians
                 start_concave_apex_flag = False
                 start_convex_apex_flag = True  # convex apex irregardless mode 1 or 2. i.e. left or right side of travel
                 start_inverted_apex_flag = True
-
+            # -----------------------------------------------------------------------
+            # 1693390144 Concave apex?
+            # 1693390164 Set abort flag
+            # -----------------------------------------------------------------------
             if start_concave_apex_flag == True:
                 abort_flag = True  # set abort_flag. do not allow sharp internal corners
-
+            # -----------------------------------------------------------------------
+            # 1693390262 Write apex flags to data frame
+            # -----------------------------------------------------------------------
             df_profile.loc[profile_counter, 'start_concave_apex_flag'] = start_concave_apex_flag
             df_profile.loc[profile_counter, 'start_convex_apex_flag'] = start_convex_apex_flag
             df_profile.loc[profile_counter, 'start_inverted_apex_flag'] = start_inverted_apex_flag
-
+        # -----------------------------------------------------------------------
+        # 1693390555 scan for undersized arcs. set abort flag if found
+        # -----------------------------------------------------------------------
         segment = df_profile.loc[profile_counter, 'segment']  # read segment
         cw = df_profile.loc[profile_counter, 'cw']  # read cw flag
         rad = df_profile.loc[profile_counter, 'rad']  # read rad flag
@@ -5388,38 +5408,57 @@ def profile_generator(df_import, tro, dia):
                     abort_flag = True
 
             df_profile.loc[profile_counter, 'undersized_internal_arc_flag'] = undersized_internal_arc_flag  # write undersized_internal_arc_flag to df
-
+        # -----------------------------------------------------------------------
+        # 1693390708 Write abort_flag to dataframe
+        # -----------------------------------------------------------------------
         df_profile.loc[profile_counter, 'abort_flag'] = abort_flag  # write abort_flag to df
-
+        # -----------------------------------------------------------------------
+        # 1693390851 last_row_flag or line_counter = end?
+        # -----------------------------------------------------------------------
         if last_row_flag == True or profile_counter == end:  # break while loop if last_row_flag detected or if last row is read.
             break  # check last_row_flag
-
+        # -----------------------------------------------------------------------
+        # 1693390868 Increment profile counter
+        # -----------------------------------------------------------------------
         profile_counter = profile_counter + 1  # increment profile counter.
 
+    # =======================================================================
+    # 1693391503 Insert row at convex apex points
+    # =======================================================================
     # -----------------------------------------------------------------------
-    # insert row at convex apex points
+    # 1693391693 Initialize counters
     # -----------------------------------------------------------------------
     profile_counter = 0  # initialize counter for profile df
     rows = len(df_profile)  # number of rows in df_line
     end = rows - 1  # initialize end counter
+    # -----------------------------------------------------------------------
+    # 1693392360 profile_counter <= end and on_line_flag == False
+    # -----------------------------------------------------------------------
     while profile_counter <= end and on_line_flag == False:
 
-        temp_loop_debug('insert row at convex apex points')  # debug only
-
+        temp_loop_debug('insert row at convex apex points')  # debug only# debug !!!TEMP!!!
+        # -----------------------------------------------------------------------
+        # 1693392444 get start_convex_apex_flag and last_row_flag
+        # -----------------------------------------------------------------------
         start_convex_apex_flag = df_profile.loc[profile_counter, 'start_convex_apex_flag']  # get start_convex_apex_flag from df_profile dataframe
         last_row_flag = df_profile.loc[profile_counter, 'last_row_flag']  # get last_row_flag from df_profile dataframe
-
-        #    print('start_convex_apex_flag: ' + str(start_convex_apex_flag))
+        # -----------------------------------------------------------------------
+        # 1693392522 start_convex_apex_flag?
+        # -----------------------------------------------------------------------
         if start_convex_apex_flag == True:
-
+            # -----------------------------------------------------------------------
+            # 1693392652 insert new row into df at apex point
+            # -----------------------------------------------------------------------
             temp_counter = (profile_counter - 1) + 0.1
-            print('temp_counter: ' + str(temp_counter))
+            print('temp_counter: ' + str(temp_counter)) # debug !!!TEMP!!!
             df_profile.loc[temp_counter, :] = '---'  # create new row, index: profile_counter+0.1 with cells containing text: '---'. to be later reindexed to be inserted before apex row.
             df_profile.loc[temp_counter, 'last_row_flag'] = False  # clear last_row_flag
             df_profile.loc[temp_counter, 'transition_arc_flag'] = True  # set transition_arc_flag
             df_profile.loc[temp_counter, 'segment'] = 'arc'  # set segment type to arc
             add_comment(temp_counter, 'transition arc. ')  # add comment to comments column
-
+            # -----------------------------------------------------------------------
+            # 1693392726 add parameters of transition arc in df
+            # -----------------------------------------------------------------------
             if mode == 2:
                 df_profile.loc[temp_counter, 'cw'] = True  # set cw to True. cutter travel on left hand side of profile will always make a cw arc.
             elif mode == 1:
@@ -5427,12 +5466,16 @@ def profile_generator(df_import, tro, dia):
             df_profile.loc[temp_counter, 'less_180'] = True  # transition arc will always be acute. impossible to be obtuse.
             df_profile.loc[temp_counter, 'arc_center_x'] = df_profile.loc[profile_counter, 'start_x']  # x coordinate of center of arc
             df_profile.loc[temp_counter, 'arc_center_y'] = df_profile.loc[profile_counter, 'start_y']  # y coordinate of center of arc
-
+        # -----------------------------------------------------------------------
+        # 1693393126 last_row_flag or line_counter = end?
+        # -----------------------------------------------------------------------
         if last_row_flag == True or profile_counter == end:  # break while loop if last_row_flag detected or if last row is read.
             df_profile = df_profile.sort_index().reset_index(drop=True)  # sort rows according to index values and reset to running integers.
             df_profile.loc[:, '#'] = df_profile.index  # copy index column to # column
             break  # check last_row_flag
-
+        # -----------------------------------------------------------------------
+        # 1693393161 Increment profile counter
+        # -----------------------------------------------------------------------
         profile_counter = profile_counter + 1  # increment profile counter.
 
     # -----------------------------------------------------------------------
