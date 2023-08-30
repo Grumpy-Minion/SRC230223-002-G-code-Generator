@@ -3383,41 +3383,6 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
 
         return (operation_name, offset, feed, safe_z, z_f, mode, step, wos, doc)  # return values
 
-    def extract_row(counter, debug=False):
-        # ---Description---
-        # Extract and format variables of a single row from the data frame to the explicit variable type.
-        # returns formatted row of variables.
-        # last_row_flag, x, y, z, arc_seg, rad, cw, less_180 = extract_row(counter)
-
-        # ---Variable List---
-        # counter = row counter
-
-        # ---Return Variable List---
-        last_row_flag = format_data_frame_variable(df, 'last_row_flag', counter, debug)  # import last_row_flag value.
-        x = format_data_frame_variable(df, 'x', counter, debug)  # import x value.
-        y = format_data_frame_variable(df, 'y', counter, debug)  # import y value.
-        x, y = shift(x, y, shift_x, shift_y)   # add shift to x, y value.
-
-        if tro == False:
-            z = format_data_frame_variable(df, 'z', counter, debug)  # import z value if line toolpath.
-        elif tro == True:
-            z = None         # null z value if trochoidal toolpath.
-
-        segment = format_data_frame_variable(df, 'segment', counter, debug)  # import segment value.
-        rad = format_data_frame_variable(df, 'rad', counter, debug)  # import radius.
-        cw = format_data_frame_variable(df, 'cw', counter, debug)  # import clockwise flag.
-        less_180 = format_data_frame_variable(df, 'less_180', counter, debug)  # import less_180 flag.
-
-        # set or clear arc_seg flag.
-        if segment == 'linear':
-            arc_seg = False
-        elif segment == 'arc':
-            arc_seg = True
-        else:
-            arc_seg = None
-
-        return (last_row_flag, x, y, z, arc_seg, rad, cw, less_180)  # return values
-
     def debug_print_row(df_temp, counter):
         # ---Description---
         # Tabulates single, current row to text format.
@@ -3455,6 +3420,9 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
         text_debug_temp = str(df_temp)       # convert to text str
         return (text_debug_temp)  # return values
 
+    # -----------------------------------------------------------------------
+    # Initialize tro flag
+    # -----------------------------------------------------------------------
     if operation == 'line':                 # initialize tro flag.
         tro = False                         # line toolpath.
     elif operation == 'trochoidal':
@@ -3462,12 +3430,19 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
     else:
         abort('operation', operation)        # invalid operation value detected.
 
+    # -----------------------------------------------------------------------
+    # Import data frame and assign static variables
+    # -----------------------------------------------------------------------
     df = pd.read_excel(excel_file, sheet_name = sheet, na_filter=False)      # import excel file into dataframe.
     operation_name, offset, feed, safe_z, z_f, mode, step, wos, doc = static_variables(df, tro, debug=False)  # assign static parameters.
     df = pd.read_excel(excel_file, sheet_name = sheet, na_filter=False)      # reimport excel file into dataframe. !!! workaround for restoring index.!!!
 
     if debug == True:       # debug
         print(f'{df}\n')
+
+    # -----------------------------------------------------------------------
+    # Write static variables to debug file
+    # -----------------------------------------------------------------------
 
     rows = df.shape[0]      # total number of rows in dataframe.
 
@@ -3499,12 +3474,24 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
     text_debug = text_debug + '\n\n'        # spacing
     write_to_file(name_debug, text_debug)   # write to debug file
 
+    # -----------------------------------------------------------------------
+    # Initialize variable: effective_wos
+    # -----------------------------------------------------------------------
+
     if tro == True:             # initialize effective width of slot/cutter. Trochodial = wos, single line = tool diameter.
         effective_wos = wos     # Trochodial = wos
     else:
         effective_wos = dia     # single line = tool diameter
 
+    # -----------------------------------------------------------------------
+    # Generate profile dataframe with profile_generator
+    # -----------------------------------------------------------------------
+
     df_profile, debug_df_profile, detect_abort_flag = profile_generator(df, tro, effective_wos)       # process data frame to generate profile data frame
+
+    # -----------------------------------------------------------------------
+    # Initialize variables
+    # -----------------------------------------------------------------------
 
     profile_counter = 0     # initialize counter for profile df
     profile_rows = len(df_profile)  # number of rows in df_line
@@ -3512,7 +3499,7 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
 
     row_df = debug_single_row_df(debug_df_profile)  # initialize single row data frame.
 
-    last_row_flag = df_profile.loc[profile_counter, 'last_row_flag']  # get last_row_flag from df_profile dataframe
+    '''    last_row_flag = df_profile.loc[profile_counter, 'last_row_flag']  # get last_row_flag from df_profile dataframe
     skip_flag = df_profile.loc[profile_counter, 'skip_flag']  # get skip_flag from df_profile dataframe
     abort_flag = df_profile.loc[profile_counter, 'abort_flag']  # get abort_flag from df_profile dataframe
     start_x = df_profile.loc[profile_counter, 'output_start_x']  # get output_start_x type from df_profile dataframe
@@ -3529,7 +3516,7 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
         start_z = None
     end_z = df_profile.loc[profile_counter, 'output_end_z']  # get output_end_z value from df_profile dataframe
     if end_z == '---':    # if value = '---' convert to None
-        end_z = None
+        end_z = None'''
 
     start_block = \
     f'''
@@ -3551,12 +3538,24 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
     first_slot = True           # initialize trochodial first slot
     last_slot = False           # initialize trochodial last slot
 
+    start_z = df_profile.loc[0, 'output_start_z']  # get first (row 0)output_start_z value from df_profile dataframe
+    if start_z == '---':  # if value = '---' convert to None
+        start_z = None
+
     if tro == True:             # initialize effective width of slot. Trochodial = wos, single line = tool diameter.
         first_z = doc           # initialize z height of starting point.
     else:
         first_z = start_z       # initialize z height of starting point.
 
+    # -----------------------------------------------------------------------
+    # Iterative loop to generate G-code from profile data frame row by row
+    # -----------------------------------------------------------------------
+
     while profile_counter <= end:      # recursive loop
+
+        # -----------------------------------------------------------------------
+        # Extract variables from row
+        # -----------------------------------------------------------------------
 
         last_row_flag = df_profile.loc[profile_counter, 'last_row_flag']  # get last_row_flag from df_profile dataframe
         skip_flag = df_profile.loc[profile_counter, 'skip_flag']  # get skip_flag from df_profile dataframe
@@ -3583,9 +3582,17 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
             start_z = None
             end_z = None
 
+        # -----------------------------------------------------------------------
+        # Write single row to debug file
+        # -----------------------------------------------------------------------
+
         text_debug = debug_print_row(row_df, profile_counter) + '\n\n'  # tabulate single row
         text_debug = indent(text_debug, 8)
         write_to_file(name_debug, text_debug)  # write to debug file
+
+        # -----------------------------------------------------------------------
+        # skip_flag?
+        # -----------------------------------------------------------------------
 
         if skip_flag == True:       # skip segment. segment inversion.
             profile_counter = profile_counter + 1  # increment profile counter.
@@ -3594,17 +3601,43 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
         if profile_counter == end or last_row_flag == True:
             last_slot = True        # set last_slot = True for trochodial toolpath.
 
+        # -----------------------------------------------------------------------
+        # first segment?
+        # -----------------------------------------------------------------------
+
         if profile_counter == 0:            # first segment
             cutter_x = start_x              # initialize cutter position at first adjusted position.
             cutter_y = start_y              # initialize cutter position at first adjusted position.
             first_x_adjusted = start_x      # first point of the segment.
             first_y_adjusted = start_y      # first point of the segment.
+
+            # -----------------------------------------------------------------------
+            # Start safe_z?
+            # -----------------------------------------------------------------------
+
             if start_safe_z == True:
+
+                # -----------------------------------------------------------------------
+                # start at safe z.
+                # Generate G-code to move cutter to:
+                # Safe z height.
+                # Rapid to start x, y of slot/line.
+                # Plunge to cutting z height.
+                # -----------------------------------------------------------------------
+
                 start_cutter = \
             f'''G0 Z{"%.4f" % safe_z}				(Rapid to safe height)
             G0 X{"%.4f" % first_x_adjusted} Y{"%.4f" % first_y_adjusted}                 (Rapid to start point)
             '''
             else:
+
+                # -----------------------------------------------------------------------
+                # Do not start at safe z.
+                # Generate G-code to move cutter to:
+                # Move to start x, y of slot/line at cut_f speed
+                # Plunge to cutting z height.
+                # -----------------------------------------------------------------------
+
                 start_cutter = \
             f'''G1 X{"%.4f" % first_x_adjusted} Y{"%.4f" % first_y_adjusted} F{feed}                 (move at cut_f to start point)
             '''
@@ -3614,35 +3647,96 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
             f'''
             G1 Z{"%.4f" % first_z}	F{"%.4f" % z_f}			(Plunge to cutting height)
             '''
+
+            # -----------------------------------------------------------------------
+            # Set cut_f
+            # -----------------------------------------------------------------------
+
             start_cutter = start_cutter + \
             f'''
             F{feed}     (set cutting feed)
             '''
             text = text + start_cutter
 
+            # -----------------------------------------------------------------------
+            # Trichodial?
+            # -----------------------------------------------------------------------
+
         if tro == False:    # linear toolpath segment
+
+            # -----------------------------------------------------------------------
+            # Generate G-Code for straight line.
+            # -----------------------------------------------------------------------
+
             if segment == 'linear':
                 cutter_x, cutter_y, cutter_z, text_temp = line(end_x, end_y, name, feed, end_z)  # print G-code for adjusted line segment.
+
+            # -----------------------------------------------------------------------
+            # Generate G-Code for arc.
+            # -----------------------------------------------------------------------
+
             elif segment == 'arc':
                 cutter_x, cutter_y, cutter_z, text_temp = arc(end_x, end_y, name, rad, cw, less_180, feed, end_z)  # print G-code for adjusted arc segment.
+
         elif tro == True:       # trochoidal toolpath segment
+
+            # -----------------------------------------------------------------------
+            # Generate G-Code for trichodial straight slot.
+            # -----------------------------------------------------------------------
+
             if segment == 'linear':
                 discard, discard, cutter_x, cutter_y, text_temp = tro_slot(start_x, start_y, end_x, end_y, step, wos, dia, name, cutter_x, cutter_y, first_slot, last_slot)   # print G-code for adjusted trichodial line segment.
+
+            # -----------------------------------------------------------------------
+            # Generate G-Code for trichodial arc.
+            # -----------------------------------------------------------------------
+
             elif segment == 'arc':
                 discard, discard, cutter_x, cutter_y, text_temp = tro_arc(start_x, start_y, end_x, end_y, step, wos, dia, rad, cw, less_180, name, cutter_x, cutter_y, first_slot, last_slot)     # print G-code for adjusted trichodial arc segment.
+
+            # -----------------------------------------------------------------------
+            # trichodial first slot = False
+            # -----------------------------------------------------------------------
+
             first_slot = False      # clear first slot flag
+
+        # -----------------------------------------------------------------------
+        # Write to text bank
+        # -----------------------------------------------------------------------
 
         text = text + text_temp      # store G-code into a text variable before printing to a text file.
 
+        # -----------------------------------------------------------------------
+        # Last segment or break_flag = True?
+        # -----------------------------------------------------------------------
+
         if profile_counter == end or last_row_flag == True:       # detect last row row or last row flag
+
+            # -----------------------------------------------------------------------
+            # Go to safe_z?
+            # -----------------------------------------------------------------------
+
             if return_safe_z == True:
+
+                # -----------------------------------------------------------------------
+                # Go to safe z
+                # -----------------------------------------------------------------------
+
                 end_cutter = \
                 f'''
                 G0 Z{"%.4f" % safe_z}				(Rapid to safe height)
                 '''
                 text = text + end_cutter
 
+                # -----------------------------------------------------------------------
+                # End
+                # -----------------------------------------------------------------------
+
             return (first_x_adjusted, first_y_adjusted, end_x, end_y, cutter_x, cutter_y, text)       # last point. exit function.
+
+        # -----------------------------------------------------------------------
+        # Increment counter
+        # -----------------------------------------------------------------------
 
         profile_counter = profile_counter + 1   # increment counter
 
