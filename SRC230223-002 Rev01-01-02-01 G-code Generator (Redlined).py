@@ -3470,9 +3470,6 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
         print(f'{df}\n')
 
     rows = df.shape[0]      # total number of rows in dataframe.
-#    last_row = rows - 1     # initialize number of last row
-#    counter = 0             # initialize counter
-#    row_df = debug_single_row_df(df)    # initialize single row data frame.
 
     text_debug = debug_print_table(df, operation, sheet, rows)    # print dataframe as read from excel file
     text_debug = indent(text_debug, 8)  # indent spacing
@@ -3510,8 +3507,8 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
     df_profile, debug_df_profile, detect_abort_flag = profile_generator(df, tro, effective_wos)       # process data frame to generate profile data frame
 
     profile_counter = 0     # initialize counter for profile df
-    rows = len(df_profile)  # number of rows in df_line
-    end = rows - 1          # initialize end counter
+    profile_rows = len(df_profile)  # number of rows in df_line
+    end = profile_rows - 1          # initialize end counter
 
     row_df = debug_single_row_df(debug_df_profile)  # initialize single row data frame.
 
@@ -3551,10 +3548,8 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
     '''
 
     text = start_block          # initialize text
-
     first_slot = True           # initialize trochodial first slot
     last_slot = False           # initialize trochodial last slot
-#    rad_adjusted = None         # Initialize
 
     if tro == True:             # initialize effective width of slot. Trochodial = wos, single line = tool diameter.
         first_z = doc           # initialize z height of starting point.
@@ -3579,11 +3574,10 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
         start_z = df_profile.loc[profile_counter, 'output_start_z']  # get output_start_z value from df_profile dataframe
         if start_z == '---':  # if value = '---' convert to None
             start_z = None
+
         end_z = df_profile.loc[profile_counter, 'output_end_z']  # get output_end_z value from df_profile dataframe
         if end_z == '---':  # if value = '---' convert to None
             end_z = None
-
-#        print('transition_arc_flag: ' + str(transition_arc_flag))
 
         if transition_arc_flag == True:     # do not change z height during transition arc.
             start_z = None
@@ -3630,7 +3624,6 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
             if segment == 'linear':
                 cutter_x, cutter_y, cutter_z, text_temp = line(end_x, end_y, name, feed, end_z)  # print G-code for adjusted line segment.
             elif segment == 'arc':
-#                print('end_z: ' + str(end_z))
                 cutter_x, cutter_y, cutter_z, text_temp = arc(end_x, end_y, name, rad, cw, less_180, feed, end_z)  # print G-code for adjusted arc segment.
         elif tro == True:       # trochoidal toolpath segment
             if segment == 'linear':
@@ -3649,13 +3642,9 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
                 '''
                 text = text + end_cutter
 
-#            text = text + text_temp
-
             return (first_x_adjusted, first_y_adjusted, end_x, end_y, cutter_x, cutter_y, text)       # last point. exit function.
 
-        profile_counter = profile_counter + 1                   # increment counter
-
-#        last_row_flag, end_x, end_y, end_z, arc_seg, rad, cw, less_180 = extract_row(counter)
+        profile_counter = profile_counter + 1   # increment counter
 
 def parameters_data_frame(excel_file, sheet):
     # ---Description---
@@ -6010,17 +5999,6 @@ def debug_print_row(df_temp):
     df_temp = df_temp.to_markdown(index=False, tablefmt='pipe', colalign=['center'] * len(df_temp.columns))  # tabulate df in txt format
     text_debug_temp = str(df_temp)  # convert to text str
     return (text_debug_temp)  # return values
-
-#===========================================================================
-#df_import = pd.read_excel(excel_file, 'test case 04', na_filter=False)      # import excel file into dataframe.
-#df_temp = df_import.to_markdown(index=False, tablefmt='pipe', colalign=['center']*len(df_import.columns))   # tabulate main df
-#print(df_temp)
-#tro = False     # line not tro
-#df_profile, debug_df_profile, abort_flag = profile_generator(df_import, tro, dia)
-
-#exit()
-
-#===========================================================================
 
 # import content of excel file.
 while counter<=last_row:
