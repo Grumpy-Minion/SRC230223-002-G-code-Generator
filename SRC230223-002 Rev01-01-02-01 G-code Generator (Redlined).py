@@ -1130,6 +1130,14 @@ def tro_slot(start_x, start_y, end_x, end_y, step, wos, dia, name, cutter_x, cut
    # text = G-code text
    
    # ---Change History---
+   #
+   # rev: 01-01-02-01
+   # decreased the snesitivity of acutal cutter starting point and desired starting point for non-first trochoidal transitions.
+   # changed from:
+   #         if (delta_x > 0.0001) or (delta_y > 0.0001):       # if cutter not at start point reorient else skip.
+   # to:
+   #         if (delta_x > 0.0005) or (delta_y > 0.0005):       # if cutter not at start point reorient else skip.
+   #
    # rev: 01-01-10-09
    # changed label and names from "trichoidal" to "trochoidal" and "tri" to "tro"
    #
@@ -1259,7 +1267,7 @@ def tro_slot(start_x, start_y, end_x, end_y, step, wos, dia, name, cutter_x, cut
             else:                                           # reorient cutter to starting point of slot.
                 delta_x = abs(x1 - cutter_x)
                 delta_y = abs(y1 - cutter_y)
-                if (delta_x > 0.0001) or (delta_y > 0.0001):       # if cutter is at start point skip else reorient.
+                if (delta_x > 0.0005) or (delta_y > 0.0005):       # if cutter is at start point skip else reorient.
                     line_1 = \
     f'''
     G03 X{"%.4f" % x1} Y{"%.4f" % y1} I{"%.4f" % (start_x-cutter_x)} J{"%.4f" % (start_y-cutter_y)}
@@ -1349,6 +1357,14 @@ def tro_arc(start_x, start_y, end_x, end_y, step, wos, dia, rad_slot, cw, less_1
    # text = G-code text
 
     # ---Change History---
+    #
+    # rev: 01-01-02-01
+    # decreased the snesitivity of acutal cutter starting point and desired starting point for non-first trochoidal transitions.
+    # changed from:
+    #         if (delta_x > 0.0001) or (delta_y > 0.0001):       # if cutter not at start point reorient else skip.
+    # to:
+    #         if (delta_x > 0.0005) or (delta_y > 0.0005):       # if cutter not at start point reorient else skip.
+    #
     # rev: 01-01-10-09
     # changed label and names from "trichoidal" to "trochoidal" and "tri" to "tro"
     #
@@ -1540,7 +1556,7 @@ def tro_arc(start_x, start_y, end_x, end_y, step, wos, dia, rad_slot, cw, less_1
     elif first_slot == False:   # reorient cutter to starting point of slot if this is not first slot. assumes cutter is along circumference of slot.
         delta_x = abs(x1 - cutter_x)
         delta_y = abs(y1 - cutter_y)
-        if (delta_x > 0.0001) or (delta_y > 0.0001):       # if cutter not at start point reorient else skip.
+        if (delta_x > 0.0005) or (delta_y > 0.0005):       # if cutter not at start point reorient else skip.
 
             #determine if angle between current/now cutter position and first position (x1, y1) is acute or obtuse
             temp_angle_now = absolute_angle(start_x, start_y, cutter_x, cutter_y)
@@ -2725,7 +2741,7 @@ def format_data_frame_variable(df, var_name, row, debug=False):
             return True
         except ValueError:
             return False
-
+#    var_raw =df.loc[row, var_name] # alternative way to import variable from dataframe
     var_raw = df[var_name][row]  # import variable from dataframe
     var_raw = str(var_raw)  # convert imported variable to string.
 
@@ -3402,10 +3418,10 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
 
         return (last_row_flag, x, y, z, arc_seg, rad, cw, less_180)  # return values
 
-    def debug_print_row(df_temp, counter, tro):
+    def debug_print_row(df_temp, counter):
         # ---Description---
         # Tabulates single, current row to text format.
-        # text_debug_temp = debug_print_row(df_temp, counter, tro)
+        # text_debug_temp = debug_print_row(df_temp, counter)
 
         # ---Variable List---
         # df_temp = data frame
@@ -3419,23 +3435,18 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
 
         df_temp.at[0, '#'] = counter  # write counter to # column
         df_temp.at[0, 'last_row_flag'] = last_row_flag
-        df_temp.at[0, 'x'] = df.at[counter, 'x']
-        df_temp.at[0, 'y'] = df.at[counter, 'y']
-        if tro == False:
-            df_temp.at[0, 'z'] = df.at[counter, 'z']
-        df_temp.at[0, 'segment'] = segment_debug
-        df_temp.at[0, 'rad'] = rad
-        df_temp.at[0, 'cw'] = cw
-        df_temp.at[0, 'less_180'] = less_180
-        df_temp.at[0, 'comments'] = df.at[counter, 'comments']
-        if counter == 0:
-            temp_x = start_x
-            temp_y = start_y
-        else:
-            temp_x = end_x
-            temp_y = end_y
-        df_temp.at[0, 'adjusted_x'] = temp_x
-        df_temp.at[0, 'adjusted_y'] = temp_y
+        df_temp.at[0, 'skip_flag'] = skip_flag
+        df_temp.at[0, 'abort_flag'] = abort_flag
+        df_temp.at[0, 'output_start_x'] = start_x
+        df_temp.at[0, 'output_start_y'] = start_y
+        df_temp.at[0, 'output_start_z'] = start_z
+        df_temp.at[0, 'output_end_x'] = end_x
+        df_temp.at[0, 'output_end_y'] = end_y
+        df_temp.at[0, 'output_end_z'] = end_z
+        df_temp.at[0, 'output_segment'] = segment
+        df_temp.at[0, 'output_rad'] = rad
+        df_temp.at[0, 'output_cw'] = cw
+        df_temp.at[0, 'output_less_180'] = less_180
         df_temp.at[0, 'shift_x'] = shift_x
         df_temp.at[0, 'shift_y'] = shift_y
         df_temp.at[0, 'repeat_flag'] = repeat_flag
@@ -3459,9 +3470,9 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
         print(f'{df}\n')
 
     rows = df.shape[0]      # total number of rows in dataframe.
-    last_row = rows - 1     # initialize number of last row
-    counter = 0             # initialize counter
-    row_df = debug_single_row_df(df)    # initialize single row data frame.
+#    last_row = rows - 1     # initialize number of last row
+#    counter = 0             # initialize counter
+#    row_df = debug_single_row_df(df)    # initialize single row data frame.
 
     text_debug = debug_print_table(df, operation, sheet, rows)    # print dataframe as read from excel file
     text_debug = indent(text_debug, 8)  # indent spacing
@@ -3487,33 +3498,41 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
 
     df_temp = df_temp.to_markdown(index=False, tablefmt='pipe', colalign=['center'] * len(df_temp.columns))  # tabulate dataframe
     text_debug = str(df_temp)
-    text_debug = indent(text_debug, 8)  # indent spacing
-    text_debug = text_debug + '\n\n'  # spacing
-    write_to_file(name_debug, text_debug)  # write to debug file
+    text_debug = indent(text_debug, 8)      # indent spacing
+    text_debug = text_debug + '\n\n'        # spacing
+    write_to_file(name_debug, text_debug)   # write to debug file
 
-    #===================
-    print('exit OK')
-    exit()
-    #===================
+    if tro == True:             # initialize effective width of slot/cutter. Trochodial = wos, single line = tool diameter.
+        effective_wos = wos     # Trochodial = wos
+    else:
+        effective_wos = dia     # single line = tool diameter
 
-    # initialize parameters
-    last_row_flag, start_x, start_y, start_z, arc_seg, rad, cw, less_180 = extract_row(counter)  # extract row 0 values.
+    df_profile, debug_df_profile, detect_abort_flag = profile_generator(df, tro, effective_wos)       # process data frame to generate profile data frame
 
-    skip_debug = False  # initialize
-    if arc_seg == False:
-        segment_debug = 'linear'
-    elif arc_seg == True:
-        segment_debug = 'arc'
-    elif arc_seg == None:
-        segment_debug = 'None'
+    profile_counter = 0     # initialize counter for profile df
+    rows = len(df_profile)  # number of rows in df_line
+    end = rows - 1          # initialize end counter
 
-        text_debug = debug_print_row(row_df, counter, tro)  # tabulate single row
-        text_debug = indent(text_debug, 8)  # indent table
-        text_debug = text_debug + '\n\n'  # spacing
-        write_to_file(name_debug, text_debug)  # write to debug file
+    row_df = debug_single_row_df(debug_df_profile)  # initialize single row data frame.
 
-    counter = counter + 1                                           # increment counter
-    last_row_flag, end_x, end_y, end_z, arc_seg, rad, cw, less_180 = extract_row(counter)  # extract row 1 values.
+    last_row_flag = df_profile.loc[profile_counter, 'last_row_flag']  # get last_row_flag from df_profile dataframe
+    skip_flag = df_profile.loc[profile_counter, 'skip_flag']  # get skip_flag from df_profile dataframe
+    abort_flag = df_profile.loc[profile_counter, 'abort_flag']  # get abort_flag from df_profile dataframe
+    start_x = df_profile.loc[profile_counter, 'output_start_x']  # get output_start_x type from df_profile dataframe
+    start_y = df_profile.loc[profile_counter, 'output_start_y']  # get output_start_y value from df_profile dataframe
+    end_x = df_profile.loc[profile_counter, 'output_end_x']  # get output_end_x value from df_profile dataframe
+    end_y = df_profile.loc[profile_counter, 'output_end_y']  # get output_end_y value from df_profile dataframe
+    segment = df_profile.loc[profile_counter, 'output_segment']  # get output_segment value from df_profile dataframe
+    rad = df_profile.loc[profile_counter, 'output_rad']  # get rad value from df_profile dataframe
+    cw = df_profile.loc[profile_counter, 'output_cw']  # get cw value from df_profile dataframe
+    less_180 = df_profile.loc[profile_counter, 'output_less_180']  # get less_180 value from df_profile dataframe
+
+    start_z = df_profile.loc[profile_counter, 'output_start_z']  # get output_start_z value from df_profile dataframe
+    if start_z == '---':    # if value = '---' convert to None
+        start_z = None
+    end_z = df_profile.loc[profile_counter, 'output_end_z']  # get output_end_z value from df_profile dataframe
+    if end_z == '---':    # if value = '---' convert to None
+        end_z = None
 
     start_block = \
     f'''
@@ -3535,49 +3554,57 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
 
     first_slot = True           # initialize trochodial first slot
     last_slot = False           # initialize trochodial last slot
-    end_x_adjusted_pre = None   # Initialize
-    end_y_adjusted_pre = None   # Initialize
-    rad_adjusted = None         # Initialize
+#    rad_adjusted = None         # Initialize
 
     if tro == True:             # initialize effective width of slot. Trochodial = wos, single line = tool diameter.
-        effective_wos = wos
         first_z = doc           # initialize z height of starting point.
     else:
-        effective_wos = dia
         first_z = start_z       # initialize z height of starting point.
 
-    while counter <= last_row:      # recursive loop
+    while profile_counter <= end:      # recursive loop
 
-        if skip_debug == False:  # skip if True.
+        last_row_flag = df_profile.loc[profile_counter, 'last_row_flag']  # get last_row_flag from df_profile dataframe
+        skip_flag = df_profile.loc[profile_counter, 'skip_flag']  # get skip_flag from df_profile dataframe
+        abort_flag = df_profile.loc[profile_counter, 'abort_flag']  # get abort_flag from df_profile dataframe
+        start_x = df_profile.loc[profile_counter, 'output_start_x']  # get output_start_x type from df_profile dataframe
+        start_y = df_profile.loc[profile_counter, 'output_start_y']  # get output_start_y value from df_profile dataframe
+        end_x = df_profile.loc[profile_counter, 'output_end_x']  # get output_end_x value from df_profile dataframe
+        end_y = df_profile.loc[profile_counter, 'output_end_y']  # get output_end_y value from df_profile dataframe
+        segment = df_profile.loc[profile_counter, 'output_segment']  # get output_segment value from df_profile dataframe
+        rad = df_profile.loc[profile_counter, 'output_rad']  # get rad value from df_profile dataframe
+        cw = df_profile.loc[profile_counter, 'output_cw']  # get cw value from df_profile dataframe
+        less_180 = df_profile.loc[profile_counter, 'output_less_180']  # get less_180 value from df_profile dataframe
+        transition_arc_flag = df_profile.loc[profile_counter, 'transition_arc_flag']  # get transition_arc_flag value from df_profile dataframe
 
-            if arc_seg == False:
-                segment_debug = 'linear'
-            elif arc_seg == True:
-                segment_debug = 'arc'
-            elif arc_seg == None:
-                segment_debug = 'None'
+        start_z = df_profile.loc[profile_counter, 'output_start_z']  # get output_start_z value from df_profile dataframe
+        if start_z == '---':  # if value = '---' convert to None
+            start_z = None
+        end_z = df_profile.loc[profile_counter, 'output_end_z']  # get output_end_z value from df_profile dataframe
+        if end_z == '---':  # if value = '---' convert to None
+            end_z = None
 
-            text_debug = debug_print_row(row_df, counter, tro) + '\n\n'  # tabulate single row
-            text_debug = indent(text_debug, 8)
-            write_to_file(name_debug, text_debug)  # write to debug file
+#        print('transition_arc_flag: ' + str(transition_arc_flag))
 
-#        elif skip_debug == True:
-#            skip_debug = False      # reset flag.
+        if transition_arc_flag == True:     # do not change z height during transition arc.
+            start_z = None
+            end_z = None
 
-        if counter == last_row or last_row_flag == True:
+        text_debug = debug_print_row(row_df, profile_counter) + '\n\n'  # tabulate single row
+        text_debug = indent(text_debug, 8)
+        write_to_file(name_debug, text_debug)  # write to debug file
+
+        if skip_flag == True:       # skip segment. segment inversion.
+            profile_counter = profile_counter + 1  # increment profile counter.
+            continue  # skip loop iteration.
+
+        if profile_counter == end or last_row_flag == True:
             last_slot = True        # set last_slot = True for trochodial toolpath.
 
-        if arc_seg == False:        # straight line segment
-            start_x_adjusted, start_y_adjusted, end_x_adjusted, end_y_adjusted = linear_offset_adjustment(effective_wos, offset, start_x, start_y,end_x, end_y, mode)     # adjust line for offset and tool diameter.
-        elif arc_seg == True:       # arc line segment
-            start_x_adjusted, start_y_adjusted, end_x_adjusted, end_y_adjusted, rad_adjusted = arc_offset_adjustment(effective_wos, offset, start_x, start_y, end_x, end_y, rad, cw, less_180, mode)     # adjust arc for offset and tool diameter.
-
-        if counter == 1:
-            cutter_x = start_x_adjusted             # initialize cutter position at first adjusted position.
-            cutter_y = start_y_adjusted             # initialize cutter position at first adjusted position.
-            first_x_adjusted = start_x_adjusted     # first point of the segment.
-            first_y_adjusted = start_y_adjusted     # first point of the segment.
-#            start_cutter = ''       # initialize
+        if profile_counter == 0:            # first segment
+            cutter_x = start_x              # initialize cutter position at first adjusted position.
+            cutter_y = start_y              # initialize cutter position at first adjusted position.
+            first_x_adjusted = start_x      # first point of the segment.
+            first_y_adjusted = start_y      # first point of the segment.
             if start_safe_z == True:
                 start_cutter = \
             f'''G0 Z{"%.4f" % safe_z}				(Rapid to safe height)
@@ -3599,78 +3626,22 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
             '''
             text = text + start_cutter
 
-        if debug == True:
-            print(f'row/counter = {counter}')
-            print(f'end_x_adjusted_pre = {end_x_adjusted_pre}')
-            print(f'start_x_adjusted = {start_x_adjusted}')
-            print(f'end_y_adjusted_pre = {end_y_adjusted_pre}')
-            print(f'start_y_adjusted = {start_y_adjusted}')
-            print(f'end_x_adjusted = {end_x_adjusted}')
-            print(f'end_y_adjusted = {end_y_adjusted}')
-            print(f'rad_adjusted = {rad_adjusted}')
-            print(f'arc_seg = {arc_seg}')
-            print(f'cw = {cw}')
-            print(f'less_180 = {less_180}')
-            print(f'tro = {tro}')
-            print(f'start_x = {start_x}')
-            print(f'start_y = {start_y}')
-            print(f'start_z = {start_z}')
-            print(f'end_x = {end_x}')
-            print(f'end_y = {end_y}')
-            print(f'end_z = {end_z}')
-            print(f'mode = {mode}')
-            print(f'operation = {operation}\n')
-
-        if ((start_x_adjusted != end_x_adjusted_pre) or (start_y_adjusted != end_y_adjusted_pre)) and counter != 1:            # detect acute/non-tangent transition point excluding 1st segment.
-
-            if debug == True:
-                print('non-tangent transition detected')
-                print(f'row/counter = {counter}')
-                print(f'end_x_adjusted_pre = {end_x_adjusted_pre}')
-                print(f'start_x_adjusted = {start_x_adjusted}')
-                print(f'end_y_adjusted_pre = {end_y_adjusted_pre}')
-                print(f'start_y_adjusted = {start_y_adjusted}\n')
-
-            counter = counter - 1   # decrement counter.
-
-            skip_debug = True   # readjustment of non-tangent transition. skip debug statement.
-
-            # intialize parameters for transition arc.
-            last_slot = False       # clear last_slot if set.
-            last_row_flag = False   # clear last_row_flag if set.
-            end_x_adjusted = start_x_adjusted   # intialize x end point of transition arc with start point of next toolpath segment.
-            end_y_adjusted = start_y_adjusted   # intialize y end point of transition arc with start point of next toolpath segment.
-            start_x_adjusted = end_x_adjusted_pre   # intialize x start point of transition arc with end point of previous toolpath segment.
-            start_y_adjusted = end_y_adjusted_pre   # intialize y start point of transition arc with end point of previous toolpath segment.
-            rad_adjusted = effective_wos/2 + offset # # intialize rad of transition arc to tangentially transition between the start and end point of previous and next toolpath segment respectively.
-            rad_adjusted = round(rad_adjusted, 5)  # round to 5 decimal places.
-            less_180 = True     # arc will never be more than 180deg.
-            arc_seg = True
-            end_x = start_x     # reset start x value
-            end_y = start_y     # reset start y value
-            end_z = None        # reset start z value. no height change during transition arc.
-
-            if mode == 1:       # !!!! CAUTION!!!! Assumes transition arc on the external/boss profile cuts. Does not check for overlapping internal/pocket correction. !!!!!
-                cw = False
-            elif mode == 2:
-                cw = True
-
         if tro == False:    # linear toolpath segment
-            if arc_seg == False:
-                cutter_x, cutter_y, cutter_z, text_temp = line(end_x_adjusted, end_y_adjusted, name, feed, end_z)  # print G-code for adjusted line segment.
-            else:
-                cutter_x, cutter_y, cutter_z, text_temp = arc(end_x_adjusted, end_y_adjusted, name, rad_adjusted, cw, less_180, feed, end_z)  # print G-code for adjusted arc segment.
+            if segment == 'linear':
+                cutter_x, cutter_y, cutter_z, text_temp = line(end_x, end_y, name, feed, end_z)  # print G-code for adjusted line segment.
+            elif segment == 'arc':
+#                print('end_z: ' + str(end_z))
+                cutter_x, cutter_y, cutter_z, text_temp = arc(end_x, end_y, name, rad, cw, less_180, feed, end_z)  # print G-code for adjusted arc segment.
         elif tro == True:       # trochoidal toolpath segment
-            if arc_seg == False:
-                discard, discard, cutter_x, cutter_y, text_temp = tro_slot(start_x_adjusted, start_y_adjusted, end_x_adjusted, end_y_adjusted, step, wos, dia, name, cutter_x, cutter_y, first_slot, last_slot)   # print G-code for adjusted trichodial line segment.
-            else:
-                discard, discard, cutter_x, cutter_y, text_temp = tro_arc(start_x_adjusted, start_y_adjusted, end_x_adjusted, end_y_adjusted, step, wos, dia, rad_adjusted, cw, less_180, name, cutter_x, cutter_y, first_slot, last_slot)     # print G-code for adjusted trichodial arc segment.
+            if segment == 'linear':
+                discard, discard, cutter_x, cutter_y, text_temp = tro_slot(start_x, start_y, end_x, end_y, step, wos, dia, name, cutter_x, cutter_y, first_slot, last_slot)   # print G-code for adjusted trichodial line segment.
+            elif segment == 'arc':
+                discard, discard, cutter_x, cutter_y, text_temp = tro_arc(start_x, start_y, end_x, end_y, step, wos, dia, rad, cw, less_180, name, cutter_x, cutter_y, first_slot, last_slot)     # print G-code for adjusted trichodial arc segment.
             first_slot = False      # clear first slot flag
 
         text = text + text_temp      # store G-code into a text variable before printing to a text file.
 
-        break_flag, text_temp = last_row_detect(df, sheet, last_row_flag, last_row, counter, 8)  # detect last row
-        if counter == last_row or break_flag == True:       # detect last row row or last row flag
+        if profile_counter == end or last_row_flag == True:       # detect last row row or last row flag
             if return_safe_z == True:
                 end_cutter = \
                 f'''
@@ -3678,17 +3649,13 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
                 '''
                 text = text + end_cutter
 
-            text = text + text_temp
+#            text = text + text_temp
 
             return (first_x_adjusted, first_y_adjusted, end_x, end_y, cutter_x, cutter_y, text)       # last point. exit function.
 
-        counter = counter + 1                   # increment counter
-        end_x_adjusted_pre = end_x_adjusted     # update previous x value
-        end_y_adjusted_pre = end_y_adjusted     # update previous y value
-        start_x = end_x                         # update start x value
-        start_y = end_y                         # update start y value
+        profile_counter = profile_counter + 1                   # increment counter
 
-        last_row_flag, end_x, end_y, end_z, arc_seg, rad, cw, less_180 = extract_row(counter)
+#        last_row_flag, end_x, end_y, end_z, arc_seg, rad, cw, less_180 = extract_row(counter)
 
 def parameters_data_frame(excel_file, sheet):
     # ---Description---
@@ -5906,8 +5873,19 @@ def profile_generator(df_import, tro, dia):
         if tro == False and transition_arc_flag != True:    # process start and end z for non transition line segments. !!! Does NOT account for disappearing internal arc segments !!!
             output_start_z = df_profile.loc[profile_counter, 'start_z']     # get start_z from df_profile dataframe
             output_end_z =  df_profile.loc[profile_counter, 'end_z']       # get end_z from df_profile dataframe
-            df_profile.loc[profile_counter, 'output_start_z'] = round(output_start_z, 4)  # write output_start_y from df_profile dataframe
-            df_profile.loc[profile_counter, 'output_end_z'] = round(output_end_z, 4)  # write output_end_y from df_profile dataframe
+#            df_profile.loc[profile_counter, 'output_start_z'] = round(output_start_z, 4)  # write output_start_y from df_profile dataframe
+#            df_profile.loc[profile_counter, 'output_end_z'] = round(output_end_z, 4)  # write output_end_y from df_profile dataframe
+
+            if output_start_z == None:
+                output_start_z = '---'
+                df_profile.loc[profile_counter, 'output_start_z'] = output_start_z  # write output_start_y from df_profile dataframe
+            else:
+                df_profile.loc[profile_counter, 'output_start_z'] = round(output_start_z, 4)  # write output_start_y from df_profile dataframe
+            if output_end_z == None:
+                output_end_z = '---'
+                df_profile.loc[profile_counter, 'output_end_z'] = output_end_z  # write output_start_y from df_profile dataframe
+            else:
+                df_profile.loc[profile_counter, 'output_end_z'] = round(output_end_z, 4)  # write output_start_y from df_profile dataframe
 
         output_comments = df_profile.loc[profile_counter, 'comments']  # get comments from df_profile dataframe
         df_profile.loc[profile_counter, 'output_comments'] = output_comments  # write output_comments from df_profile dataframe
@@ -5941,7 +5919,9 @@ def profile_generator(df_import, tro, dia):
 
         profile_counter = profile_counter + 1  # increment profile counter.
 
-    debug_df_profile = df_profile.to_markdown(index=False, tablefmt='pipe', colalign=['center'] * len(df_profile.columns))  # tabulate main df !!!!TEMP!!!
+#    debug_df_profile = df_profile.to_markdown(index=False, tablefmt='pipe', colalign=['center'] * len(df_profile.columns))  # tabulate main df !!!!TEMP!!!
+    debug_df_profile = df_profile.loc[:, :'output_comments']  # create dataframe up to 'comments' columns !!!!TEMP!!!
+    debug_df_profile.loc[:, 'comments'] = '---'  # create new column labeled "comments" with cells containing text: '---'.
     temp_text_df_debug(df_profile)  # !!!!TEMP!!!
     return (df_profile, debug_df_profile, detect_abort_flag)
 
