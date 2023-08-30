@@ -5003,7 +5003,8 @@ def profile_generator(df_import, tro, dia):
     # Initial Release
     # software test run on 18/Aug/2023
 
-    def temp_text_df_debug(df_profile):
+    def temp_text_df_debug(df_profile): # debug !!!TEMP!!!
+        # generates a debug file for every profile data frame created/processed.
 
         df_temp = df_profile.to_markdown(index=False, tablefmt='pipe', floatfmt=".6f",colalign=['center'] * len(df_profile.columns))  # format df into table # debug !!!TEMP!!!
         print('\n')     # debug !!!TEMP!!!
@@ -5089,12 +5090,18 @@ def profile_generator(df_import, tro, dia):
     doc_number = datetime.now().strftime("%Y%m%d-%H%M%S")  # get date time stamp (YYYYMMDD-HHMMSS) for file name. !!!!TEMP!!!
     name_debug = 'Profile Debug ' + str(doc_number)  # name of debug text file.  !!!!TEMP!!!
 
+    # -----------------------------------------------------------------------
+    # 1693379022 Create single row profile dataframe for future appending
+    # -----------------------------------------------------------------------
     df_profile = pd.read_excel(excel_file, 'profile-00', na_filter=False)  # import profile tab from excel file into dataframe.
     df_profile = df_profile.loc[:, :'comments']  # create dataframe up to 'comments' columns
     df_profile = df_profile.drop(df_profile.index[1:])  # remove all rows except for the first row. = df_temp.drop(df_temp.index[1:])  # remove all rows except for the first row.
     df_profile.loc[0] = '---'   # populate cells of first row with '---'
     df_profile_single_row = df_profile      # create a single row profile df for future appending. all cells contain '---'
 
+    # -----------------------------------------------------------------------
+    # 1693379434 Create static data frame and line dataframe from imported data frame
+    # -----------------------------------------------------------------------
     df_static = df_import.loc[:,'static_variable':'static_value']  # creates new data frame for static variables only.
     temp = df_static.to_markdown(index=False, tablefmt='pipe', colalign=['center'] * len(df_static.columns))  # tabulate dataframe   # !!!!TEMP!!!
     print(str(temp))   # !!!!TEMP!!!
@@ -5106,42 +5113,65 @@ def profile_generator(df_import, tro, dia):
     print(temp)   # !!!!TEMP!!!
     print('\n')   # !!!!TEMP!!!
 
-    rows = len(df_line)  # print number of rows in df_line
-
-    # ----------------------------------
-    # look for online cut
-    # ----------------------------------
-    mode = df_static.loc['mode', 'static_value']  # read mode from static_df
-    on_line_flag = False  # initialize
+    # -----------------------------------------------------------------------
+    # 1693379801 Initialize variables total number of rows and mode (online, left or right)
+    # -----------------------------------------------------------------------
+    rows = len(df_line)  # initialize number of rows in df_line
+    mode = df_static.loc['mode', 'static_value']  # read mode from static_df. look for online cut
     if mode == 3:  # look for online cut
         on_line_flag = True  # set on_line_flag
+    else:
+        on_line_flag = False  # clear on_line_flag
+
+    if on_line_flag == True:   # !!!!TEMP!!!
         print('==========================')   # !!!!TEMP!!!
         print('on_line_flag: ' + str(on_line_flag))   # !!!!TEMP!!!
         print('==========================\n')   # !!!!TEMP!!!
 
+    # =======================================================================
+    # 1693380113 Construct segments and populate fundamental data in profile data frame
+    # =======================================================================
+
     # -----------------------------------------------------------------------
-    # construct segments and populate fundamental data in profile data frame
+    # 1693380770 Initialize counters
     # -----------------------------------------------------------------------
     line_counter = 0  # initialize counter for line df
     profile_counter = 0  # initialize counter for profile df
     end = rows - 1  # initialize end counter
+    # -----------------------------------------------------------------------
+    # 1693380891 line_counter <= end?
+    # -----------------------------------------------------------------------
     while line_counter <= end:
 
+        # -----------------------------------------------------------------------
+        # 1693381450 Extract row from line data frame
+        # -----------------------------------------------------------------------
         last_row_flag, x, y, z, arc_seg, rad, cw, less_180 = extract_row(line_counter, df_line, tro)
 
-        temp_loop_debug_01('construct segments and populate fundamental data in profile data frame')  # debug only
-        print(f'line counter: ' + str(line_counter))
+        temp_loop_debug_01('construct segments and populate fundamental data in profile data frame')  # debug only# debug !!!TEMP!!!
+        print(f'line counter: ' + str(line_counter)) # debug !!!TEMP!!!
 
+        # -----------------------------------------------------------------------
+        # 1693381555 First row?
+        # 1693381667 Write start x,y,z to first segment of profile df
+        # -----------------------------------------------------------------------
         if line_counter == 0:
             df_profile.loc[profile_counter, 'start_x'] = x  # write start_x value to df_profile dataframe
             df_profile.loc[profile_counter, 'start_y'] = y  # write start_y value to df_profile dataframe
             df_profile.loc[profile_counter, 'start_z'] = z  # write start_z value to df_profile dataframe
             df_profile.loc[profile_counter, 'start_#'] = line_counter  # write start_# value to df_profile dataframe. start_# is the row #  corresponding to the starting point of the segment on the original line dataframe.
+        # -----------------------------------------------------------------------
+        # 1693381879 2nd row?
+        # 1693381893 Write end x,y,z to first segment of profile df
+        # -----------------------------------------------------------------------
         elif line_counter == 1:
             df_profile.loc[profile_counter, 'end_x'] = x  # write start_x value to df_profile dataframe
             df_profile.loc[profile_counter, 'end_y'] = y  # write start_y value to df_profile dataframe
             df_profile.loc[profile_counter, 'end_z'] = z  # write start_z value to df_profile dataframe
             df_profile.loc[profile_counter, 'end_#'] = line_counter  # write end_# value to df_profile dataframe. end_# is the row #  corresponding to the ending point of the segment on the original line dataframe.
+        # -----------------------------------------------------------------------
+        # 1693382082 Copy end x,y,z of previous segment to start x,y,z current segment
+        # -----------------------------------------------------------------------
         else:
             df_profile.loc[profile_counter, 'start_x'] = df_profile.loc[profile_counter - 1, 'end_x']  # write start_x value to df_profile dataframe
             df_profile.loc[profile_counter, 'start_y'] = df_profile.loc[profile_counter - 1, 'end_y']  # write start_y value to df_profile dataframe
@@ -5149,10 +5179,17 @@ def profile_generator(df_import, tro, dia):
             df_profile.loc[profile_counter, 'start_#'] = df_profile.loc[profile_counter - 1, 'end_#']  # write start_# value to df_profile dataframe. copy end_# value from previous row.
             df_profile.loc[profile_counter, 'end_#'] = line_counter  # write end_# value to df_profile dataframe. end_# is the row #  corresponding to the ending point of the segment on the original line dataframe.
 
+        # -----------------------------------------------------------------------
+        # 1693382302 First line df row?
+        # 1693383115 Increment counter
+        # -----------------------------------------------------------------------
         if line_counter == 0:  # if line_counter = 0 skip while loop iteration
             line_counter = line_counter + 1  # increment counter.
             continue  # skip while loop iteration
 
+        # -----------------------------------------------------------------------
+        # 1693382459 Write variables to current segment of profile df
+        # -----------------------------------------------------------------------
         df_profile.loc[profile_counter, 'offset_start'] = df_static.loc['offset', 'static_value']  # write static_value to df_profile dataframe. at point of creation, offset is constant.
         df_profile.loc[profile_counter, 'offset_end'] = df_static.loc['offset', 'static_value']  # write static_value to df_profile dataframe. at point of creation, offset is constant.
         df_profile.loc[profile_counter, '#'] = profile_counter  # write # value to df_profile dataframe
@@ -5165,23 +5202,38 @@ def profile_generator(df_import, tro, dia):
         df_profile.loc[profile_counter, 'less_180'] = less_180  # write less_180 value to df_profile dataframe
         df_profile.loc[profile_counter, 'last_row_flag'] = False  # clear last_row_flag on df_profile dataframe
 
+        # -----------------------------------------------------------------------
+        # 1693382545 last_row_flag or line_counter = end?
+        # -----------------------------------------------------------------------
         if last_row_flag == True or line_counter == end:  # break while loop if last_row_flag detected or if last row is read.
             df_profile.loc[profile_counter, 'last_row_flag'] = True  # set last_row_flag on df_profile dataframe
             break
 
+        # -----------------------------------------------------------------------
+        # 1693383531 Increment line counter
+        # Increment profile counter
+        # Append new row to profile df
+        # -----------------------------------------------------------------------
         line_counter = line_counter + 1  # increment line counter.
         profile_counter = profile_counter + 1  # increment profile counter.
-#        df_profile.loc[len(df_profile), :] = ['---']  # create new row at bottom of df with cells containing text: '---'.
         df_profile = df_profile.append(df_profile_single_row, ignore_index=True)    # append new row at bottom of df with cells containing text: '---'.
 
+    # =======================================================================
+    # 1693384775 Calculate derived data for online toolpath in profile data frame
+    # =======================================================================
     # -----------------------------------------------------------------------
-    # calculate derived data for online toolpath in profile data frame
+    # 1693384973 Initialize counters
     # -----------------------------------------------------------------------
     profile_counter = 0  # initialize counter for profile df
     rows = len(df_profile)  # number of rows in df_line
     end = rows - 1  # initialize end counter
+    # -----------------------------------------------------------------------
+    # 1693385002 line_counter <= end?
+    # -----------------------------------------------------------------------
     while profile_counter <= end:
-
+        # -----------------------------------------------------------------------
+        # 1693385140 Extract row variables from data frame
+        # -----------------------------------------------------------------------
         last_row_flag = df_profile.loc[profile_counter, 'last_row_flag']  # get last_row_flag from df_profile dataframe
         segment = df_profile.loc[profile_counter, 'segment']  # get segment type from df_profile dataframe
         start_x = df_profile.loc[profile_counter, 'start_x']  # get start_x value from df_profile dataframe
@@ -5192,61 +5244,73 @@ def profile_generator(df_import, tro, dia):
         cw = df_profile.loc[profile_counter, 'cw']  # get cw value from df_profile dataframe
         less_180 = df_profile.loc[profile_counter, 'less_180']  # get less_180 value from df_profile dataframe
 
-        temp_loop_debug('calculate derived data for online toolpath in profile data frame')  # debug only
-
+        temp_loop_debug('calculate derived data for online toolpath in profile data frame')  # debug only # debug !!!TEMP!!!
+        # -----------------------------------------------------------------------
+        # 1693385354 Segment = linear?
+        # 1693385420 Calculate and write line to df row
+        # -----------------------------------------------------------------------
         if segment == 'linear':
             angle, length, origin_x, origin_y = absolute_cartesian_to_relative_polar(start_x, start_y, end_x, end_y)
-            df_profile.loc[
-                profile_counter, 'vector_angle_start'] = angle  # write vector_angle_start to df_profile dataframe (round to 2 decimal places)
-            df_profile.loc[
-                profile_counter, 'vector_angle_end'] = angle  # write vector_angle_end to df_profile dataframe (round to 2 decimal places)
-            df_profile.loc[
-                profile_counter, 'length'] = length  # write length to df_profile dataframe (round to 4 decimal places)
+            df_profile.loc[profile_counter, 'vector_angle_start'] = angle  # write vector_angle_start to df_profile dataframe (round to 2 decimal places)
+            df_profile.loc[profile_counter, 'vector_angle_end'] = angle  # write vector_angle_end to df_profile dataframe (round to 2 decimal places)
+            df_profile.loc[profile_counter, 'length'] = length  # write length to df_profile dataframe (round to 4 decimal places)
+        # -----------------------------------------------------------------------
+        # 1693385689 Segment =arc?
+        # 1693385783 Calculate and write line to df row
+        # -----------------------------------------------------------------------
         elif segment == 'arc':
-            center_x, center_y, start_angle, end_angle, arc_length, arc_angle = arc_data(start_x, start_y, end_x, end_y,
-                                                                                         rad, cw, less_180)
-            df_profile.loc[
-                profile_counter, 'arc_center_x'] = center_x  # write arc_center_x to df_profile dataframe (round to 4 decimal places)
-            df_profile.loc[
-                profile_counter, 'arc_center_y'] = center_y  # write arc_center_y to df_profile dataframe (round to 4 decimal places)
-            df_profile.loc[
-                profile_counter, 'vector_angle_start'] = start_angle  # write vector_angle_start to df_profile dataframe (round to 2 decimal places)
-            df_profile.loc[
-                profile_counter, 'vector_angle_end'] = end_angle  # write vector_angle_end to df_profile dataframe (round to 2 decimal places)
-            df_profile.loc[
-                profile_counter, 'length'] = arc_length  # write length to df_profile dataframe (round to 4 decimal places)
+            center_x, center_y, start_angle, end_angle, arc_length, arc_angle = arc_data(start_x, start_y, end_x, end_y, rad, cw, less_180)
+            df_profile.loc[profile_counter, 'arc_center_x'] = center_x  # write arc_center_x to df_profile dataframe (round to 4 decimal places)
+            df_profile.loc[profile_counter, 'arc_center_y'] = center_y  # write arc_center_y to df_profile dataframe (round to 4 decimal places)
+            df_profile.loc[profile_counter, 'vector_angle_start'] = start_angle  # write vector_angle_start to df_profile dataframe (round to 2 decimal places)
+            df_profile.loc[profile_counter, 'vector_angle_end'] = end_angle  # write vector_angle_end to df_profile dataframe (round to 2 decimal places)
+            df_profile.loc[profile_counter, 'length'] = arc_length  # write length to df_profile dataframe (round to 4 decimal places)
 
+        # -----------------------------------------------------------------------
+        # 1693386016 Calculate and write direction angle of start to end point
+        # -----------------------------------------------------------------------
         angle, length, origin_x, origin_y = absolute_cartesian_to_relative_polar(start_x, start_y, end_x, end_y)
-        df_profile.loc[
-            profile_counter, 'direction'] = angle  # write direction of start to end point irregardless of line or arc (round to 2 decimal places)
+        df_profile.loc[profile_counter, 'direction'] = angle  # write direction of start to end point irregardless of line or arc (round to 2 decimal places)
 
+        # -----------------------------------------------------------------------
+        # 1693386125 First df row?
+        # 1693386167 Increment line counter
+        # -----------------------------------------------------------------------
         if profile_counter == 0:  # if line_counter = 0 skip while loop iteration
             profile_counter = profile_counter + 1  # increment counter.
             continue  # skip while loop iteration
+        # -----------------------------------------------------------------------
+        # 1693386346 write vector_angle_pre to profile dataframe
+        # -----------------------------------------------------------------------
         else:
-            df_profile.loc[profile_counter, 'vector_angle_pre'] = df_profile.loc[
-                profile_counter - 1, 'vector_angle_end']  # write vector_angle_pre to df_profile dataframe (round to 2 decimal places)
-
+            df_profile.loc[profile_counter, 'vector_angle_pre'] = df_profile.loc[profile_counter - 1, 'vector_angle_end']  # write vector_angle_pre to df_profile dataframe (round to 2 decimal places)
+        # -----------------------------------------------------------------------
+        # 1693386438 last_row_flag or line_counter = end?
+        # -----------------------------------------------------------------------
         if last_row_flag == True or profile_counter == end:  # break while loop if last_row_flag detected or if last row is read.
             break  # check last_row_flag
-
+        # -----------------------------------------------------------------------
+        # 1693386310 Increment profile counter
+        # -----------------------------------------------------------------------
         profile_counter = profile_counter + 1  # increment profile counter.
 
+    # =======================================================================
+    # 1693387029 Scan for apex and undersized arc
+    # =======================================================================
     # -----------------------------------------------------------------------
-    # scan for apex and undersized arc
+    # 1693387162 Initialize counters
     # -----------------------------------------------------------------------
     mode = df_static.loc['mode', 'static_value']  # read mode from static_df
     profile_counter = 0  # initialize counter for profile df
     rows = len(df_profile)  # number of rows in df_line
     end = rows - 1  # initialize end counter
-    # initialize flags
-    start_concave_apex_flag = False
-    start_convex_apex_flag = False
-    start_inverted_apex_flag = False
-    undersized_internal_arc_flag = False
-    abort_flag = False
+    # -----------------------------------------------------------------------
+    # 1693387480 line_counter <= end and on_line_flag == False?
+    # -----------------------------------------------------------------------
     while profile_counter <= end and on_line_flag == False:
-
+        # -----------------------------------------------------------------------
+        # 1693387584 initialize flags. get last_row_flag
+        # -----------------------------------------------------------------------
         start_concave_apex_flag = False  # reset flag
         start_convex_apex_flag = False  # reset flag
         start_inverted_apex_flag = False  # reset flag
@@ -5255,11 +5319,15 @@ def profile_generator(df_import, tro, dia):
 
         last_row_flag = df_profile.loc[profile_counter, 'last_row_flag']  # get last_row_flag from df_profile dataframe
 
-        temp_loop_debug('scan for apex and undersized arc')  # debug only
+        temp_loop_debug('scan for apex and undersized arc')  # debug only# debug !!!TEMP!!!
 
-        # scan for apex and determine apex type.
-        if profile_counter > 0:
-
+        # -----------------------------------------------------------------------
+        # 1693387659 profile_counter > 0
+        # -----------------------------------------------------------------------
+        if profile_counter > 0:  # scan for apex and determine apex type.
+            # -----------------------------------------------------------------------
+            # 1693387815 Calculate angular difference between prior and current vector
+            # -----------------------------------------------------------------------
             vector_angle_pre = df_profile.loc[profile_counter, 'vector_angle_pre']  # get vector_angle_pre from df_profile dataframe
             vector_angle_start = df_profile.loc[profile_counter, 'vector_angle_start']  # get vector_angle_start from df_profile dataframe
             vector = vector_angle_start - vector_angle_pre  # calculate change in vector between current segment and segment before
