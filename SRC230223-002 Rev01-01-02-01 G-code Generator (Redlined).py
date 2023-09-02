@@ -11,6 +11,11 @@
 # rev: 01-01-02-01
 # date: 18/Aug/2023
 # Major change.
+# Added profile_generator function. Uses dataframe to process toolpath modification.
+# Major modification to toolpath_data_frame function to work with profile_generator function
+# decreased sensitivity of tro_slot and tro_arc function.
+# Added minor functions for calculations.
+# Added change history to earlier functions.
 #
 # rev: 01-01-01-13
 # date: 21/Jul/2023
@@ -3296,7 +3301,7 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
     #
     # rev: 01-01-02-01
     # date: 18/Aug/2023
-    # major change. designed to be used with profile function.
+    # major change. designed to be used with profile_generator function.
     #
     # rev: 01-01-10-12
     # updated debug text to print tabulated tables and rows.
@@ -5012,7 +5017,8 @@ def profile_generator(df_import, tro, dia):
 
         df_profile = df_profile.loc[:, :'output_comments']  # removes all columns up to 'output_comments' columns
         df_temp = df_profile.to_markdown(index=False, tablefmt='pipe', floatfmt=".4f",colalign=['center'] * len(df_profile.columns))  # format df into table
-        text_debug = '\n' + str(df_temp)  # convert to text
+        text_debug = 'operation name: ' + operation_name_debug + '\n'
+        text_debug = text_debug + '\n' + str(df_temp) + '\n' # convert to text
         text_debug = indent(text_debug, 0)  # indent to margin
         write_to_file(name_debug, text_debug)  # write to debug file
 
@@ -5107,6 +5113,7 @@ def profile_generator(df_import, tro, dia):
     print(str(temp))   # !!!!TEMP!!!
     print('\n') # !!!!TEMP!!!
     df_static.set_index('static_variable', inplace=True)  # replace index default column with 'static_variable' column
+    operation_name_debug = df_static.loc['operation_name', 'static_value']    # read operation_name
 
     df_line = df_import.loc[:, :'comments']  # create dataframe up to 'comments' columns
     temp = df_line.to_markdown(index=False, tablefmt='pipe', colalign=['center'] * len(df_line.columns))  # tabulate dataframe   # !!!!TEMP!!!
@@ -6131,10 +6138,9 @@ def profile_generator(df_import, tro, dia):
         # -----------------------------------------------------------------------
         profile_counter = profile_counter + 1  # increment profile counter.
 
-    # -----------------------------------------------------------------------
-    # populate output columns
-    # -----------------------------------------------------------------------
-
+    # =======================================================================
+    # 1693636800 Populate output columns
+    # =======================================================================
     profile_counter = 0  # initialize counter for profile df
     rows = len(df_profile)  # number of rows in df_line
     end = rows - 1  # initialize end counter
@@ -6233,10 +6239,9 @@ def profile_generator(df_import, tro, dia):
 
         profile_counter = profile_counter + 1  # increment profile counter.
 
-    # -----------------------------------------------------------------------
-    # detect abort_flag
-    # -----------------------------------------------------------------------
-
+    # =======================================================================
+    # 1693637708 Detect abort_flag
+    # =======================================================================
     profile_counter = 0  # initialize counter for profile df
     rows = len(df_profile)  # number of rows in df_line
     end = rows - 1  # initialize end counter
