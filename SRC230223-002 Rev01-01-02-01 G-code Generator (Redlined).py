@@ -3482,8 +3482,8 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
 
     # print static variables to debug file
     df_temp = df[['static_variable', 'static_value']]  # drop all columns except 'static_variable'and 'static_value'
-#    df_temp['static_variable_index'] = df_temp.loc[:, 'static_variable']    # create static_variable_index column. duplicate of static_variable column
-#    df_temp.set_index('static_variable_index', inplace=True)  # replace index default column with static_variable_index column
+#    df_temp['static_variable_index'] = df_temp.loc[:, 'static_variable']    # create static_variable_index column. duplicate of static_variable column. warning "A value is trying to be set on a copy of a slice from a DataFrame. Try using .loc[row_indexer,col_indexer] = value instead"
+#    df_temp.set_index('static_variable_index', inplace=True)  # replace index default column with static_variable_index column. warning "A value is trying to be set on a copy of a slice from a DataFrame. Try using .loc[row_indexer,col_indexer] = value instead"
     df_temp.insert(0, 'static_variable_index', None, True)  # insert new column at index 0 (first colun of data frame)
     df_temp = df_temp.sort_index().reset_index(drop=True)  # sort rows according to index values and reset to running integers. done to avoid warning "A value is trying to be set on a copy of a slice from a DataFrame. Try using .loc[row_indexer,col_indexer] = value instead"
     df_temp['static_variable_index'] = df_temp['static_variable']   # copy values of 'static_variable' column to 'static_variable_index' column
@@ -5250,8 +5250,8 @@ def profile_generator(df_import, tro, dia):
         # -----------------------------------------------------------------------
         line_counter = line_counter + 1  # increment line counter.
         profile_counter = profile_counter + 1  # increment profile counter.
-#        df_profile = df_profile.append(df_profile_single_row, ignore_index=True)    # append new row at bottom of df with cells containing text: '---'.
-        df_profile = pd.concat([df_profile, df_profile_single_row], ignore_index=True)    # append new row at bottom of df with cells containing text: '---'.
+#        df_profile = df_profile.append(df_profile_single_row, ignore_index=True)    # append new row at bottom of df with cells containing text: '---'. deprecate user warning
+        df_profile = pd.concat([df_profile, df_profile_single_row], ignore_index=True)    # append new row at bottom of df with cells containing text: '---'. use concat function as opposed to append(deprecate user warning)
     # =======================================================================
     # 1693384775 Calculate derived data for online toolpath in profile data frame
     # =======================================================================
@@ -6295,11 +6295,6 @@ def profile_generator(df_import, tro, dia):
     debug_df_profile.loc[:, 'comments'] = '---'  # create new column labeled "comments" with cells containing text: '---'. # debug !!!TEMP!!!
     temp_text_df_debug(df_profile)  # !!!!TEMP!!! # debug !!!TEMP!!!
     return (df_profile, debug_df_profile, detect_abort_flag)
-
-
-
-toolbox_data_frame()
-exit()
 
 # ---------Import Parameters------------
 
