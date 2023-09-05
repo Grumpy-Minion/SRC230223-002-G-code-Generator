@@ -301,6 +301,23 @@ def toolbox_data_frame():
     print('copies index column to \'#\' column')
     print(str(df)+'\n')
 
+    # insert new column at desired position
+    df.insert(0, '#_copy', 'COPY_HERE', True)  # insert new column '#_copy' at index 0 (first column of data frame) containing the values 'COPY_HERE'
+    df = df.sort_index().reset_index(drop=True)  # sort rows according to index values and reset to running integers. done to avoid warning "A value is trying to be set on a copy of a slice from a DataFrame. Try using .loc[row_indexer,col_indexer] = value instead"
+    print('insert new column \'#_copy\' at index position 0 or first column containing the values \'COPY_HERE\'')
+    print(str(df)+'\n')
+
+    # copy values of a column to another column
+    df = df.sort_index().reset_index(drop=True)  # sort rows according to index values and reset to running integers. done to avoid warning "A value is trying to be set on a copy of a slice from a DataFrame. Try using .loc[row_indexer,col_indexer] = value instead"
+    df['#_copy'] = df['#']   # copy values of '#' column to '#_copy' column
+    print('copy values of \'#\' column to \'#_copy\' column')
+    print(str(df)+'\n')
+
+    # write a single value to all cells in a column.
+    df = df.assign(D = '---')    # write '---' into all cells in 'D' column
+    print('write \'---\' into all cells in \'D\' column')
+    print(str(df)+'\n')
+
 def absolute_cartesian_to_relative_polar(origin_x, origin_y, absolute_x, absolute_y):
     # ---Description---
     # transforms absolute cartesian coordinates of a single point to its relative polar coordinates about an origin point.
@@ -1433,9 +1450,16 @@ def tro_arc(start_x, start_y, end_x, end_y, step, wos, dia, rad_slot, cw, less_1
     linear_length = math.sqrt(vec_x ** 2 + vec_y ** 2)      # calculate linear length from start point to end point
 
     # check if diameter of arc is larger than linear length
-    if rad_slot*2 < linear_length:
-        print(f'''!!script aborted!!\ntro_arc\ndiameter of arc is smaller than linear length.\ndiameter of arc = {"%.3f" % (rad_slot*2)}\nlinear length = {"%.3f" % linear_length}''')
-        text = '''\n(!!script aborted!!)\n(diameter of arc is smaller than linear length)\n'''  # write header for section.
+    #print( '0001 dia arc: ' + str(rad_slot*2) + '\n' + 'linear_length: ' + str(linear_length) + '\n')  # debug !!!TEMP!!!
+#    if rad_slot*2 < linear_length:      # !!!BUG!!!  check does not work as intended.
+#        print(f'''!!script aborted!!\ntro_arc\ndiameter of arc is smaller than linear length.\ndiameter of arc = {"%.3f" % (rad_slot*2)}\nlinear length = {"%.3f" % linear_length}''')
+#        text = '''\n(!!script aborted!!)\n(diameter of arc is smaller than linear length)\n'''  # write header for section.
+#        quit()
+
+    if rad_slot*2 < (wos-dia):      # !!!BUG!!!  check does not work as intended.
+        print(f'''!!script aborted!!\ntro_arc\ndiameter of arc is smaller than (wos-dia).\ndiameter of arc = {"%.3f" % (rad_slot*2)}\nwos = {"%.3f" % (wos-dia)}''')
+        print('minor arc of trochoidal arc is too small.\nCausing unpredictability of trochoidal pattern')
+        text = '''\n(!!script aborted!!)\n(diameter of arc is smaller than (wos-dia))\n(minor arc of trochoidal arc is too small.)\n(Causing unpredictability of trochoidal pattern)'''  # write header for section.
         quit()
 
     slot_angle = 2 * math.degrees(math.asin(( linear_length / 2) / rad_slot))  # acute arc angle
@@ -3458,9 +3482,13 @@ def toolpath_data_frame(name, excel_file, sheet, start_safe_z, return_safe_z, op
 
     # print static variables to debug file
     df_temp = df[['static_variable', 'static_value']]  # drop all columns except 'static_variable'and 'static_value'
-    df_temp['static_variable_index'] = df_temp.loc[:, 'static_variable']    # create static_variable_index column. duplicate of static_variable column
-    df_temp.set_index('static_variable_index', inplace=True)  # replace index default column with static_variable_index column
-    df_temp = df_temp.assign(static_value='---')    # initialize cells by writing '---' into all cells in static_value column
+#    df_temp['static_variable_index'] = df_temp.loc[:, 'static_variable']    # create static_variable_index column. duplicate of static_variable column
+#    df_temp.set_index('static_variable_index', inplace=True)  # replace index default column with static_variable_index column
+    df_temp.insert(0, 'static_variable_index', None, True)  # insert new column at index 0 (first colun of data frame)
+    df_temp = df_temp.sort_index().reset_index(drop=True)  # sort rows according to index values and reset to running integers. done to avoid warning "A value is trying to be set on a copy of a slice from a DataFrame. Try using .loc[row_indexer,col_indexer] = value instead"
+    df_temp['static_variable_index'] = df_temp['static_variable']   # copy values of 'static_variable' column to 'static_variable_index' column
+    df_temp.set_index('static_variable', inplace=True)  # replace index default column with 'static_variable_index' column
+    df_temp = df_temp.assign(static_value='---')    # initialize cells by writing '---' into all cells in 'static_value' column
 
     df_temp.at['offset', 'static_value'] = offset  # write offset
     df_temp.at['feed', 'static_value'] = feed  # feed
@@ -5222,8 +5250,8 @@ def profile_generator(df_import, tro, dia):
         # -----------------------------------------------------------------------
         line_counter = line_counter + 1  # increment line counter.
         profile_counter = profile_counter + 1  # increment profile counter.
-        df_profile = df_profile.append(df_profile_single_row, ignore_index=True)    # append new row at bottom of df with cells containing text: '---'.
-
+#        df_profile = df_profile.append(df_profile_single_row, ignore_index=True)    # append new row at bottom of df with cells containing text: '---'.
+        df_profile = pd.concat([df_profile, df_profile_single_row], ignore_index=True)    # append new row at bottom of df with cells containing text: '---'.
     # =======================================================================
     # 1693384775 Calculate derived data for online toolpath in profile data frame
     # =======================================================================
@@ -6267,6 +6295,11 @@ def profile_generator(df_import, tro, dia):
     debug_df_profile.loc[:, 'comments'] = '---'  # create new column labeled "comments" with cells containing text: '---'. # debug !!!TEMP!!!
     temp_text_df_debug(df_profile)  # !!!!TEMP!!! # debug !!!TEMP!!!
     return (df_profile, debug_df_profile, detect_abort_flag)
+
+
+
+toolbox_data_frame()
+exit()
 
 # ---------Import Parameters------------
 
