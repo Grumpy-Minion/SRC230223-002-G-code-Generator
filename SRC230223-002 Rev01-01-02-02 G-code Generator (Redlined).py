@@ -3798,6 +3798,10 @@ def parameters_data_frame(excel_file, sheet):
     # dia = adjusted cutter tolerance
 
     # ---Change History---
+    # rev: 01-01-02-02
+    # date: 22/Apr/2024
+    # def parameters_data_frame. removed "%.0f" %  from surface_speed and chipload variables. enable variable to accept both string and number variables.
+    #
     # rev: 01-01-10-12
     # added header borders
     # software test run on 19/Jul/2023
