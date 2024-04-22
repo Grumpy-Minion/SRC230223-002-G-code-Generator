@@ -10,7 +10,10 @@
 # ---Change History---
 # rev: 01-01-02-02
 # date: 22/Apr/2024
+# minor change.
 # def parameters_data_frame. removed "%.0f" %  from surface_speed and chipload variables. enable variable to accept both string and number variables.
+# adjusted minor spacing.
+# tested on 22/Apr/2024.
 #
 # rev: 01-01-02-01
 # date: 18/Aug/2023
@@ -3800,7 +3803,10 @@ def parameters_data_frame(excel_file, sheet):
     # ---Change History---
     # rev: 01-01-02-02
     # date: 22/Apr/2024
+    # minor change.
     # def parameters_data_frame. removed "%.0f" %  from surface_speed and chipload variables. enable variable to accept both string and number variables.
+    # adjusted minor spacing.
+    # tested on 22/Apr/2024.
     #
     # rev: 01-01-10-12
     # added header borders
@@ -3915,21 +3921,21 @@ def parameters_data_frame(excel_file, sheet):
     var = \
         f'''
     (===General variables===)
-    (clear z                = {"%.3f" % clear_z})
-    (initial x              = {"%.3f" % initial_x})
-    (initial y              = {"%.3f" % initial_y})
-    (start z                = {"%.3f" % start_z})
-    (terminal x             = {"%.3f" % terminal_x})
-    (terminal y             = {"%.3f" % terminal_y})
-    (cut feed (default)     = {"%.1f" % cut_f})
-    (plunge feed (default)  = {"%.1f" % z_f})
-    (finish feed (default)  = {"%.1f" % finish_f})
-    (spindle speed (default)= {"%.0f" % rpm})
-    (diameter of cutter     = {"%.3f" % cutter_dia})
-    (tolerance of cutter    = {"%.3f" % tol})
-    (effective diameter     = {"%.3f" % dia})
-    (Surface Speed          = {"%.0f" % surface_speed} m/min (reference))
-    (Chipload               = {"%.3f" % chipload} mm/tooth (reference))
+    (clear z                   = {"%.3f" % clear_z})
+    (initial x                 = {"%.3f" % initial_x})
+    (initial y                 = {"%.3f" % initial_y})
+    (start z                   = {"%.3f" % start_z})
+    (terminal x                = {"%.3f" % terminal_x})
+    (terminal y                = {"%.3f" % terminal_y})
+    (cut feed (default)        = {"%.1f" % cut_f})
+    (plunge feed (default)     = {"%.1f" % z_f})
+    (finish feed (default)     = {"%.1f" % finish_f})
+    (spindle speed (default)   = {"%.0f" % rpm})
+    (diameter of cutter        = {"%.3f" % cutter_dia})
+    (tolerance of cutter       = {"%.3f" % tol})
+    (effective diameter        = {"%.3f" % dia})
+    (surface Speed (reference) = {surface_speed} m/min)
+    (chipload (reference)      = {chipload} mm/tooth)
     '''
 
     start_block = \
